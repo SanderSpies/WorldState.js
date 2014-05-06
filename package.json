@@ -1,0 +1,25 @@
+{
+  "name": "WorldState.js",
+  "description": "A library for immutable graphs",
+  "homepage": "https://github.com/SanderSpies/WorldState.js",
+  "author": {
+    "name": "Sander Spies",
+    "email": "sandermail@gmail.com"
+  },
+  "version": "0.0.1",
+  "bin": {
+    "worldstate": "src/Generator/Generator.js"
+  },
+  "bugs": {
+    "url":"https://github.com/SanderSpies/WorldState.js"
+  },
+  "license": "MIT",
+
+  "dependencies": {
+    "lodash-node": "2.4.1"
+  },
+
+  "devDependencies": {
+
+  }
+}

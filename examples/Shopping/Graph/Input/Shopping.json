@@ -1,0 +1,72 @@
+{
+  "userInfo": {
+    "name": "",
+    "address": ""
+  },
+
+  "orders": [
+    {
+      "id": 1,
+      "deliveryDate": "{date}",
+      "type": 1
+    }
+  ],
+
+  "card": {
+    "items": [
+      {
+        "product": "{item of /products}",
+        "amount": 0
+      }
+    ]
+  },
+
+  "shelves": [
+    {
+      "id": 1,
+      "title": "bla",
+      "shelves": "{array of /shelves}"
+    }
+  ],
+
+  "brands": [
+    {
+      "id": 1,
+      "title": ""
+    }
+  ],
+
+  "features": [
+    {
+      "title": ""
+    }
+  ],
+
+  "products": [
+    {
+      "id": 1,
+      "title": "",
+      "description": "",
+      "isSoldOut": false,
+      "isSpecial": false,
+      "img": "",
+      "price": "",
+      "oldPrice": "",
+      "unit": "",
+      "unitAmount": 1,
+      "shelves": "{array of /shelves}",
+      "brand": "{item of /brands}",
+      "features": "{array of /shelves}"
+    }
+  ],
+
+  "canvas": [
+    {
+      "id": 1,
+      "product": "{item of /products}",
+      "style": 1
+    }
+  ],
+
+  "favorites": "{array of /products}"
+}
