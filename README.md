@@ -3,6 +3,8 @@ WorldState.js - a library for immutable graphs
 
 Current version: pre 0.1
 
+DO NOT USE. Still getting everything ready for 0.1.
+
 Introduction
 ---
 This library takes a plain object model and turns it into an immutable object model. Although it's possible to only
@@ -19,7 +21,7 @@ Library features:
 
 Added features by generated wrappers:
 - Easy to use
-- JSDocs (closure style) are automatically created for the wrappers
+- JsDocs
 
 Todo:
 - Object pools support
