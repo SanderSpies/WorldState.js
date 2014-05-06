@@ -1,5 +1,5 @@
 {
-  "name": "WorldState.js",
+  "name": "worldstate",
   "description": "A library for immutable graphs",
   "homepage": "https://github.com/SanderSpies/WorldState.js",
   "author": {

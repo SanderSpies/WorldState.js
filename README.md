@@ -9,18 +9,17 @@ This library takes a plain object model and turns it into an immutable object mo
 use the library, I would recommend using the code generator for generating wrappers around the library. This way the
 cognitive strain of using this library is left to a minimum.
 
-Features:
+Library features:
 - Immutable
 - High performance
+- Recreating parent objects
+- Change by value - To change all the objects pointing at the same object at once
+- Change by reference - To change only the current object
+- Versioning support - Easily jump to different versions the graph
+
+Added features by generated wrappers:
 - Easy to use
 - JSDocs (closure style) are automatically created for the wrappers
-- Recreating parent objects
-- Change by value
-  To change all the objects pointing at the same object at once
-- Change by reference
-  To change only the current object
-- Versioning support
-  Easily jump to different versions the graph
 
 Todo:
 - Object pools support
