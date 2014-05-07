@@ -1,4 +1,4 @@
-WorldState.js - a library for immutable graphs
+WorldState.js - a generator for immutable graphs
 ===
 
 Current version: pre 0.1
@@ -7,30 +7,38 @@ DO NOT USE. Still getting everything ready for 0.1.
 
 Introduction
 ---
-This library takes a plain object model and turns it into an immutable object model. Although it's possible to only
-use the library, I would recommend using the code generator for generating wrappers around the library. This way the
+This generator takes a plain object model and turns it into an immutable graph. Although it's possible to only
+use the library, I would recommend using the generator for creating wrappers around the library. This way the
 cognitive strain of using this library is left to a minimum.
 
 Library features:
 - Immutable
 - High performance
 - Recreating parent objects
-- Change by value - To change all the objects pointing at the same object at once
-- Change by reference - To change only the current object
-- Versioning support - Easily jump to different versions the graph
+- Change by value
+
+  To change all the objects pointing at the same object at once
+- Change by reference
+
+  To change only the current object
+- Versioning support
+
+  Easily jump to different versions the graph. This is handy for undo/redo support.
 
 Added features by generated wrappers:
 - Easy to use
 - JsDocs
 
-Todo:
+[Ideas behind the graph](GRAPH.md)
+
+Todo (after 0.1)
+---
 - Object pools support
 - More complex examples:
   - Separation between global and local graph objects.
   - Infinite scrolling
 - Merge/diff support
-
-[More details](GRAPH.md)
+- Closure Compiler Advanced Mode support
 
 Installation
 ---
@@ -58,6 +66,7 @@ File: TodoGraph.json
     ]
 }
 ```
+[Extra syntax options](JSON_SYNTAX.md)
 
 Next you need to generate the immutable wrappers:
 ```
@@ -115,7 +124,19 @@ var versions = todoGraph.getVersions();
 todoGraph.restoreVersion(versions[0]);
 ```
 
+Removing a part of the graph:
+```
+//Not implemented yet
+```
+
 [More examples](EXAMPLES.md)
+
+FAQ
+---
+- Why no support for feature XYZ?
+
+  Feel free to report an issue if you are missing a feature.
+
 
 LICENSE
 ---

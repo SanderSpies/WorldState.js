@@ -73,10 +73,16 @@ function generateObjectWrapper(outputFolder, objName, obj) {
         generateObjectWrapper(outputFolder, constructorName, val);
       }
     }
-    else {
-      graphReadDoc += key + ':' + typeof(val) + ',';
+    else if (typeof val === 'string' && val.match(/^\{array of ([\/a-zA-Z0-9]*)\}$/gi)) {
+      console.log('do array magic');
     }
-    graphValueDoc += key + ':' + typeof(val) + ',';
+    else if (typeof val === 'string' && val.match(/^\{item of ([\/a-zA-Z0-9]*)\}$/gi)) {
+      console.log('do item magic');
+    }
+    else {
+      graphReadDoc += key + ':' + getType(val) + ',';
+    }
+    graphValueDoc += key + ':' + getType(val) + ',';
 
   }
   graphReadDoc = graphReadDoc.substr(0, graphReadDoc.length - 1) + '}';
@@ -93,6 +99,15 @@ function generateObjectWrapper(outputFolder, objName, obj) {
       console.log(err);
     }
   });
+}
+
+function getType(val) {
+  if (Array.isArray(val)) {
+    return 'Array'
+  }
+  else {
+    return typeof val;
+  }
 }
 
 function generateArrayWrapper(outputFolder, graphName, obj) {

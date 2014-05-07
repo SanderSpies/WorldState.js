@@ -1,14 +1,9 @@
 {
-  "details": {
-    "bla": 1
-  },
   "items": [
     {
       "id": 1,
-      "text": "Groceries",
+      "text": "",
       "isComplete": false
     }
-  ],
-  "cars": [
   ]
 }
