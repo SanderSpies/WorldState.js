@@ -6,7 +6,7 @@
     "name": "Sander Spies",
     "email": "sandermail@gmail.com"
   },
-  "version": "0.0.4",
+  "version": "0.0.5",
   "bin": {
     "worldstate": "src/Generator/Generator.js"
   },
@@ -21,5 +21,11 @@
 
   "devDependencies": {
 
+  },
+
+  "repository": {
+    "type":"git",
+    "utl":"https://github.com/SanderSpies/WorldState.js.git"
   }
+
 }
