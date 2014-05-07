@@ -4,14 +4,14 @@ var path = require('path');
 
 var inputFolder = process.argv[2];
 var outputFolder = process.argv[3];
-var ImmutableObjectTemplate = fs.readFileSync('src/Generator/Templates/ImmutableObjectTemplate.jst',{
+
+var ImmutableObjectTemplate = fs.readFileSync(path.resolve('src/Generator/Templates/ImmutableObjectTemplate.jst'), {
   encoding:'utf8'
 });
 
-var ImmutableArrayTemplate = fs.readFileSync('src/Generator/Templates/ImmutableArrayTemplate.jst',{
+var ImmutableArrayTemplate = fs.readFileSync(path.resolve('src/Generator/Templates/ImmutableArrayTemplate.jst'), {
   encoding:'utf8'
 });
-
 
 function parseJSONFiles(inputFolder, files) {
   var parsedObjects = [];
@@ -39,12 +39,22 @@ function generateObjectWrapper(outputFolder, objName, obj) {
   var requireBlock = '';
   var generatedCode = '';
   var graphReadDoc = '{';
+  var graphValueDoc = '{';
+  var graphInsertDoc = '';
   for (var key in obj) {
     var val = obj[key];
     var constructorName;
 
-    if (typeof val === 'object' && !Array.isArray(obj)) {
-      constructorName = key[0].toUpperCase() + key.substr(1);
+    if (Array.isArray(obj)){
+      constructorName = objName.substr(0, objName.length - 1);
+      val = obj[0];
+      if (typeof val === 'object') {
+        graphInsertDoc += '{' + constructorName + '}';
+        generateObjectWrapper(outputFolder, constructorName, val)
+      }
+    }
+    else if (typeof val === 'object') {
+      constructorName = objName + key[0].toUpperCase() + key.substr(1);
       generatedCode += '  /**\n';
       generatedCode += '   * @returns {' + constructorName +'}\n';
       generatedCode += '   */\n';
@@ -62,15 +72,20 @@ function generateObjectWrapper(outputFolder, objName, obj) {
       else {
         generateObjectWrapper(outputFolder, constructorName, val);
       }
-    } else {
+    }
+    else {
       graphReadDoc += key + ':' + typeof(val) + ',';
     }
+    graphValueDoc += key + ':' + typeof(val) + ',';
 
   }
   graphReadDoc = graphReadDoc.substr(0, graphReadDoc.length - 1) + '}';
+  graphValueDoc = graphValueDoc.substr(0, graphValueDoc.length - 1) + '}';
   x = x.replace(/{RequireBlock}/gi, requireBlock);
   x = x.replace(/{GraphMethods}/gi, generatedCode);
   x = x.replace(/{GraphReadDoc}/gi, graphReadDoc);
+  x = x.replace(/{GraphChangeValueDoc}/gi, graphValueDoc);
+  x = x.replace(/{GraphInsertDoc}/gi, graphInsertDoc);
 
   fs.writeFile(outputFolder + '/' + objName + '.js', x,  function(err) {
     if (err) {

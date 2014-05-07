@@ -60,7 +60,7 @@
     }
   ],
 
-  "canvas": [
+  "canvasItems": [
     {
       "id": 1,
       "product": "{item of /products}",
