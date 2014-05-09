@@ -55,6 +55,9 @@ function generateObjectWrapper(outputFolder, objName, obj) {
   var graphInsertDoc = '';
   for (var key in obj) {
     var val = obj[key];
+    if (val == null) {
+      continue;
+    }
     var constructorName;
 
     if (Array.isArray(obj)){
@@ -62,13 +65,14 @@ function generateObjectWrapper(outputFolder, objName, obj) {
 
       val = obj[0];
       if (typeof val === 'object') {
-        graphInsertDoc += '{' + constructorName + '}';
+        graphInsertDoc += '{' + constructorName + 'Prototype}';
         generateObjectWrapper(outputFolder, constructorName, val)
       }
     }
     else if (typeof val === 'object') {
       constructorName = objName + key[0].toUpperCase() + key.substr(1);
       generatedCode += '  /**\n';
+      generatedCode += '   * @this {' + objName +'}\n';
       generatedCode += '   * @return {' + constructorName +'}\n';
       generatedCode += '   */\n';
       generatedCode += '  ' + key + ': function ' + objName + '$' + key + '() {\n' +
@@ -81,6 +85,7 @@ function generateObjectWrapper(outputFolder, objName, obj) {
         '    }\n' +
         '    return wrappers.' + key + ';\n' +
         '  },\n\n';
+      requireBlock += '/* @type {' + constructorName +'} */\n';
       requireBlock += 'var ' + constructorName + ' = require(\'./' + constructorName + '\');\n';
       if (Array.isArray(val)) {
         generateArrayWrapper(outputFolder, constructorName, val);
@@ -101,6 +106,7 @@ function generateObjectWrapper(outputFolder, objName, obj) {
     else {
       graphReadDoc += key + ':' + getType(val) + ',';
     }
+
     graphValueDoc +=  key + ':' + getType(val) + ',';
 
   }
@@ -133,9 +139,11 @@ function getSingleName(val) {
   if (val.indexOf('ies') === (val.length - 3)) {
     val = val.substr(0, val.length - 3) + 'y';
   }
-  else if (val.indexOf('s') === (val.length - 1)) {
+  else if (val.lastIndexOf('s') === (val.length - 1)) {
+
     val = val.substr(0, val.length - 1);
   }
+
   return val;
 }
 

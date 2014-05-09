@@ -1,5 +1,5 @@
 Examples
 ===
 
-- [Todo List](examples/TodoList)
-- [Shopping](examples/Shopping)
+- [Todo List with React](examples/ReactTodoList)
+- [Shopping](examples/Shopping

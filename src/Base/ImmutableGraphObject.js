@@ -15,8 +15,6 @@ var resolveObject = ReferenceRegistry.resolveObject;
  */
 var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   this.__private = {
-    connectionEndPoints: {},
-    connectionStartPoints: {},
     refToObj: null,
     parents: [],
     saveHistory: false,
@@ -31,8 +29,6 @@ var getImmutableObject;
 
 ImmutableGraphObject.prototype = {
   __private: {
-    connectionEndPoints: {},
-    connectionStartPoints: {},
     refToObj: null,
     parents: [],
     saveHistory: false,
@@ -115,13 +111,6 @@ ImmutableGraphObject.prototype = {
             oldReference);
       }
     }
-
-    var connectionEndPoints = __private.connectionEndPoints;
-    var keys = Object.keys(connectionEndPoints);
-    for (i = 0, l = keys.length; i < l; i++) {
-      var key = keys[i];
-      connectionEndPoints[key].changed(oldReference);
-    }
   },
 
   __childChanged: function(key, newValue, _oldReference) {
@@ -140,18 +129,6 @@ ImmutableGraphObject.prototype = {
     }
 
     this.changed(oldReference);
-  },
-
-  addConnection: function(opt) {
-    var key = opt.startPointName;
-    this.__private.connectionStartPoints[key] = opt.reference;
-    opt.reference.__private.connectionEndPoints[opt.endPointName] = this;
-  },
-
-  getConnection: function(connectionKey) {
-    var __private = this.__private;
-    return __private.connectionStartPoints[connectionKey] ||
-        __private.connectionEndPoints[connectionKey];
   },
 
   remove: function() {

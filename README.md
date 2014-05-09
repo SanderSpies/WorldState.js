@@ -27,6 +27,7 @@ Library features:
 - Object pools (not ready yet)
 - Diff/merge support (not ready yet)
 - Closure Compiler Advanced Mode compatible (not ready yet)
+- ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
 
 Added features by generated wrappers:
 - Easy to use
@@ -69,8 +70,13 @@ worldstate inputdir outputdir
 
 Now you can use the immutable graph within your application:
 ```
+/**
+ * @type {TodoGraph}
+ */
 var TodoGraph = require('outputdir/TodoGraph');
 ```
+
+The {TodoGraph} annotation is added for autocomplete support.
 
 Loading data into the graph (you might want to use [superagent](https://github.com/visionmedia/superagent)):
 ```
@@ -89,7 +95,7 @@ console.log('Found item:', todoGraph.items().where({id:2})[0].read());
 
 Inserting an item:
 ```
-var todoItem = TodoGraph.newItem({
+var todoItem = TodoGraphItem.newInstance({
    id: 3,
    title: 'foo',
    isComplete: true
@@ -99,22 +105,22 @@ todoGraph.items().insert(todoItem);
 
 If a new item is inserted with an id parameter that is already present, it will replace the old item.
 
-You can also insert multiple values by using ``insertMulti``.
+You can also insert multiple values by using ``insertMulti``, which accepts an array.
 
-Setting the object pool:
+You can also use an object pool:
 ```
 //Not implemented yet
-TodoGraph.setItemsPool(1000);
+TodoGraphItem.setObjectPoolSize(1000);
 ```
 
 Using a pooled object:
 ```
 // Not implemented yet
-var pooledItem = TodoGraph.newPooledItem();
-var data = pooledItem.read();
+var item = TodoGraphItem.newInstance();
+var data = item.read();
 data.id = 1;
 data.title = 'bar';
-todoGraph.items().insert(pooledItem);
+todoGraph.items().insert(item);
 ```
 
 Changing a value:

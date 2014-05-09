@@ -17,9 +17,13 @@ var ImmutableGraphArray = require('worldstate/src/Base/ImmutableGraphArray');
  */
 var {GraphName} = function {GraphName}(obj) {
   this.__private.graph = new ImmutableGraphArray(obj);
+  this.length = obj.length;
 };
 
 {GraphName}.prototype = {
+  /* type {number} */
+  length: 0,
+
   /**
    * @private
    * @struct
@@ -95,10 +99,11 @@ var {GraphName} = function {GraphName}(obj) {
    * Get items that have the given conditions
    *
    * @param {Object.<*, *>} conditions
+   * @param {boolean} cached
    * @return {[{GraphInsertDoc}]}
    */
-  where: function {GraphName}$where(conditions) {
-    return this.__private.graph.where(conditions);
+  where: function {GraphName}$where(conditions, cached) {
+    return this.__private.graph.where(conditions, cached);
   },
 
   /**
@@ -119,6 +124,7 @@ var {GraphName} = function {GraphName}(obj) {
   insert: function {GraphName}$insert(item) {
     var realItem = item.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
+    this.length++;
   },
 
   /**
@@ -128,7 +134,8 @@ var {GraphName} = function {GraphName}(obj) {
    * @param {[{GraphInsertDoc}]} items
    */
   insertMulti: function {GraphName}$insertMulti(items) {
-    this.__private.graph.insertMulti(items);
+    var nrInserted = this.__private.graph.insertMulti(items);
+    this.length += nrInserted;
   }
 };
 

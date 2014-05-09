@@ -7,19 +7,48 @@ var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 
 {RequireBlock}
 
+/* @type {number} */
+var objectPoolSize = 0;
+
 
 /**
- * {GraphName}
+ * A factory for {{GraphName}}
  *
- * @constructor
- * @lends {GraphName}
- * @param {{GraphChangeValueDoc}} obj JSON input data
+ * @lends {{GraphName}}
  */
-var {GraphName} = function {GraphName}(obj) {
-  this.__private.graph = new ImmutableGraphObject(obj);
+var {GraphName}Factory = {
+  /**
+   * @param {{GraphChangeValueDoc}} obj JSON input data
+   * @return {{GraphName}Prototype}
+   */
+  newInstance: function {GraphName}$newInstance(obj) {
+
+    /**
+     * {GraphName}
+     *
+     * @constructor
+     * @param {{GraphChangeValueDoc}} obj JSON input data
+     */
+    var {GraphName}Class = function {GraphName}(obj) {
+      this.__private.graph = new ImmutableGraphObject(obj);
+    };
+    {GraphName}Class.prototype = {GraphName}Prototype;
+    return new {GraphName}Class(obj);
+  },
+
+  /**
+   * size {number} size of the object pool
+   */
+  setObjectPoolSize: function(size) {
+    objectPoolSize = size;
+  }
 };
 
-{GraphName}.prototype = {
+
+/**
+ * @lends {{GraphName}Prototype}
+ */
+var {GraphName}Prototype = {
   /**
    * @private
    * @struct
@@ -32,6 +61,7 @@ var {GraphName} = function {GraphName}(obj) {
 {GraphMethods}
   /**
    * Enable versioning
+   * @this {{GraphName}Prototype}
    */
   enableVersioning: function {GraphName}$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -41,6 +71,7 @@ var {GraphName} = function {GraphName}(obj) {
    * Save a version (versioning must be enabled)
    *
    * @param {string} name name of the version
+   * @this {{GraphName}Prototype}
    */
   saveVersion: function {GraphName}$saveVersion(name) {
     this.__private.graph.saveVersion(name);
@@ -50,6 +81,7 @@ var {GraphName} = function {GraphName}(obj) {
    * Restore a version
    *
    * @param {{name:string, ref:object}} version version to restore
+   * @this {{GraphName}Prototype}
    */
   restoreVersion: function {GraphName}$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -59,6 +91,7 @@ var {GraphName} = function {GraphName}(obj) {
    * Get all the versions
    *
    * @return {[{name:string, ref:object}]}
+   * @this {{GraphName}Prototype}
    */
   getVersions: function {GraphName}$getVersions() {
     return this.__private.graph.historyRefs;
@@ -68,6 +101,7 @@ var {GraphName} = function {GraphName}(obj) {
    * Change reference
    *
    * @param {{GraphChangeValueDoc}} obj
+   * @this {{GraphName}Prototype}
    */
   changeReferenceTo: function {GraphName}$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -77,6 +111,7 @@ var {GraphName} = function {GraphName}(obj) {
    * Change value
    *
    * @param {{GraphChangeValueDoc}} val
+   * @this {{GraphName}Prototype}
    */
   changeValueTo: function {GraphName}$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -86,10 +121,11 @@ var {GraphName} = function {GraphName}(obj) {
    * Get the actual immutable object
    *
    * @return {{GraphReadDoc}}
+   * @this {{GraphName}Prototype}
    */
   read: function {GraphName}$read() {
     return this.__private.graph.__private.refToObj.ref;
   }
 };
 
-module.exports = {GraphName};
+module.exports = {GraphName}Factory;

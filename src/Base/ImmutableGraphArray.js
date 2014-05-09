@@ -4,19 +4,19 @@ var ImmutableGraphObject = require('./ImmutableGraphObject');
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
-var getReferenceTo = ReferenceRegistry.getReferenceTo;
 
 
 
 /**
+ * ImmutableGraphArray
  *
- * @param array
+ * @param {[]} array
  * @constructor
  */
 var ImmutableGraphArray = function ImmutableGraphArray(array) {
   if (!getImmutableObject) {
     getImmutableObject =
-      require('./ImmutableGraphRegistry').getImmutableObject;
+        require('./ImmutableGraphRegistry').getImmutableObject;
   }
 
   ImmutableGraphObject.call(this, array);
@@ -55,7 +55,7 @@ ImmutableGraphArray.prototype = {
   /**
    * Insert a new item into the array
    *
-   * @param newItem
+   * @param {{}} newItem
    */
   insert: function(newItem) {
     var __private = this.__private;
@@ -65,7 +65,7 @@ ImmutableGraphArray.prototype = {
 
   /**
    *
-   * @param newItem
+   * @param {{}} newItem
    * @private
    */
   _insert: function(newItem) {
@@ -101,7 +101,7 @@ ImmutableGraphArray.prototype = {
   /**
    * Insert multiple items into the array
    *
-   * @param newItems
+   * @param {[]} newItems
    */
   insertMulti: function(newItems) {
     var __private = this.__private;
@@ -117,8 +117,8 @@ ImmutableGraphArray.prototype = {
   /**
    * Retrieve an item from the array at the specified position
    *
-   * @param position
-   * @returns {*}
+   * @param {number} position
+   * @return {*}
    */
   at: function(position) {
     return getImmutableObject(this.__private.refToObj.ref[position]);
@@ -127,9 +127,9 @@ ImmutableGraphArray.prototype = {
   /**
    * Filter the array on the given conditions
    *
-   * @param conditions {object}
-   * @param cache {boolean}
-   * @returns {Array}
+   * @param {object} conditions
+   * @param {boolean} cache
+   * @return {Array}
    */
   where: function(conditions, cache) {
     // TODO: cache results, and give the same results back
@@ -160,7 +160,7 @@ ImmutableGraphArray.prototype = {
     var containers = [];
     for (i = 0, l = results.length; i < l; i++) {
       containers[containers.length] =
-        getImmutableObject(results[i], this, parentKeys[i]);
+          getImmutableObject(results[i], this, parentKeys[i]);
     }
 
     return containers;
