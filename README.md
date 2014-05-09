@@ -24,21 +24,15 @@ Library features:
 - Versioning support
 
   Easily jump to different versions the graph. This is handy for undo/redo support.
+- Object pools (not ready yet)
+- Diff/merge support (not ready yet)
+- Closure Compiler Advanced Mode compatible (not ready yet)
 
 Added features by generated wrappers:
 - Easy to use
-- JsDocs
+- JsDocs based on Closure
 
 [Ideas behind the graph](GRAPH.md)
-
-Todo (after 0.1)
----
-- Object pools support
-- More complex examples:
-  - Separation between global and local graph objects.
-  - Infinite scrolling
-- Merge/diff support
-- Closure Compiler Advanced Mode support
 
 Installation
 ---
@@ -78,7 +72,7 @@ Now you can use the immutable graph within your application:
 var TodoGraph = require('outputdir/TodoGraph');
 ```
 
-Loading data into the graph:
+Loading data into the graph (you might want to use [superagent](https://github.com/visionmedia/superagent)):
 ```
 var todoGraph = new TodoGraph({/*data*/});
 ```
@@ -88,9 +82,39 @@ Getting the first item of an array:
 console.log('The first item is:', todoGraph.items().at(0).read());
 ```
 
-Finding an item in an array:
+Finding an item:
 ```
 console.log('Found item:', todoGraph.items().where({id:2})[0].read());
+```
+
+Inserting an item:
+```
+var todoItem = TodoGraph.newItem({
+   id: 3,
+   title: 'foo',
+   isComplete: true
+});
+todoGraph.items().insert(todoItem);
+```
+
+If a new item is inserted with an id parameter that is already present, it will replace the old item.
+
+You can also insert multiple values by using ``insertMulti``.
+
+Setting the object pool:
+```
+//Not implemented yet
+TodoGraph.setItemsPool(1000);
+```
+
+Using a pooled object:
+```
+// Not implemented yet
+var pooledItem = TodoGraph.newPooledItem();
+var data = pooledItem.read();
+data.id = 1;
+data.title = 'bar';
+todoGraph.items().insert(pooledItem);
 ```
 
 Changing a value:
@@ -127,6 +151,19 @@ todoGraph.restoreVersion(versions[0]);
 Removing a part of the graph:
 ```
 //Not implemented yet
+todoGraph.items().at(1).remove();
+```
+
+Get the difference between two graphs:
+```
+// Not implemented yet
+var diff = todoGraph.diff(otherTodoGraph)
+```
+
+Merging two graphs
+```
+// Not implemented yet
+var mergedGraph = todoGraph.merge(otherTodoGraph);
 ```
 
 [More examples](EXAMPLES.md)
@@ -136,7 +173,6 @@ FAQ
 - Why no support for feature XYZ?
 
   Feel free to report an issue if you are missing a feature.
-
 
 LICENSE
 ---

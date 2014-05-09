@@ -1,20 +1,24 @@
-describe('ImmutableObject', function () {
+'use strict';
 
-  xit('should support two ImmutableObjects pointing to the same object', function () {
+describe('WorldState.js', function () {
 
-  });
-
-  xit('should recreate parent objects', function () {
+  it('should support two ImmutableGraphObjects pointing to the same object', function () {
 
   });
 
-  xit('should store the changes in a ', function(){
+  it('should recreate parent objects', function () {
 
   });
 
-  xit('should support ')
+  it('should replace an object within an Immutable array if the id\'s are the same', function () {
 
-  xit('should replace an object within an Immutable array if the id\'s are the same', function () {
+  });
+
+  it('should support saving versions of the graph', function() {
+
+  });
+
+  it('should support restoring versions of the graph', function() {
 
   });
 

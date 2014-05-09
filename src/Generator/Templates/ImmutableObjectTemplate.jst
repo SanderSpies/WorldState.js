@@ -6,12 +6,14 @@
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 
 {RequireBlock}
+
+
 /**
  * {GraphName}
  *
  * @constructor
  * @lends {GraphName}
- * @param obj {{GraphChangeValueDoc}} JSON input data
+ * @param {{GraphChangeValueDoc}} obj JSON input data
  */
 var {GraphName} = function {GraphName}(obj) {
   this.__private.graph = new ImmutableGraphObject(obj);
@@ -20,6 +22,7 @@ var {GraphName} = function {GraphName}(obj) {
 {GraphName}.prototype = {
   /**
    * @private
+   * @struct
    */
   __private: {
     graph: null,
@@ -37,7 +40,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Save a version (versioning must be enabled)
    *
-   * @param name {string} name of the version
+   * @param {string} name name of the version
    */
   saveVersion: function {GraphName}$saveVersion(name) {
     this.__private.graph.saveVersion(name);
@@ -46,7 +49,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Restore a version
    *
-   * @param version {{name:string, ref:object}} version to restore
+   * @param {{name:string, ref:object}} version version to restore
    */
   restoreVersion: function {GraphName}$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -64,7 +67,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Change reference
    *
-   * @param obj {{GraphChangeValueDoc}}
+   * @param {{GraphChangeValueDoc}} obj
    */
   changeReferenceTo: function {GraphName}$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -73,7 +76,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Change value
    *
-   * @param val {{GraphChangeValueDoc}}
+   * @param {{GraphChangeValueDoc}} val
    */
   changeValueTo: function {GraphName}$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);

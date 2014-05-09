@@ -1,5 +1,6 @@
 'use strict';
 
+
 /**
  * Keep track of references to objects.
  *
@@ -31,7 +32,7 @@ var ReferenceRegistry = {
     if (isArray(obj)) {
       var refToArray = ReferenceRegistry.getReferenceTo(obj);
       var newArray = refToArray.ref;
-      for ( i = 0, l = obj.length; i < l; i++) {
+      for (i = 0, l = obj.length; i < l; i++) {
         val = obj[i];
         if (val.ref) {
           newArray[i] = val;

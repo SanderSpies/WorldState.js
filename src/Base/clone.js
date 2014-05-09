@@ -2,6 +2,13 @@
 
 var isArray = Array.isArray;
 
+
+/**
+ *
+ * @param {{}} obj
+ * @return {{}}
+ * @private
+ */
 function _cloneObject(obj) {
   var newObj = {};
   var keys = Object.keys(obj);
@@ -12,8 +19,14 @@ function _cloneObject(obj) {
   return newObj;
 }
 
+/**
+ * Clone an object
+ *
+ * @param {{}} obj
+ * @return {[]|{}}
+ */
 function clone(obj) {
-  if(isArray(obj)){
+  if (isArray(obj)) {
     return obj.slice();
   }
   else {

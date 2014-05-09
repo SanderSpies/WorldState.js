@@ -1,6 +1,6 @@
 {
   "name": "worldstate",
-  "description": "A library for immutable graphs",
+  "description": "A generator for immutable graphs",
   "homepage": "https://github.com/SanderSpies/WorldState.js",
   "author": {
     "name": "Sander Spies",
@@ -20,7 +20,9 @@
   },
 
   "devDependencies": {
-
+    "gulp-util": "~2.2.14",
+    "gulp": "~3.5.1",
+    "gulp-jasmine": "~0.2.0"
   },
 
   "repository": {

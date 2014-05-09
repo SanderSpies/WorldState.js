@@ -1,15 +1,23 @@
 #!/usr/bin/env node
+
+// Yes this code is fugly -> needs MAJOR refactoring.
+
 var fs = require('fs');
 var path = require('path');
 
 var inputFolder = process.argv[2];
 var outputFolder = process.argv[3];
 
-var ImmutableObjectTemplate = fs.readFileSync(path.resolve('src/Generator/Templates/ImmutableObjectTemplate.jst'), {
+if (!inputFolder || !outputFolder) {
+  console.log('Correct usage: worldstate inputfolder outputfolder');
+  return;
+}
+
+var ImmutableObjectTemplate = fs.readFileSync(__dirname + '/Templates/ImmutableObjectTemplate.jst',{
   encoding:'utf8'
 });
 
-var ImmutableArrayTemplate = fs.readFileSync(path.resolve('src/Generator/Templates/ImmutableArrayTemplate.jst'), {
+var ImmutableArrayTemplate = fs.readFileSync(__dirname + '/Templates/ImmutableArrayTemplate.jst',{
   encoding:'utf8'
 });
 
@@ -25,10 +33,14 @@ function parseJSONFiles(inputFolder, files) {
       };
     }
     catch (e) {
-      console.log('Invalid JSON file:', file)
+      console.log('Invalid JSON file:', file);
     }
   }
   return parsedObjects;
+}
+
+function createWrapperFunction(objName, val) {
+
 }
 
 function generateObjectWrapper(outputFolder, objName, obj) {
@@ -46,7 +58,8 @@ function generateObjectWrapper(outputFolder, objName, obj) {
     var constructorName;
 
     if (Array.isArray(obj)){
-      constructorName = objName.substr(0, objName.length - 1);
+      constructorName = getSingleName(objName);
+
       val = obj[0];
       if (typeof val === 'object') {
         graphInsertDoc += '{' + constructorName + '}';
@@ -56,12 +69,15 @@ function generateObjectWrapper(outputFolder, objName, obj) {
     else if (typeof val === 'object') {
       constructorName = objName + key[0].toUpperCase() + key.substr(1);
       generatedCode += '  /**\n';
-      generatedCode += '   * @returns {' + constructorName +'}\n';
+      generatedCode += '   * @return {' + constructorName +'}\n';
       generatedCode += '   */\n';
       generatedCode += '  ' + key + ': function ' + objName + '$' + key + '() {\n' +
-        '    var wrappers = this.__private.wrappers;\n' +
+        '    var __private = this.__private;\n' +
+        '    var __graphPrivate = __private.graph.__private;\n' +
+        '    var ' + key + ' = __graphPrivate.refToObj.ref.' + key + '.ref;\n' +
+        '    var wrappers = __private.wrappers;\n' +
         '    if (!wrappers.' + key + ') {\n' +
-        '      wrappers.' + key + ' = new ' + constructorName + '(this.__private.graph.__private.refToObj.ref.' + key + '.ref);\n' +
+        '      wrappers.' + key + ' = new ' + constructorName + '(' + key + ');\n' +
         '    }\n' +
         '    return wrappers.' + key + ';\n' +
         '  },\n\n';
@@ -79,10 +95,13 @@ function generateObjectWrapper(outputFolder, objName, obj) {
     else if (typeof val === 'string' && val.match(/^\{item of ([\/a-zA-Z0-9]*)\}$/gi)) {
       console.log('do item magic');
     }
+    else if (typeof val === 'string' && val.match(/^\{enum of ([\/a-zA-Z0-9]*)\}$/gi)) {
+      console.log('do item magic');
+    }
     else {
       graphReadDoc += key + ':' + getType(val) + ',';
     }
-    graphValueDoc += key + ':' + getType(val) + ',';
+    graphValueDoc +=  key + ':' + getType(val) + ',';
 
   }
   graphReadDoc = graphReadDoc.substr(0, graphReadDoc.length - 1) + '}';
@@ -103,11 +122,21 @@ function generateObjectWrapper(outputFolder, objName, obj) {
 
 function getType(val) {
   if (Array.isArray(val)) {
-    return 'Array'
+    return 'Array';
   }
   else {
     return typeof val;
   }
+}
+
+function getSingleName(val) {
+  if (val.indexOf('ies') === (val.length - 3)) {
+    val = val.substr(0, val.length - 3) + 'y';
+  }
+  else if (val.indexOf('s') === (val.length - 1)) {
+    val = val.substr(0, val.length - 1);
+  }
+  return val;
 }
 
 function generateArrayWrapper(outputFolder, graphName, obj) {

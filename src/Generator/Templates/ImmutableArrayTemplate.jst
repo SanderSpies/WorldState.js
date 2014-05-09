@@ -6,12 +6,14 @@
 var ImmutableGraphArray = require('worldstate/src/Base/ImmutableGraphArray');
 
 {RequireBlock}
+
+
 /**
  * {GraphName}
  *
  * @constructor
  * @lends {GraphName}
- * @param obj {{GraphChangeValueDoc}} JSON input data
+ * @param {{GraphChangeValueDoc}} obj JSON input data
  */
 var {GraphName} = function {GraphName}(obj) {
   this.__private.graph = new ImmutableGraphArray(obj);
@@ -20,6 +22,7 @@ var {GraphName} = function {GraphName}(obj) {
 {GraphName}.prototype = {
   /**
    * @private
+   * @struct
    */
   __private: {
     graph: null,
@@ -37,7 +40,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Save a version (versioning must be enabled)
    *
-   * @param name {string} name of the version
+   * @param {string} name name of the version
    */
   saveVersion: function {GraphName}$saveVersion(name) {
     this.__private.graph.saveVersion(name);
@@ -46,7 +49,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Restore a version
    *
-   * @param name {string} name of the version
+   * @param {string} name name of the version
    */
   restoreVersion: function {GraphName}$restoreVersion(name) {
     this.__private.graph.restoreVersion(name);
@@ -64,7 +67,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Change reference
    *
-   * @param obj {{GraphChangeValueDoc}}
+   * @param {{GraphChangeValueDoc}} obj
    */
   changeReferenceTo: function {GraphName}$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -73,7 +76,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Change value
    *
-   * @param val {{GraphInsertDoc}}
+   * @param {{GraphInsertDoc}} val
    */
   changeValueTo: function {GraphName}$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -91,7 +94,7 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Get items that have the given conditions
    *
-   * @param conditions {Object.<*, *>}
+   * @param {Object.<*, *>} conditions
    * @return {[{GraphInsertDoc}]}
    */
   where: function {GraphName}$where(conditions) {
@@ -111,16 +114,18 @@ var {GraphName} = function {GraphName}(obj) {
   /**
    * Insert item
    *
-   * @param item {GraphInsertDoc}
+   * @param {GraphInsertDoc} item
    */
   insert: function {GraphName}$insert(item) {
-    this.__private.graph.insert(item);
+    var realItem = item.__private.refToObj.ref;
+    this.__private.graph.insert(realItem);
   },
 
   /**
-   * Insert multiple items. Items with the same id property get replaced with the new version.
+   * Insert multiple items. Items with the same id property get replaced
+   * with the new version.
    *
-   * @param items {[{GraphInsertDoc}]}
+   * @param {[{GraphInsertDoc}]} items
    */
   insertMulti: function {GraphName}$insertMulti(items) {
     this.__private.graph.insertMulti(items);

@@ -7,6 +7,12 @@ var cloneDeep = require('lodash-node/modern/objects/cloneDeep');
 var resolveObject = ReferenceRegistry.resolveObject;
 
 
+
+/**
+ *
+ * @param obj
+ * @constructor
+ */
 var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   this.__private = {
     connectionEndPoints: {},
@@ -34,13 +40,13 @@ ImmutableGraphObject.prototype = {
     historyRefs: []
   },
 
-  enableVersioning: function () {
+  enableVersioning: function() {
     var __private = this.__private;
     __private.saveHistory = true;
     __private.historyRef = cloneDeep(__private.refToObj);
   },
 
-  saveVersion: function (name) {
+  saveVersion: function(name) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
     historyRefs[historyRefs.length] = {
@@ -49,32 +55,33 @@ ImmutableGraphObject.prototype = {
     };
   },
 
-  getVersions: function () {
+  getVersions: function() {
     return this.__private.historyRefs;
   },
 
-  restoreVersion: function (version) {
+  restoreVersion: function(version) {
     var __private = this.__private;
     __private.refToObj = resolveObject(version.ref);
   },
 
-  changeReferenceTo: function (newObj) {
+  changeReferenceTo: function(newObj) {
     var __private = this.__private;
     __private.refToObj = resolveObject(newObj.ref || newObj);
     this.changed(clone(__private.refToObj));
   },
 
-  changeValueTo: function (newArrayInput) {
+  changeValueTo: function(newArrayInput) {
     var __private = this.__private;
     __private.refToObj.ref = resolveObject(newArrayInput).ref;
     this.changed(clone(__private.refToObj));
   },
 
-  wrapped: function () {
+  wrapped: function() {
     var __private = this.__private;
     var refToObjRef = __private.refToObj.ref;
     if (!getImmutableObject) {
-      getImmutableObject = require('./ImmutableGraphRegistry').getImmutableObject;
+      getImmutableObject =
+          require('./ImmutableGraphRegistry').getImmutableObject;
     }
     var wrap = {};
     var keys = Object.keys(refToObjRef);
@@ -91,7 +98,7 @@ ImmutableGraphObject.prototype = {
     return wrap;
   },
 
-  read: function () {
+  read: function() {
     return this.__private.refToObj.ref;
   },
 
@@ -104,7 +111,8 @@ ImmutableGraphObject.prototype = {
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
-        parent.parent.__childChanged(parent.parentKey, refToObj.ref, oldReference);
+        parent.parent.__childChanged(parent.parentKey, refToObj.ref,
+            oldReference);
       }
     }
 
@@ -116,7 +124,7 @@ ImmutableGraphObject.prototype = {
     }
   },
 
-  __childChanged: function (key, newValue, _oldReference) {
+  __childChanged: function(key, newValue, _oldReference) {
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var refToObjRef = refToObj.ref;
@@ -134,16 +142,16 @@ ImmutableGraphObject.prototype = {
     this.changed(oldReference);
   },
 
-  addConnection: function (opt) {
+  addConnection: function(opt) {
     var key = opt.startPointName;
     this.__private.connectionStartPoints[key] = opt.reference;
     opt.reference.__private.connectionEndPoints[opt.endPointName] = this;
   },
 
-  getConnection: function (connectionKey) {
+  getConnection: function(connectionKey) {
     var __private = this.__private;
     return __private.connectionStartPoints[connectionKey] ||
-      __private.connectionEndPoints[connectionKey];
+        __private.connectionEndPoints[connectionKey];
   },
 
   remove: function() {

@@ -6,6 +6,8 @@ var ReferenceRegistry = require('./ReferenceRegistry');
 var clone = require('./clone');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 
+
+
 /**
  *
  * @param array
@@ -13,7 +15,8 @@ var getReferenceTo = ReferenceRegistry.getReferenceTo;
  */
 var ImmutableGraphArray = function ImmutableGraphArray(array) {
   if (!getImmutableObject) {
-    getImmutableObject = require('./ImmutableGraphRegistry').getImmutableObject;
+    getImmutableObject =
+      require('./ImmutableGraphRegistry').getImmutableObject;
   }
 
   ImmutableGraphObject.call(this, array);
@@ -54,7 +57,7 @@ ImmutableGraphArray.prototype = {
    *
    * @param newItem
    */
-  insert: function (newItem) {
+  insert: function(newItem) {
     var __private = this.__private;
     this._insert(newItem);
     this.changed(clone(__private.refToObj));
@@ -65,7 +68,7 @@ ImmutableGraphArray.prototype = {
    * @param newItem
    * @private
    */
-  _insert: function (newItem) {
+  _insert: function(newItem) {
     var __private = this.__private;
     var refToArray = __private.refToObj;
     var refToArrayRef = refToArray.ref;
@@ -100,7 +103,7 @@ ImmutableGraphArray.prototype = {
    *
    * @param newItems
    */
-  insertMulti: function (newItems) {
+  insertMulti: function(newItems) {
     var __private = this.__private;
 
     for (var i = 0, l = newItems.length; i < l; i++) {
@@ -117,7 +120,7 @@ ImmutableGraphArray.prototype = {
    * @param position
    * @returns {*}
    */
-  at: function (position) {
+  at: function(position) {
     return getImmutableObject(this.__private.refToObj.ref[position]);
   },
 
@@ -128,7 +131,7 @@ ImmutableGraphArray.prototype = {
    * @param cache {boolean}
    * @returns {Array}
    */
-  where: function (conditions, cache) {
+  where: function(conditions, cache) {
     // TODO: cache results, and give the same results back
     var refToArrayRef = this.__private.refToObj.ref;
     var results = [];
@@ -163,7 +166,7 @@ ImmutableGraphArray.prototype = {
     return containers;
   },
 
-  remove: function (obj) {
+  remove: function(obj) {
     // not implemented yet
   }
 

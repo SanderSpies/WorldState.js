@@ -65,7 +65,7 @@ function _getImmutableArray(array, parent, parentKey) {
 
 var ImmutableGraphRegistry = {
 
-  getImmutableObject: function (obj, parent, parentKey) {
+  getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
       return _getImmutableArray(obj, parent, parentKey);
     }

@@ -11,8 +11,7 @@ needs to create a new object with the changed and unchanged properties. The deve
 the old and new object to see if something has changed. So objects should be treated like if they were immutable.
 
 The drawback here is creating a new object and the memory allocation, luckily browsers are really good at this. When
-you are changing a lot of objects at once, in for instance a game or infinite scrolling, you might want to use
-an object pool.
+you are changing a lot of objects at once, in for instance a game, you might want to use an object pool.
 
 Changing multiple references to the same object at once
 ---
