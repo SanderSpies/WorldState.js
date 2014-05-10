@@ -48,7 +48,9 @@ function _getImmutableObject(obj, parent, parentKey) {
   if (!imo) {
     imo = new ImmutableGraphObject(obj);
   }
-  _addParent(imo, parent, parentKey);
+  if (parent && parentKey) {
+    _addParent(imo, parent, parentKey);
+  }
   _objects[_objects.length] = imo;
   return imo;
 }
@@ -58,12 +60,27 @@ function _getImmutableArray(array, parent, parentKey) {
   if (!imo) {
     imo = new ImmutableGraphArray(array);
   }
-  _addParent(imo, parent, parentKey);
+  if (parent && parentKey) {
+    _addParent(imo, parent, parentKey);
+  }
   _arrays[_arrays.length] = imo;
   return imo;
 }
 
 var ImmutableGraphRegistry = {
+
+  mergeWithExistingImmutableObject: function(imo) {
+    if (imo.__private.refToObj) {
+      var refToObjRef = imo.__private.refToObj.ref;
+      var results = _objects.filter(function(obj) {
+        return obj.__private.refToObj.ref === refToObjRef && obj !== imo;
+      });
+      if (results.length) {
+        results[0].__private.parents = results[0].__private.parents.concat(imo.__private.parents);
+        imo.__private = results[0].__private;
+      }
+    }
+  },
 
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {

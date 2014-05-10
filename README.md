@@ -37,7 +37,20 @@ Added features by generated wrappers:
 
 Installation
 ---
+First install WorldState.js globally:
+```
 npm install -g worldstate
+```
+
+Then add it to your project's package.json:
+```
+{
+    "dependencies": {
+        "worldstate": "~0.1"
+    }
+}
+```
+Note: as I'm still getting everything ready for 0.1, the 0.1 release is not on NPM yet.
 
 Getting started
 ---
@@ -93,7 +106,7 @@ Finding an item:
 console.log('Found item:', todoGraph.items().where({id:2})[0].read());
 ```
 
-Inserting an item:
+Inserting a value:
 ```
 var todoItem = TodoGraphItem.newInstance({
    id: 3,
@@ -131,6 +144,7 @@ todoGraph.items().at(0).changeValueTo({
     isComplete: true
 });
 ```
+All the objects using this reference will get this value.
 
 Changing a reference:
 ```
@@ -140,6 +154,7 @@ todoGraph.items().at(0).changeReferenceTo({
     isComplete: true
 });
 ```
+You can point to an existing reference if you want to use the same values.
 
 Saving and restoring a version:
 ```

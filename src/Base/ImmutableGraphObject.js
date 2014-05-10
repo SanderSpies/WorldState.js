@@ -6,8 +6,6 @@ var clone = require('./clone');
 var cloneDeep = require('lodash-node/modern/objects/cloneDeep');
 var resolveObject = ReferenceRegistry.resolveObject;
 
-
-
 /**
  *
  * @param obj
@@ -26,6 +24,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
 };
 
 var getImmutableObject;
+var mergeWithExistingImmutableObject;
 
 ImmutableGraphObject.prototype = {
   __private: {
@@ -62,7 +61,16 @@ ImmutableGraphObject.prototype = {
 
   changeReferenceTo: function(newObj) {
     var __private = this.__private;
+
     __private.refToObj = resolveObject(newObj.ref || newObj);
+
+    if (!mergeWithExistingImmutableObject) {
+      mergeWithExistingImmutableObject =
+        require('./ImmutableGraphRegistry').mergeWithExistingImmutableObject;
+    }
+
+    mergeWithExistingImmutableObject(this);
+
     this.changed(clone(__private.refToObj));
   },
 
@@ -77,7 +85,7 @@ ImmutableGraphObject.prototype = {
     var refToObjRef = __private.refToObj.ref;
     if (!getImmutableObject) {
       getImmutableObject =
-          require('./ImmutableGraphRegistry').getImmutableObject;
+        require('./ImmutableGraphRegistry').getImmutableObject;
     }
     var wrap = {};
     var keys = Object.keys(refToObjRef);
@@ -108,7 +116,7 @@ ImmutableGraphObject.prototype = {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
         parent.parent.__childChanged(parent.parentKey, refToObj.ref,
-            oldReference);
+          oldReference);
       }
     }
   },
