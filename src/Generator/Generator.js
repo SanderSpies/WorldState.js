@@ -106,7 +106,7 @@ function generateObjectWrapper(outputFolder, objName, obj) {
     else {
       graphReadDoc += key + ':' + getType(val) + ',';
     }
-    
+
     graphValueDoc +=  key + ':' + getType(val) + ',';
   }
   graphReadDoc = graphReadDoc.substr(0, graphReadDoc.length - 1) + '}';

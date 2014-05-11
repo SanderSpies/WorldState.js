@@ -1,5 +1,6 @@
 WorldState.js - a generator for immutable graphs
 ===
+[![Build Status](https://travis-ci.org/SanderSpies/WorldState.js.svg?branch=master)](https://travis-ci.org/SanderSpies/WorldState.js)
 
 Current version: pre 0.1
 
