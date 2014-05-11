@@ -70,14 +70,44 @@ function _getImmutableArray(array, parent, parentKey) {
 var ImmutableGraphRegistry = {
 
   mergeWithExistingImmutableObject: function(imo) {
-    if (imo.__private.refToObj) {
-      var refToObjRef = imo.__private.refToObj.ref;
+    // TODO: make less fugly
+    var imoPrivate = imo.__private;
+    var imoRefToObj = imoPrivate.refToObj;
+    if (!imoPrivate.realParent && imoPrivate.parents.length) {
+      imoPrivate.realParent = imoPrivate.parents[0];
+    }
+    var realParents = imoPrivate.parents.filter(function(p) {
+      return p === imoPrivate.realParent;
+    });
+
+    // ensure the parent is removed from the other children
+    var otherImos = _objects.filter(function(obj) {
+      var objPrivate = obj.__private;
+      return objPrivate.parents.indexOf(realParents[0]) > -1 &&
+        objPrivate.refToObj.ref !== imoRefToObj.ref;
+    });
+
+    if (otherImos && otherImos.length) {
+      var p2 = otherImos[0].__private.parents;
+      var position = p2.indexOf(realParents[0]);
+      p2 = p2.slice(0, position).concat(p2.slice(position + 1));
+      otherImos[0].__private.parents = p2;
+    }
+
+    // set the real parents
+    imoPrivate.parents = realParents;
+
+    if (imoRefToObj) {
+      var imoRefToObjRef = imoRefToObj.ref;
       var results = _objects.filter(function(obj) {
-        return obj.__private.refToObj.ref === refToObjRef && obj !== imo;
+        return obj.__private.refToObj.ref === imoRefToObjRef && obj !== imo;
       });
       if (results.length) {
-        results[0].__private.parents = results[0].__private.parents.concat(imo.__private.parents);
-        imo.__private = results[0].__private;
+        var resultPrivate = results[0].__private;
+        resultPrivate.parents =
+          resultPrivate.parents.concat(imoPrivate.parents);
+        imoPrivate.parents = resultPrivate.parents;
+        imoPrivate.refToObj = resultPrivate.refToObj;
       }
     }
   },

@@ -6,15 +6,16 @@ var ImmutableGraphRegistry = require('../src/Base/ImmutableGraphRegistry');
 
 describe('WorldState.js', function() {
 
-  it('should have the correct values', function() {
-
+  it('should be able to create an immutable object', function() {
     // test 1
     var testData = {
       text: 'oh hai'
     };
     var imo1 = ImmutableGraphRegistry.getImmutableObject(testData);
     expect(imo1.read().text).toBe('oh hai');
+  });
 
+  it('should be possible for two objects to have the same value', function() {
     var testData2 = {
       foo: [
         {
@@ -24,12 +25,22 @@ describe('WorldState.js', function() {
       ]
     };
 
-    // test 2
     var imo2 = ImmutableGraphRegistry.getImmutableObject(testData2);
     var imo3 = imo2.wrapped().foo;
-    expect(imo3.wrapped()[0].read()).toBe(imo2.__private.refToObj.ref.foo.ref[0].ref);
+    expect(imo3.wrapped()[0].read()).toBe(imo2.read().foo.ref[0].ref);
+  });
 
-    // test 3
+  it('should be possible to change the value of an object', function() {
+    var testData2 = {
+      foo: [
+        {
+          id: 1,
+          bar: 'woop woop'
+        }
+      ]
+    };
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(testData2);
+    var imo3 = imo2.wrapped().foo;
     imo3.changeValueTo({
       bla: {
         x: '33'
@@ -38,7 +49,7 @@ describe('WorldState.js', function() {
     expect(imo3.wrapped().bla.read()).toBe(imo2.wrapped().foo.wrapped().bla.read());
   });
 
-  it('should recreate all parent objects, but not siblings', function() {
+  it('should properly recreate all parent objects', function() {
     var testData = {
       items: [
         {
@@ -48,22 +59,18 @@ describe('WorldState.js', function() {
                 hello: 'world'
               }
             ]
-          }, sibling: {
+          },
+          sibling: {
             foo: 'bar'
           }
         }
       ],
       otherArea: {
-        item: {
-
-        }
+        item: {}
       },
       andAnother: {
-        boeja: {
-
-        }
+        boeja: {}
       }
-
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(testData);
     var deepItem = imo.wrapped().items.wrapped()[0].wrapped().bla.wrapped().
@@ -73,6 +80,7 @@ describe('WorldState.js', function() {
     // here we make sure that the same object is used
     otherAreaItem.item.changeReferenceTo(deepItem.read());
 
+    // caching old values
     var oldObj1 = imo.read().items.ref[0].ref.sibling;
     var oldObj2 = imo.read().items.ref;
     var old3 = deepItem.__private.refToObj.ref;
@@ -83,14 +91,45 @@ describe('WorldState.js', function() {
       hello: 'there'
     });
 
+    // test to see if both values are the same
     expect(oldObj1).toBe(imo.read().items.ref[0].ref.sibling);
+
+    // test to see if the changed item has really changed
     expect(imo.read().items.ref[0].ref.bla.ref.items.ref[0].ref).
         not.toBe(old3);
     expect(deepItem.read()).not.toBe(old3);
+
+    // test to see if the parent has changed
     expect(imo.read().items.ref).not.toBe(oldObj2);
+
+    // test to see if the referenced items are the same
     expect(deepItem.read()).toBe(otherAreaItem.item.read());
+
+    // test to see if the other parent has changed
     expect(imo.wrapped().otherArea.read()).not.toBe(old4);
+
+    // test to see if the other area has not changed
     expect(imo.wrapped().andAnother.read()).toBe(old5);
+
+    // make sure the parents of the other item has changed correctly
+    expect(deepItem.__private.parents.length).toBe(2);
+
+    // make sure the parents of the referenced item has changed correctly
+    expect(otherAreaItem.item.__private.parents.length).toBe(2);
+
+    var x2 = {
+      rar: 'bla'
+    };
+    otherAreaItem.item.changeReferenceTo(x2);
+
+    // ensure the referenced items are not the same anymore
+    expect(deepItem.read()).not.toBe(otherAreaItem.item.read());
+
+    // make sure the parents of the other item has changed correctly
+    expect(deepItem.__private.parents.length).toBe(1);
+
+    // make sure the parents of the referenced item has changed correctly
+    expect(otherAreaItem.item.__private.parents.length).toBe(1);
   });
 
   it('should replace an object within an Immutable array if the id\'s are the same', function() {
