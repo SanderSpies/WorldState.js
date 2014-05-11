@@ -133,7 +133,40 @@ describe('WorldState.js', function() {
   });
 
   it('should replace an object within an Immutable array if the id\'s are the same', function() {
+    var exampleData = [
+      {
+        foo: [
+          {id:1,
+           bla: 'test'
+          }
+        ]
+      }
+    ];
+    var array = new ImmutableGraphArray(exampleData);
+    var newObj = {
+      id:1,
+      bla: 'test2'
+    };
+    var old1 = array.read();
 
+    array.wrapped()[0].wrapped().foo.insert(newObj);
+
+    expect(array.wrapped()[0].wrapped().foo.read().length).toBe(1);
+    expect(array.wrapped()[0].wrapped().foo.wrapped()[0].read()).toBe(newObj);
+    expect(array.read()).not.toBe(old1);
+
+    var newMultiple = [
+      {
+        id: 1,
+        bla: 'zzz'
+      },
+      {
+        id: 2,
+        bla: 'yyy'
+      }
+    ];
+    array.wrapped()[0].wrapped().foo.insertMulti(newMultiple);
+    expect(array.wrapped()[0].wrapped().foo.read().length).toBe(2);
   });
 
   it('should support saving versions of the graph', function() {

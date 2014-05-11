@@ -68,19 +68,18 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newItem
    * @private
    */
-  _insert: function(newItem) {
+  _insert: function(newItem2) {
+    var newItem = ReferenceRegistry.getReferenceTo(newItem2.ref || newItem2);
     var __private = this.__private;
     var refToArray = __private.refToObj;
     var refToArrayRef = refToArray.ref;
 
     var alreadyInserted = false;
-    var newItemId = newItem.id;
-
+    var newItemId = newItem.ref.id;
     if (newItemId) {
-
       var position = -1;
       for (var i = 0, l = refToArrayRef.length; i < l; i++) {
-        if (refToArrayRef[i].id === newItemId) {
+        if (refToArrayRef[i].ref.id === newItemId) {
           position = i;
           break;
         }
