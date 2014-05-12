@@ -1,7 +1,5 @@
 'use strict';
 
-var ImmutableGraphObject = require('../src/Base/ImmutableGraphObject');
-var ImmutableGraphArray = require('../src/Base/ImmutableGraphArray');
 var ImmutableGraphRegistry = require('../src/Base/ImmutableGraphRegistry');
 
 describe('WorldState.js', function() {
@@ -136,15 +134,16 @@ describe('WorldState.js', function() {
     var exampleData = [
       {
         foo: [
-          {id:1,
-           bla: 'test'
+          {
+            id: 1,
+            bla: 'test'
           }
         ]
       }
     ];
-    var array = new ImmutableGraphArray(exampleData);
+    var array = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var newObj = {
-      id:1,
+      id: 1,
       bla: 'test2'
     };
     var old1 = array.read();
@@ -169,8 +168,38 @@ describe('WorldState.js', function() {
     expect(array.wrapped()[0].wrapped().foo.read().length).toBe(2);
   });
 
-  it('should support saving versions of the graph', function() {
-
+  it('should support saving and restoring versions of the graph', function() {
+    var exampleData = {
+      parent: {
+        items: [
+          {
+            id: 1,
+            title: 'test'
+          }
+        ]
+      },
+      otherOne: {
+        child: {}
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var ref = imo.wrapped().parent.wrapped().items.at(0).read();
+    imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
+    imo.enableVersioning();
+    imo.saveVersion('Initial');
+    var newData = {id: 1, title: 'test444'};
+    imo.wrapped().parent.wrapped().items.at(0).changeValueTo(newData);
+    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+        imo.wrapped().parent.wrapped().items.at(0).read());
+    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+      newData);
+    imo.restoreVersion(imo.getVersions()[0]);
+    expect(imo.wrapped().otherOne.wrapped().child.read()).toEqual({
+      id: 1,
+      title: 'test'
+    });
+    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+      imo.wrapped().parent.wrapped().items.at(0).read());
   });
 
   it('should support restoring versions of the graph', function() {
