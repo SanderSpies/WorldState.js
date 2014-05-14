@@ -120,7 +120,9 @@ ImmutableGraphArray.prototype = {
    * @return {*}
    */
   at: function(position) {
-    return getImmutableObject(this.__private.refToObj.ref[position]);
+    var ref = this.__private.refToObj.ref[position].ref;
+    var res = getImmutableObject(ref, this, position);
+    return res;
   },
 
   /**

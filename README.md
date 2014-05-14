@@ -8,9 +8,10 @@ DO NOT USE. Still getting everything ready for 0.1.
 
 Introduction
 ---
-This generator takes a plain object model and turns it into an immutable graph. Although it's possible to only
-use the library, I would recommend using the generator for creating wrappers around the library. This way the
-cognitive strain of using this library is left to a minimum.
+This generator turns a plain object model into an immutable graph.
+
+Although it's possible to only use the library, I would recommend using the generator for creating wrappers around
+the library. This way the cognitive strain of using this library is left to a minimum.
 
 Library features:
 - Immutable

@@ -3,6 +3,7 @@
 var ImmutableGraphArray = require('./ImmutableGraphArray');
 var ImmutableGraphObject = require('./ImmutableGraphObject');
 var ReferenceRegistry = require('./ReferenceRegistry');
+var clone = require('./clone');
 
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
@@ -43,14 +44,26 @@ function _find(objects, obj) {
   return imo;
 }
 
+function _findAll(objects, obj) {
+  var imos = [];
+  for (var i = 0, l = objects.length; i < l; i++) {
+    var a = objects[i];
+    if (a.__private.refToObj.ref === obj) {
+      imos[imos.length] = a;
+    }
+  }
+  return imos;
+}
+
 function _getImmutableObject(obj, parent, parentKey) {
   var imo = _find(_objects, obj);
   if (!imo) {
     imo = new ImmutableGraphObject(obj);
   }
-  if (parent && parentKey) {
+  if (parent && parentKey != null) {
     _addParent(imo, parent, parentKey);
   }
+
   _objects[_objects.length] = imo;
   return imo;
 }
@@ -60,9 +73,10 @@ function _getImmutableArray(array, parent, parentKey) {
   if (!imo) {
     imo = new ImmutableGraphArray(array);
   }
-  if (parent && parentKey) {
+  if (parent && parentKey != null) {
     _addParent(imo, parent, parentKey);
   }
+
   _arrays[_arrays.length] = imo;
   return imo;
 }
@@ -70,7 +84,6 @@ function _getImmutableArray(array, parent, parentKey) {
 var ImmutableGraphRegistry = {
 
   mergeWithExistingImmutableObject: function(imo) {
-    // TODO: make less fugly
     var imoPrivate = imo.__private;
     var imoRefToObj = imoPrivate.refToObj;
     if (!imoPrivate.realParent && imoPrivate.parents.length) {
@@ -119,8 +132,22 @@ var ImmutableGraphRegistry = {
     else if (typeof obj === 'object') {
       return _getImmutableObject(obj, parent, parentKey);
     }
-  }
+  },
 
+  setReferences: function(oldRef, newValue){
+    var res;
+    if (isArray(oldRef.ref || oldRef)) {
+      res = _findAll(_arrays, oldRef.ref || oldRef);
+    }
+    else {
+      res = _findAll(_objects, oldRef.ref || oldRef);
+    }
+
+    var newRef = getReferenceTo(newValue.ref || newValue);
+    for (var i = 0, l = res.length; i < l; i++) {
+      res[i].__private.refToObj = newRef;
+    }
+  }
 };
 
 module.exports = ImmutableGraphRegistry;

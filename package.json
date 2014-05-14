@@ -15,14 +15,11 @@
   },
   "license": "MIT",
 
-  "dependencies": {
-    "lodash-node": "2.4.1"
-  },
-
   "devDependencies": {
     "gulp-util": "~2.2.14",
     "gulp": "~3.5.1",
-    "gulp-jasmine": "~0.2.0"
+    "gulp-jasmine": "~0.2.0",
+    "gulp-browserify": "0.5.0"
   },
 
   "repository": {

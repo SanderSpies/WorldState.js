@@ -3,7 +3,6 @@
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
-var cloneDeep = require('lodash-node/modern/objects/cloneDeep');
 var resolveObject = ReferenceRegistry.resolveObject;
 
 /**
@@ -25,6 +24,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
 
 var getImmutableObject;
 var mergeWithExistingImmutableObject;
+var setReferences;
 
 ImmutableGraphObject.prototype = {
   __private: {
@@ -38,7 +38,7 @@ ImmutableGraphObject.prototype = {
   enableVersioning: function() {
     var __private = this.__private;
     __private.saveHistory = true;
-    __private.historyRef = cloneDeep(__private.refToObj);
+    __private.historyRef = clone(__private.refToObj);
   },
 
   saveVersion: function(name) {
@@ -46,7 +46,7 @@ ImmutableGraphObject.prototype = {
     var historyRefs = __private.historyRefs;
     historyRefs[historyRefs.length] = {
       name: name,
-      ref: __private.historyRef.ref
+      ref: clone(__private.historyRef.ref)
     };
   },
 
@@ -74,9 +74,15 @@ ImmutableGraphObject.prototype = {
     this.changed(clone(__private.refToObj));
   },
 
-  changeValueTo: function(newArrayInput) {
+  changeValueTo: function(newValue) {
     var __private = this.__private;
-    __private.refToObj.ref = resolveObject(newArrayInput).ref;
+    // __private.refToObj.ref = resolveObject(newValue).ref;
+    if (!setReferences) {
+      setReferences =
+        require('./ImmutableGraphRegistry').setReferences;
+    }
+    var newRefToObj = clone(resolveObject(newValue));
+    setReferences(__private.refToObj, newRefToObj.ref);
     this.changed(clone(__private.refToObj));
   },
 
@@ -115,7 +121,7 @@ ImmutableGraphObject.prototype = {
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
-        parent.parent.__childChanged(parent.parentKey, refToObj.ref,
+        parent.parent.__childChanged(parent.parentKey, refToObj,
           oldReference);
       }
     }
@@ -124,16 +130,24 @@ ImmutableGraphObject.prototype = {
   __childChanged: function(key, newValue, _oldReference) {
     var __private = this.__private;
     var refToObj = __private.refToObj;
-    var refToObjRef = refToObj.ref;
 
-    refToObj.ref = clone(refToObjRef);
-    refToObj.ref[key] = newValue;
+    if (!setReferences) {
+      setReferences =
+        require('./ImmutableGraphRegistry').setReferences;
+    }
 
-    var oldReference = clone(refToObj);
-    oldReference.ref[key] = _oldReference;
+    var newRefToObj = {ref: clone(refToObj.ref)};
+
+    newRefToObj.ref[key] = newValue;
+
+    var oldRefToObj = __private.refToObj;
+
+    setReferences(__private.refToObj, newRefToObj.ref);
+
+    var oldReference = oldRefToObj;
 
     if (__private.saveHistory) {
-      __private.historyRef = oldReference;
+      __private.historyRef = __private.refToObj;
     }
 
     this.changed(oldReference);
