@@ -14,16 +14,16 @@ Although it's possible to only use the library, I would recommend using the gene
 the library. This way the cognitive strain of using this library is left to a minimum.
 
 Library features:
-- Immutable
-- High performance
-- Recreating parent objects
-- Change by value
+- Immutable  (implemented)
+- High performance (verification needed)
+- Recreating parent objects  (implemented)
+- Change by value  (implemented)
 
   To change all the objects pointing at the same object at once
-- Change by reference
+- Change by reference  (implemented)
 
   To change only the current object
-- Versioning support
+- Versioning support (implemented)
 
   Easily jump to different versions the graph. This is handy for undo/redo support.
 - Object pools (not ready yet)
@@ -33,7 +33,7 @@ Library features:
 
 Added features by generated wrappers:
 - Easy to use
-- JsDocs based on Closure
+- JsDocs based on Closure (implemented)
 
 [Ideas behind the graph](GRAPH.md)
 
@@ -195,7 +195,11 @@ FAQ
 ---
 - Why no support for feature XYZ?
 
-  Feel free to report an issue if you are missing a feature.
+  Feel free to open an issue for the feature that you are missing.
+
+- Which browsers are supported?
+
+  IE8+, latest Chrome, Firefox, Safari, Opera.
 
 LICENSE
 ---

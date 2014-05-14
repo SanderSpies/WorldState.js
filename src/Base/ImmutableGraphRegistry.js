@@ -48,7 +48,8 @@ function _findAll(objects, obj) {
   var imos = [];
   for (var i = 0, l = objects.length; i < l; i++) {
     var a = objects[i];
-    if (a.__private.refToObj.ref === obj) {
+    var refToObj = a.__private.refToObj
+    if (refToObj && refToObj.ref === obj) {
       imos[imos.length] = a;
     }
   }
@@ -134,18 +135,31 @@ var ImmutableGraphRegistry = {
     }
   },
 
-  setReferences: function(oldRef, newValue){
+  setReferences: function(reference, newValue) {
     var res;
-    if (isArray(oldRef.ref || oldRef)) {
-      res = _findAll(_arrays, oldRef.ref || oldRef);
+    if (isArray(reference.ref)) {
+      res = _findAll(_arrays, reference.ref);
     }
     else {
-      res = _findAll(_objects, oldRef.ref || oldRef);
+      res = _findAll(_objects, reference.ref);
     }
 
-    var newRef = getReferenceTo(newValue.ref || newValue);
+    var newRef = getReferenceTo(newValue);
     for (var i = 0, l = res.length; i < l; i++) {
       res[i].__private.refToObj = newRef;
+    }
+  },
+
+  removeReferences: function(reference) {
+    var res;
+    if (isArray(reference)) {
+      res = _findAll(_arrays, reference.ref);
+    }
+    else {
+      res = _findAll(_objects, reference.ref);
+    }
+    for (var i = 0, l = res.length; i < l; i++) {
+      res[i].__private.refToObj = null;
     }
   }
 };

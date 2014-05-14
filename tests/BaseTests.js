@@ -253,8 +253,6 @@ describe('WorldState.js', function() {
     item0.changeValueTo(newData5);
     imo.saveVersion('5');
 
-
-
     imo.restoreVersion(imo.getVersions()[0]);
     expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test'});
     imo.restoreVersion(imo.getVersions()[1]);
@@ -266,9 +264,40 @@ describe('WorldState.js', function() {
     imo.restoreVersion(imo.getVersions()[4]);
     expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test4'});
     imo.restoreVersion(imo.getVersions()[5]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test5'});
+    expect(item0.read()).toEqual({id: 1, title: 'test5'});
+    expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
   });
 
-  // test for possible leaks -> not properly removing objects
+  it('should support removing of objects', function() {
+    var exampleData = {
+      items: [
+        {
+          id: 1,
+          title: 'lurrr'
+        }
+      ]
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var child = imo.wrapped().items.at(0);
+    child.remove();
+    expect(imo.wrapped().items.read()).toEqual([]);
+    expect(imo.wrapped().items.length).toBe(0);
+  });
 
+  it('should support merging of objects', function() {
+    var exampleData1 = {
+
+    };
+    var exampleData2 = {
+
+    };
+  });
+
+  it('should support diffing of objects', function() {
+
+  });
+
+  // TODO: merge
+  // TODO: diff
+  // TODO: test for possible leaks -> not properly removing objects
 });

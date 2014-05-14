@@ -1,5 +1,6 @@
-JSON Syntax
+JSON Syntax - Not implemented yet.
 ===
+
 ```"key":"{item of /foo/bar}"```
 Create an object of the given type
 

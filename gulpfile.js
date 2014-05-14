@@ -20,5 +20,4 @@ gulp.task('build-test', function() {
   ])
   .pipe(browserify())
   .pipe(gulp.dest('build/production.js'));
-
 });

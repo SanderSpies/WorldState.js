@@ -11,11 +11,19 @@ var resolveObject = ReferenceRegistry.resolveObject;
  * @constructor
  */
 var ImmutableGraphObject = function ImmutableGraphObject(obj) {
+  if (!mergeWithExistingImmutableObject) {
+    var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
+    mergeWithExistingImmutableObject =
+        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+    setReferences = ImmutableGraphRegistry.setReferences;
+    getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
+    removeReferences = ImmutableGraphRegistry.removeReferences;
+  }
+
   this.__private = {
     refToObj: null,
     parents: [],
     saveHistory: false,
-    historyRef: null,
     historyRefs: []
   };
 
@@ -25,20 +33,19 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
 var getImmutableObject;
 var mergeWithExistingImmutableObject;
 var setReferences;
+var removeReferences;
 
 ImmutableGraphObject.prototype = {
   __private: {
     refToObj: null,
     parents: [],
     saveHistory: false,
-    historyRef: null,
     historyRefs: []
   },
 
   enableVersioning: function() {
     var __private = this.__private;
     __private.saveHistory = true;
-    __private.historyRef = clone(__private.refToObj);
   },
 
   saveVersion: function(name) {
@@ -46,7 +53,7 @@ ImmutableGraphObject.prototype = {
     var historyRefs = __private.historyRefs;
     historyRefs[historyRefs.length] = {
       name: name,
-      ref: clone(__private.historyRef.ref)
+      ref: clone(__private.refToObj.ref)
     };
   },
 
@@ -64,35 +71,24 @@ ImmutableGraphObject.prototype = {
 
     __private.refToObj = resolveObject(newObj.ref || newObj);
 
-    if (!mergeWithExistingImmutableObject) {
-      mergeWithExistingImmutableObject =
-        require('./ImmutableGraphRegistry').mergeWithExistingImmutableObject;
-    }
-
     mergeWithExistingImmutableObject(this);
 
-    this.changed(clone(__private.refToObj));
+    this.changed();
   },
 
   changeValueTo: function(newValue) {
     var __private = this.__private;
-    // __private.refToObj.ref = resolveObject(newValue).ref;
-    if (!setReferences) {
-      setReferences =
-        require('./ImmutableGraphRegistry').setReferences;
-    }
+
+
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
-    this.changed(clone(__private.refToObj));
+    this.changed();
   },
 
   wrapped: function() {
     var __private = this.__private;
     var refToObjRef = __private.refToObj.ref;
-    if (!getImmutableObject) {
-      getImmutableObject =
-        require('./ImmutableGraphRegistry').getImmutableObject;
-    }
+
     var wrap = {};
     var keys = Object.keys(refToObjRef);
     for (var i = 0, l = keys.length; i < l; i++) {
@@ -112,7 +108,7 @@ ImmutableGraphObject.prototype = {
     return this.__private.refToObj.ref;
   },
 
-  changed: function(oldReference) {
+  changed: function() {
     var __private = this.__private;
     var parents = __private.parents;
     var refToObj = __private.refToObj;
@@ -121,40 +117,40 @@ ImmutableGraphObject.prototype = {
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
-        parent.parent.__childChanged(parent.parentKey, refToObj,
-          oldReference);
+        parent.parent.__childChanged(parent.parentKey, refToObj);
       }
     }
   },
 
-  __childChanged: function(key, newValue, _oldReference) {
+  __childChanged: function(key, newValue) {
     var __private = this.__private;
     var refToObj = __private.refToObj;
-
-    if (!setReferences) {
-      setReferences =
-        require('./ImmutableGraphRegistry').setReferences;
-    }
-
     var newRefToObj = {ref: clone(refToObj.ref)};
-
-    newRefToObj.ref[key] = newValue;
-
-    var oldRefToObj = __private.refToObj;
+    if (!newValue && Array.isArray(refToObj.ref)) {
+      var newRef = newRefToObj.ref;
+      newRefToObj.ref = newRef.slice(0, key).concat(newRef.slice(key + 1));
+      this.length--;
+    }
+    else {
+      newRefToObj.ref[key] = newValue;
+    }
 
     setReferences(__private.refToObj, newRefToObj.ref);
-
-    var oldReference = oldRefToObj;
-
-    if (__private.saveHistory) {
-      __private.historyRef = __private.refToObj;
-    }
-
-    this.changed(oldReference);
+    this.changed();
   },
 
   remove: function() {
-    // not implemented yet
+    var __private = this.__private;
+    removeReferences(__private.refToObj);
+    this.changed();
+  },
+
+  merge: function(obj) {
+
+  },
+
+  diff: function() {
+
   }
 
 };

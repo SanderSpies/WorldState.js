@@ -20,6 +20,7 @@ var ImmutableGraphArray = function ImmutableGraphArray(array) {
   }
 
   ImmutableGraphObject.call(this, array);
+  this.length = array.length;
 };
 var ImmutableGraphObjectPrototype = ImmutableGraphObject.prototype;
 var getImmutableObject;
@@ -40,7 +41,7 @@ ImmutableGraphArray.prototype = {
     historyRefs: [],
     cachedWhereResults: []
   },
-
+  length: 0,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
   saveVersion: ImmutableGraphObjectPrototype.saveVersion,
   restoreVersion: ImmutableGraphObjectPrototype.restoreVersion,
@@ -50,6 +51,7 @@ ImmutableGraphArray.prototype = {
   wrapped: ImmutableGraphObjectPrototype.wrapped,
   read: ImmutableGraphObjectPrototype.read,
   changed: ImmutableGraphObjectPrototype.changed,
+  remove: ImmutableGraphObjectPrototype.remove,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
 
   /**
@@ -60,7 +62,7 @@ ImmutableGraphArray.prototype = {
   insert: function(newItem) {
     var __private = this.__private;
     this._insert(newItem);
-    this.changed(clone(__private.refToObj));
+    this.changed();
   },
 
   /**
@@ -94,6 +96,7 @@ ImmutableGraphArray.prototype = {
     if (!alreadyInserted) {
       var key = refToArrayRef.length;
       refToArrayRef[key] = newItem;
+      this.length++;
     }
   },
 
@@ -110,7 +113,7 @@ ImmutableGraphArray.prototype = {
       this._insert(newItem);
     }
 
-    this.changed(clone(__private.refToObj));
+    this.changed();
   },
 
   /**
@@ -121,8 +124,7 @@ ImmutableGraphArray.prototype = {
    */
   at: function(position) {
     var ref = this.__private.refToObj.ref[position].ref;
-    var res = getImmutableObject(ref, this, position);
-    return res;
+    return getImmutableObject(ref, this, position);
   },
 
   /**
@@ -165,10 +167,6 @@ ImmutableGraphArray.prototype = {
     }
 
     return containers;
-  },
-
-  remove: function(obj) {
-    // not implemented yet
   }
 
 };
