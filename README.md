@@ -26,14 +26,17 @@ Library features:
 - Versioning support (implemented)
 
   Easily jump to different versions the graph. This is handy for undo/redo support.
-- Object pools (not ready yet)
-- Diff/merge support (not ready yet)
-- Closure Compiler Advanced Mode compatible (not ready yet)
 - ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
 
-Added features by generated wrappers:
+Added features by generated wrappers (not ready yet):
 - Easy to use
 - JsDocs based on Closure (implemented)
+
+Coming after 0.1:
+- Object pools
+- Diff/merge support
+- Closure Compiler Advanced Mode compatible
+- Branches  (?)
 
 [Ideas behind the graph](GRAPH.md)
 

@@ -11,46 +11,38 @@ var isArray = Array.isArray;
 var _arrays = [];
 var _objects = [];
 
-function _addParent(imo, parent, parentKey) {
+function _addParent(imo, newParent, parentKey) {
   var i;
   var l;
-  var parents = imo.__private.parents;
+  var existingParents = imo.__private.parents;
   var hasParent = false;
-  for (i = 0, l = parents.length; i < l; i++) {
-    var parentO = parents[i];
-    if (parentO.parent === parent) {
+  for (i = 0, l = existingParents.length; i < l; i++) {
+    var existingParent = existingParents[i];
+    if (existingParent.parent === newParent) {
       hasParent = true;
       break;
     }
   }
 
   if (!hasParent) {
-    parents[parents.length] = {
-      parent: parent,
+    existingParents[existingParents.length] = {
+      parent: newParent,
       parentKey: parentKey
     };
   }
 }
 
 function _find(objects, obj) {
-  var imo;
-  for (var i = 0, l = objects.length; i < l; i++) {
-    var a = objects[i];
-    if (a.__private.refToObj.ref === obj) {
-      imo = a;
-      break;
-    }
-  }
-  return imo;
+  return _findAll(objects, obj)[0];
 }
 
 function _findAll(objects, obj) {
   var imos = [];
   for (var i = 0, l = objects.length; i < l; i++) {
-    var a = objects[i];
-    var refToObj = a.__private.refToObj;
+    var existingObject = objects[i];
+    var refToObj = existingObject.__private.refToObj;
     if (refToObj && refToObj.ref === obj) {
-      imos[imos.length] = a;
+      imos[imos.length] = existingObject;
     }
   }
   return imos;
@@ -90,22 +82,32 @@ var ImmutableGraphRegistry = {
     if (!imoPrivate.realParent && imoPrivate.parents.length) {
       imoPrivate.realParent = imoPrivate.parents[0];
     }
-    var realParents = imoPrivate.parents.filter(function(p) {
-      return p === imoPrivate.realParent;
-    });
+    var realParents = [];
+    var imoParents = imoPrivate.parents;
+    for (var i = 0, l = imoParents.length; i < l; i++) {
+      var imoParent = imoParents[i];
+      if (imoParent === imoPrivate.realParent) {
+        realParents[realParents.length] = imoParent;
+      }
+    }
 
     // ensure the parent is removed from the other children
-    var otherImos = _objects.filter(function(obj) {
+    var otherImos = [];
+    for (i = 0, l = _objects.length; i < l; i++) {
+      var obj = _objects[i];
       var objPrivate = obj.__private;
-      return objPrivate.parents.indexOf(realParents[0]) > -1 &&
-        objPrivate.refToObj.ref !== imoRefToObj.ref;
-    });
+      if (objPrivate.parents.indexOf(realParents[0]) > -1 &&
+          objPrivate.refToObj.ref !== imoRefToObj.ref) {
+        otherImos[otherImos.length] = obj;
+      }
+    }
 
     if (otherImos && otherImos.length) {
       var p2 = otherImos[0].__private.parents;
       var position = p2.indexOf(realParents[0]);
-      p2 = p2.slice(0, position).concat(p2.slice(position + 1));
-      otherImos[0].__private.parents = p2;
+      var newParents = p2.slice();
+      newParents.splice(position, 1);
+      otherImos[0].__private.parents = newParents;
     }
 
     // set the real parents
@@ -113,13 +115,18 @@ var ImmutableGraphRegistry = {
 
     if (imoRefToObj) {
       var imoRefToObjRef = imoRefToObj.ref;
-      var results = _objects.filter(function(obj) {
-        return obj.__private.refToObj.ref === imoRefToObjRef && obj !== imo;
-      });
+      var results = [];
+      for (i = 0, l = _objects.length; i < l; i++) {
+        var obj2 = _objects[i];
+        if (obj2.__private.refToObj.ref === imoRefToObjRef && obj2 !== imo) {
+          results[results.length] = obj2;
+        }
+      }
+
       if (results.length) {
         var resultPrivate = results[0].__private;
         resultPrivate.parents =
-          resultPrivate.parents.concat(imoPrivate.parents);
+            resultPrivate.parents.concat(imoPrivate.parents);
         imoPrivate.parents = resultPrivate.parents;
         imoPrivate.refToObj = resultPrivate.refToObj;
       }
@@ -161,12 +168,16 @@ var ImmutableGraphRegistry = {
     for (var i = 0, l = res.length; i < l; i++) {
       res[i].__private.refToObj = null;
       var position = _objects.indexOf(res[i]);
-      if (position) {
-        _objects = _objects.slice(0, position).concat(_objects.slice(position + 1));
+      if (position > -1) {
+        var newObjects = _objects.slice();
+        newObjects.splice(position, 1);
+        _objects = newObjects;
       }
       position = _arrays.indexOf(res[i]);
-      if (position) {
-        _arrays = _arrays.slice(0, position).concat(_arrays.slice(position + 1));
+      if (position > -1) {
+        var newArrays = _arrays.slice();
+        newArrays.splice(position, 1);
+        _arrays = newArrays;
       }
     }
   }

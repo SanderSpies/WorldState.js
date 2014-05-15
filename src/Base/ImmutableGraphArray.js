@@ -144,6 +144,7 @@ ImmutableGraphArray.prototype = {
     var j = 0;
     var i;
     var l;
+    var containers = [];
     for (i = 0, l = refToArrayRef.length; i < l; i++) {
       var obj = refToArrayRef[i].ref;
       var show = true;
@@ -158,14 +159,9 @@ ImmutableGraphArray.prototype = {
         results[j] = obj;
         parentKeys[j] = i;
         j++;
+        containers[containers.length] =
+          getImmutableObject(obj, this, i);
       }
-    }
-
-    // wrap into ImmutableObjects
-    var containers = [];
-    for (i = 0, l = results.length; i < l; i++) {
-      containers[containers.length] =
-          getImmutableObject(results[i], this, parentKeys[i]);
     }
 
     return containers;

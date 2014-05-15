@@ -6,9 +6,11 @@ var clone = require('./clone');
 var resolveObject = ReferenceRegistry.resolveObject;
 var removeReference = ReferenceRegistry.removeReference;
 
+
+
 /**
  *
- * @param obj
+ * @param {{}} obj
  * @constructor
  */
 var ImmutableGraphObject = function ImmutableGraphObject(obj) {
@@ -18,7 +20,8 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
         ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
-    removeImmutableGraphObject = ImmutableGraphRegistry.removeImmutableGraphObject;
+    removeImmutableGraphObject =
+        ImmutableGraphRegistry.removeImmutableGraphObject;
   }
 
   this.__private = {
@@ -133,8 +136,9 @@ ImmutableGraphObject.prototype = {
     var refToObj = __private.refToObj;
     var newRefToObj = {ref: clone(refToObj.ref)};
     if (!newValue && Array.isArray(refToObj.ref)) {
-      var newRef = newRefToObj.ref;
-      newRefToObj.ref = newRef.slice(0, key).concat(newRef.slice(key + 1));
+      var newRef = newRefToObj.ref.slice();
+      newRef.splice(key, 1);
+      newRefToObj.ref = newRef;
       this.length--;
     }
     else {
@@ -150,14 +154,6 @@ ImmutableGraphObject.prototype = {
     removeReference(__private.refToObj.ref);
     removeImmutableGraphObject(__private.refToObj);
     this.changed();
-  },
-
-  merge: function(obj) {
-
-  },
-
-  diff: function() {
-
   }
 
 };

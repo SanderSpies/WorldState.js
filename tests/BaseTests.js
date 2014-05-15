@@ -356,21 +356,4 @@ describe('WorldState.js', function() {
     // so garbage collection can do its work
 
   });
-
-  it('should support merging of objects', function() {
-    var exampleData1 = {
-
-    };
-    var exampleData2 = {
-
-    };
-  });
-
-  it('should support diffing of objects', function() {
-
-  });
-
-  // TODO: merge
-  // TODO: diff
-  // TODO: test for possible leaks -> not properly removing objects
 });
