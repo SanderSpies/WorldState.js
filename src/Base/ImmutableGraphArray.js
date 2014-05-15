@@ -163,7 +163,6 @@ ImmutableGraphArray.prototype = {
           getImmutableObject(obj, this, i);
       }
     }
-
     return containers;
   }
 

@@ -352,8 +352,50 @@ describe('WorldState.js', function() {
 
   // and check the ImmutableGraphRegistry for lost objects also...
 
-  it('should remove all links to unused immutable graph objects', function() {
+  it('should remove all links to unused imo objects when changing an unversioned value', function() {
     // so garbage collection can do its work
-
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToBar = imo.read().foo.ref;
+    imo.changeValueTo({
+      bar: 'test2'
+    });
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    expect(imo).not.toBe(imo2);
   });
+
+
+  it('should remove all links to unused imo objects when changing the reference to an unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToBar = imo.read().foo.ref;
+    imo.changeReferenceTo({
+      bar: 'test2'
+    });
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    expect(imo).not.toBe(imo2);
+  });
+
+  it('should remove all links to unused imo objects when removing an unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    imo.remove();
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    expect(imo).not.toBe(imo2);
+  });
+
 });
