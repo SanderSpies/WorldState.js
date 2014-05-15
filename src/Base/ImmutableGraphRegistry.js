@@ -48,7 +48,7 @@ function _findAll(objects, obj) {
   var imos = [];
   for (var i = 0, l = objects.length; i < l; i++) {
     var a = objects[i];
-    var refToObj = a.__private.refToObj
+    var refToObj = a.__private.refToObj;
     if (refToObj && refToObj.ref === obj) {
       imos[imos.length] = a;
     }
@@ -160,7 +160,17 @@ var ImmutableGraphRegistry = {
     }
     for (var i = 0, l = res.length; i < l; i++) {
       res[i].__private.refToObj = null;
+      var position = _objects.indexOf(res[i]);
+      if (position) {
+        _objects = _objects.slice(0, position).concat(_objects.slice(position + 1));
+      }
+      position = _arrays.indexOf(res[i]);
+      if (position) {
+        _arrays = _arrays.slice(0, position).concat(_arrays.slice(position + 1));
+      }
     }
+
+
   }
 };
 

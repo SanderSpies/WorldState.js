@@ -4,6 +4,7 @@ var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
 var resolveObject = ReferenceRegistry.resolveObject;
+var removeReference = ReferenceRegistry.removeReference;
 
 /**
  *
@@ -68,20 +69,25 @@ ImmutableGraphObject.prototype = {
 
   changeReferenceTo: function(newObj) {
     var __private = this.__private;
-
-    __private.refToObj = resolveObject(newObj.ref || newObj);
-
+    var oldRefToObj = __private.refToObj;
+    var oldRef;
+    if (oldRefToObj) {
+      oldRef = oldRefToObj.ref;
+    }
+    __private.refToObj = resolveObject(newObj);
     mergeWithExistingImmutableObject(this);
-
+    if (oldRef) {
+      removeReference(oldRef);
+    }
     this.changed();
   },
 
   changeValueTo: function(newValue) {
     var __private = this.__private;
-
-
+    var oldRef = __private.refToObj.ref;
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
+    removeReference(oldRef);
     this.changed();
   },
 

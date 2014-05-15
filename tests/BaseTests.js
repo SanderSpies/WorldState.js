@@ -1,6 +1,9 @@
 'use strict';
 
+// TODO: for now this file is a little messy, which should be fixed after 0.1
+
 var ImmutableGraphRegistry = require('../src/Base/ImmutableGraphRegistry');
+var ReferenceRegistry = require('../src/Base/ReferenceRegistry');
 
 describe('WorldState.js', function() {
 
@@ -282,6 +285,47 @@ describe('WorldState.js', function() {
     child.remove();
     expect(imo.wrapped().items.read()).toEqual([]);
     expect(imo.wrapped().items.length).toBe(0);
+  });
+
+  it('should remove all links to unused reference objects when changing an unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToBar = imo.read().foo.ref;
+    imo.wrapped().foo.changeValueTo({
+      bar: 'test2'
+    });
+    var oldReference = ReferenceRegistry.findReference(referenceToBar);
+    expect(oldReference).toBe(null);
+  });
+
+  it('should remove all links to unused reference objects when changing the reference to an unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToBar = imo.read().foo.ref;
+    imo.wrapped().foo.changeReferenceTo({
+      bar: 'test2'
+    });
+    var oldReference = ReferenceRegistry.findReference(referenceToBar);
+    expect(oldReference).toBe(null);
+  });
+
+  // also for remove
+  // also for (replace) insert
+  // and check the ImmutableGraphRegistry for lost objects also...
+
+  it('should remove all links to unused immutable graph objects', function() {
+    // so garbage collection can do its work
+
   });
 
   it('should support merging of objects', function() {

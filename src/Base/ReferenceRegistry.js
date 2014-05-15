@@ -1,6 +1,5 @@
 'use strict';
 
-
 /**
  * Keep track of references to objects.
  *
@@ -10,12 +9,28 @@ var isArray = Array.isArray;
 
 var ReferenceRegistry = {
 
-  getReferenceTo: function (obj) {
+  findReference: function(obj) {
     for (var i = 0, l = _references.length; i < l; i++) {
       var reference = _references[i];
       if (reference.ref === obj) {
         return reference;
       }
+    }
+    return null;
+  },
+
+  removeReference: function(obj) {
+    var ref = ReferenceRegistry.findReference(obj);
+    if (ref) {
+      var position = _references.indexOf(ref);
+      _references = _references.slice(0, position).concat(_references.slice(position + 1));
+    }
+  },
+
+  getReferenceTo: function(obj) {
+    var reference = ReferenceRegistry.findReference(obj);
+    if (reference) {
+      return reference;
     }
 
     var ref = _references[_references.length] = {
@@ -25,7 +40,7 @@ var ReferenceRegistry = {
     return ref;
   },
 
-  resolveObject: function (obj) {
+  resolveObject: function(obj) {
     var val;
     var i;
     var l;
