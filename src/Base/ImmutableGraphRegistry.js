@@ -150,7 +150,7 @@ var ImmutableGraphRegistry = {
     }
   },
 
-  removeReferences: function(reference) {
+  removeImmutableGraphObject: function(reference) {
     var res;
     if (isArray(reference)) {
       res = _findAll(_arrays, reference.ref);
@@ -169,8 +169,6 @@ var ImmutableGraphRegistry = {
         _arrays = _arrays.slice(0, position).concat(_arrays.slice(position + 1));
       }
     }
-
-
   }
 };
 

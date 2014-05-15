@@ -18,7 +18,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
         ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
-    removeReferences = ImmutableGraphRegistry.removeReferences;
+    removeImmutableGraphObject = ImmutableGraphRegistry.removeImmutableGraphObject;
   }
 
   this.__private = {
@@ -34,7 +34,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
 var getImmutableObject;
 var mergeWithExistingImmutableObject;
 var setReferences;
-var removeReferences;
+var removeImmutableGraphObject;
 
 ImmutableGraphObject.prototype = {
   __private: {
@@ -147,7 +147,8 @@ ImmutableGraphObject.prototype = {
 
   remove: function() {
     var __private = this.__private;
-    removeReferences(__private.refToObj);
+    removeReference(__private.refToObj.ref);
+    removeImmutableGraphObject(__private.refToObj);
     this.changed();
   },
 

@@ -319,8 +319,37 @@ describe('WorldState.js', function() {
     expect(oldReference).toBe(null);
   });
 
-  // also for remove
-  // also for (replace) insert
+  it('should remove all links to unused reference objects when removing an unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: {
+        bar: 'test'
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToBar = imo.read().foo.ref;
+    imo.wrapped().foo.remove();
+    var oldReference = ReferenceRegistry.findReference(referenceToBar);
+    expect(oldReference).toBe(null);
+  });
+
+  it('should remove all links to unused reference objects when replacing an existing unversioned value', function() {
+    // so garbage collection can do its work
+    var exampleData = {
+      foo: [
+        {
+          id: 1,
+          title: 'test'
+        }
+      ]
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var referenceToItem = imo.read().foo.ref[0].ref;
+    imo.wrapped().foo.insert({id: 1, title: 'test2'});
+    var oldReference = ReferenceRegistry.findReference(referenceToItem);
+    expect(oldReference).toBe(null);
+  });
+
   // and check the ImmutableGraphRegistry for lost objects also...
 
   it('should remove all links to unused immutable graph objects', function() {

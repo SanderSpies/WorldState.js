@@ -4,7 +4,8 @@ var ImmutableGraphObject = require('./ImmutableGraphObject');
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
-
+var getReferenceTo = ReferenceRegistry.getReferenceTo;
+var removeReference = ReferenceRegistry.removeReference;
 
 
 /**
@@ -67,11 +68,11 @@ ImmutableGraphArray.prototype = {
 
   /**
    *
-   * @param {{}} newItem
+   * @param {{}} newItem2
    * @private
    */
   _insert: function(newItem2) {
-    var newItem = ReferenceRegistry.getReferenceTo(newItem2.ref || newItem2);
+    var newItem = getReferenceTo(newItem2);
     var __private = this.__private;
     var refToArray = __private.refToObj;
     var refToArrayRef = refToArray.ref;
@@ -89,6 +90,7 @@ ImmutableGraphArray.prototype = {
 
       if (position > -1) {
         alreadyInserted = true;
+        removeReference(refToArrayRef[position].ref);
         refToArrayRef[position] = newItem;
       }
     }
