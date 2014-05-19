@@ -28,6 +28,13 @@ Therefore the parents should also be recreated every time something changes.
 
 The drawback here is also creating new objects and memory allocation.
 
+Aggregating child changes
+---
+If we would blindly change 1000 children of the same item, it would result in 1000x recreation of the same path. To
+avoid this we aggregate all child changes and perform them all at once. This gives a small performance loss for simple
+operations, but gives a big performance boost for when performing lots of changes. We could probably tweak this more
+in the future for even better results.
+
 History / Undo / Redo
 ---
 In the previous sections we spoke about replacing objects with new objects, whereby the old object chains are

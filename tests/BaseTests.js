@@ -49,7 +49,7 @@ describe('WorldState.js', function() {
     });
   });
 
-  it('should properly recreate all parent objects', function() {
+  it('should properly recreate all parent objects', function(done) {
     var testData = {
       items: [
         {
@@ -74,68 +74,73 @@ describe('WorldState.js', function() {
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(testData);
     var deepItem = imo.wrapped().items.wrapped()[0].wrapped().bla.wrapped().
-        items.wrapped()[0];
+      items.wrapped()[0];
     var otherAreaItem = imo.wrapped().otherArea.wrapped();
 
     // here we make sure that the same object is used
     otherAreaItem.item.changeReferenceTo(deepItem.read());
+    imo.afterChange(function() {
+      // caching old values
+      var oldObj1 = imo.read().items.ref[0].ref.sibling;
+      var oldObj2 = imo.read().items.ref;
+      var oldObj3 = imo.read().items.ref[0];
+      var old3 = deepItem.__private.refToObj.ref;
+      var old4 = imo.wrapped().otherArea.read();
+      var old5 = imo.wrapped().andAnother.read();
 
-    // caching old values
-    var oldObj1 = imo.read().items.ref[0].ref.sibling;
-    var oldObj2 = imo.read().items.ref;
-    var oldObj3 = imo.read().items.ref[0];
-    var old3 = deepItem.__private.refToObj.ref;
-    var old4 = imo.wrapped().otherArea.read();
-    var old5 = imo.wrapped().andAnother.read();
+      deepItem.changeValueTo({
+        hello: 'there'
+      });
 
-    deepItem.changeValueTo({
-      hello: 'there'
+      imo.afterChange(function() {
+        // test to see if both values are the same
+        expect(oldObj1).toBe(imo.read().items.ref[0].ref.sibling);
+
+        // test to see if the changed item has really changed
+        expect(imo.read().items.ref[0].ref.bla.ref.items.ref[0].ref).
+          not.toBe(old3);
+        expect(deepItem.read()).not.toBe(old3);
+
+        expect(oldObj3).not.toBe(imo.read().items.ref[0]);
+
+        // test to see if the parent has changed
+        expect(imo.read().items.ref).not.toBe(oldObj2);
+
+        // test to see if the referenced items are the same
+        expect(deepItem.read()).toBe(otherAreaItem.item.read());
+
+        // test to see if the other parent has changed
+        expect(imo.wrapped().otherArea.read()).not.toBe(old4);
+
+        // test to see if the other area has not changed
+        expect(imo.wrapped().andAnother.read()).toBe(old5);
+
+        // make sure the parents of the other item has changed correctly
+        expect(deepItem.__private.parents.length).toBe(2);
+
+        // make sure the parents of the referenced item has changed correctly
+        expect(otherAreaItem.item.__private.parents.length).toBe(2);
+
+        var x2 = {
+          rar: 'bla'
+        };
+        otherAreaItem.item.changeReferenceTo(x2);
+        imo.afterChange(function() {
+          // ensure the referenced items are not the same anymore
+          expect(deepItem.read()).not.toBe(otherAreaItem.item.read());
+
+          // make sure the parents of the other item has changed correctly
+          expect(deepItem.__private.parents.length).toBe(1);
+
+          // make sure the parents of the referenced item has changed correctly
+          expect(otherAreaItem.item.__private.parents.length).toBe(1);
+          done();
+        });
+      });
     });
-
-    // test to see if both values are the same
-    expect(oldObj1).toBe(imo.read().items.ref[0].ref.sibling);
-
-    // test to see if the changed item has really changed
-    expect(imo.read().items.ref[0].ref.bla.ref.items.ref[0].ref).
-        not.toBe(old3);
-    expect(deepItem.read()).not.toBe(old3);
-
-    expect(oldObj3).not.toBe(imo.read().items.ref[0]);
-
-    // test to see if the parent has changed
-    expect(imo.read().items.ref).not.toBe(oldObj2);
-
-    // test to see if the referenced items are the same
-    expect(deepItem.read()).toBe(otherAreaItem.item.read());
-
-    // test to see if the other parent has changed
-    expect(imo.wrapped().otherArea.read()).not.toBe(old4);
-
-    // test to see if the other area has not changed
-    expect(imo.wrapped().andAnother.read()).toBe(old5);
-
-    // make sure the parents of the other item has changed correctly
-    expect(deepItem.__private.parents.length).toBe(2);
-
-    // make sure the parents of the referenced item has changed correctly
-    expect(otherAreaItem.item.__private.parents.length).toBe(2);
-
-    var x2 = {
-      rar: 'bla'
-    };
-    otherAreaItem.item.changeReferenceTo(x2);
-
-    // ensure the referenced items are not the same anymore
-    expect(deepItem.read()).not.toBe(otherAreaItem.item.read());
-
-    // make sure the parents of the other item has changed correctly
-    expect(deepItem.__private.parents.length).toBe(1);
-
-    // make sure the parents of the referenced item has changed correctly
-    expect(otherAreaItem.item.__private.parents.length).toBe(1);
   });
 
-  it('should replace an object within an Immutable array if the id\'s are the same', function() {
+  it('should replace an object within an Immutable array if the id\'s are the same', function(done) {
     var exampleData = [
       {
         foo: [
@@ -154,67 +159,30 @@ describe('WorldState.js', function() {
     var old1 = array.read();
 
     array.wrapped()[0].wrapped().foo.insert(newObj);
+    array.afterChange(function() {
+      expect(array.wrapped()[0].wrapped().foo.read().length).toBe(1);
+      expect(array.wrapped()[0].wrapped().foo.wrapped()[0].read()).toBe(newObj);
+      expect(array.read()).not.toBe(old1);
 
-    expect(array.wrapped()[0].wrapped().foo.read().length).toBe(1);
-    expect(array.wrapped()[0].wrapped().foo.wrapped()[0].read()).toBe(newObj);
-    expect(array.read()).not.toBe(old1);
-
-    var newMultiple = [
-      {
-        id: 1,
-        bla: 'zzz'
-      },
-      {
-        id: 2,
-        bla: 'yyy'
-      }
-    ];
-    array.wrapped()[0].wrapped().foo.insertMulti(newMultiple);
-    expect(array.wrapped()[0].wrapped().foo.read().length).toBe(2);
-  });
-
-  it('should support saving and restoring versions of the graph', function() {
-    var exampleData = {
-      parent: {
-        items: [
-          {
-            id: 1,
-            title: 'test'
-          }
-        ]
-      },
-      otherOne: {
-        child: {}
-      }
-    };
-    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
-    var ref = imo.wrapped().parent.wrapped().items.at(0).read();
-    imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
-    imo.enableVersioning();
-    imo.saveVersion('Initial');
-
-
-    var newData = {id: 1, title: 'test444'};
-    imo.wrapped().parent.wrapped().items.at(0).changeValueTo(newData);
-
-
-    expect(imo.__private.historyRefs[0].ref.parent).not.toBe(imo.__private.refToObj.ref.parent);
-
-    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
-        imo.wrapped().parent.wrapped().items.at(0).read());
-    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
-      newData);
-    imo.restoreVersion(imo.getVersions()[0]);
-    expect(imo.wrapped().otherOne.wrapped().child.read()).toEqual({
-      id: 1,
-      title: 'test'
+      var newMultiple = [
+        {
+          id: 1,
+          bla: 'zzz'
+        },
+        {
+          id: 2,
+          bla: 'yyy'
+        }
+      ];
+      array.wrapped()[0].wrapped().foo.insertMulti(newMultiple);
+      array.afterChange(function() {
+        expect(array.wrapped()[0].wrapped().foo.read().length).toBe(2);
+      });
+      done();
     });
-    expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
-      imo.wrapped().parent.wrapped().items.at(0).read());
   });
 
-
-  it('should support saving and restoring versions of the graph 2', function() {
+  it('should support saving and restoring versions of the graph', function(done) {
     var exampleData = {
       parent: {
         items: [
@@ -231,44 +199,101 @@ describe('WorldState.js', function() {
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var ref = imo.wrapped().parent.wrapped().items.at(0).read();
     imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
-    imo.enableVersioning();
-    imo.saveVersion('Initial');
-    var newData1 = {id: 1, title: 'test1'};
-    var newData2 = {id: 1, title: 'test2'};
-    var newData3 = {id: 1, title: 'test3'};
-    var newData4 = {id: 1, title: 'test4'};
-    var newData5 = {id: 1, title: 'test5'};
-    var item0 = imo.wrapped().parent.wrapped().items.at(0);
-    item0.changeValueTo(newData1);
-    imo.saveVersion('1');
+    imo.afterChange(function() {
+      imo.enableVersioning();
+      imo.saveVersion('Initial');
 
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toBe(item0.read());
+      var newData = {id: 1, title: 'test444'};
+      imo.wrapped().parent.wrapped().items.at(0).changeValueTo(newData);
+      imo.afterChange(function() {
+        expect(imo.__private.historyRefs[0].ref.parent).not.toBe(imo.__private.refToObj.ref.parent);
 
-    item0.changeValueTo(newData2);
-    imo.saveVersion('2');
+        expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+          imo.wrapped().parent.wrapped().items.at(0).read());
+        expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+          newData);
+        imo.restoreVersion(imo.getVersions()[0]);
+        //imo.afterChange(function() {
+        expect(imo.wrapped().otherOne.wrapped().child.read()).toEqual({
+          id: 1,
+          title: 'test'
+        });
+        expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
+          imo.wrapped().parent.wrapped().items.at(0).read());
+        done();
 
-    expect(imo.__private.refToObj.ref.parent).not.toBe(imo.__private.historyRefs[1].ref.parent);
+      });
+    });
+  });
 
-    item0.changeValueTo(newData3);
-    imo.saveVersion('3');
-    item0.changeValueTo(newData4);
-    imo.saveVersion('4');
-    item0.changeValueTo(newData5);
-    imo.saveVersion('5');
+  it('should support saving and restoring versions of the graph 2', function(done) {
+    var exampleData = {
+      parent: {
+        items: [
+          {
+            id: 1,
+            title: 'test'
+          }
+        ]
+      },
+      otherOne: {
+        child: {}
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var ref = imo.wrapped().parent.wrapped().items.at(0).read();
+    imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
+    imo.afterChange(function() {
+      imo.enableVersioning();
+      imo.saveVersion('Initial');
+      var newData1 = {id: 1, title: 'test1'};
+      var newData2 = {id: 1, title: 'test2'};
+      var newData3 = {id: 1, title: 'test3'};
+      var newData4 = {id: 1, title: 'test4'};
+      var newData5 = {id: 1, title: 'test5'};
+      var item0 = imo.wrapped().parent.wrapped().items.at(0);
+      item0.changeValueTo(newData1);
+      imo.afterChange(function() {
+        imo.saveVersion('1');
 
-    imo.restoreVersion(imo.getVersions()[0]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test'});
-    imo.restoreVersion(imo.getVersions()[1]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test1'});
-    imo.restoreVersion(imo.getVersions()[2]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test2'});
-    imo.restoreVersion(imo.getVersions()[3]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test3'});
-    imo.restoreVersion(imo.getVersions()[4]);
-    expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test4'});
-    imo.restoreVersion(imo.getVersions()[5]);
-    expect(item0.read()).toEqual({id: 1, title: 'test5'});
-    expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
+        expect(imo.wrapped().parent.wrapped().items.at(0).read()).toBe(item0.read());
+
+        item0.changeValueTo(newData2);
+        imo.afterChange(function() {
+          imo.saveVersion('2');
+
+          expect(imo.__private.refToObj.ref.parent).not.toBe(imo.__private.historyRefs[1].ref.parent);
+
+          item0.changeValueTo(newData3);
+          imo.afterChange(function() {
+            imo.saveVersion('3');
+            item0.changeValueTo(newData4);
+            imo.afterChange(function() {
+              imo.saveVersion('4');
+              item0.changeValueTo(newData5);
+              imo.afterChange(function() {
+                imo.saveVersion('5');
+
+                imo.restoreVersion(imo.getVersions()[0]);
+                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test'});
+                imo.restoreVersion(imo.getVersions()[1]);
+                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test1'});
+                imo.restoreVersion(imo.getVersions()[2]);
+                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test2'});
+                imo.restoreVersion(imo.getVersions()[3]);
+                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test3'});
+                imo.restoreVersion(imo.getVersions()[4]);
+                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test4'});
+                imo.restoreVersion(imo.getVersions()[5]);
+                expect(item0.read()).toEqual({id: 1, title: 'test5'});
+                expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
   });
 
   it('should support removing of objects', function() {
@@ -283,8 +308,10 @@ describe('WorldState.js', function() {
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var child = imo.wrapped().items.at(0);
     child.remove();
-    expect(imo.wrapped().items.read()).toEqual([]);
-    expect(imo.wrapped().items.length).toBe(0);
+    imo.afterChange(function() {
+      expect(imo.wrapped().items.read()).toEqual([]);
+      expect(imo.wrapped().items.length).toBe(0);
+    });
   });
 
   it('should remove all links to unused reference objects when changing an unversioned value', function() {
@@ -299,8 +326,10 @@ describe('WorldState.js', function() {
     imo.wrapped().foo.changeValueTo({
       bar: 'test2'
     });
-    var oldReference = ReferenceRegistry.findReference(referenceToBar);
-    expect(oldReference).toBe(null);
+    imo.afterChange(function() {
+      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      expect(oldReference).toBe(null);
+    });
   });
 
   it('should remove all links to unused reference objects when changing the reference to an unversioned value', function() {
@@ -315,8 +344,10 @@ describe('WorldState.js', function() {
     imo.wrapped().foo.changeReferenceTo({
       bar: 'test2'
     });
-    var oldReference = ReferenceRegistry.findReference(referenceToBar);
-    expect(oldReference).toBe(null);
+    imo.afterChange(function() {
+      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      expect(oldReference).toBe(null);
+    });
   });
 
   it('should remove all links to unused reference objects when removing an unversioned value', function() {
@@ -329,8 +360,10 @@ describe('WorldState.js', function() {
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var referenceToBar = imo.read().foo.ref;
     imo.wrapped().foo.remove();
-    var oldReference = ReferenceRegistry.findReference(referenceToBar);
-    expect(oldReference).toBe(null);
+    imo.afterChange(function() {
+      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      expect(oldReference).toBe(null);
+    });
   });
 
   it('should remove all links to unused reference objects when replacing an existing unversioned value', function() {
@@ -346,8 +379,10 @@ describe('WorldState.js', function() {
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var referenceToItem = imo.read().foo.ref[0].ref;
     imo.wrapped().foo.insert({id: 1, title: 'test2'});
-    var oldReference = ReferenceRegistry.findReference(referenceToItem);
-    expect(oldReference).toBe(null);
+    imo.afterChange(function() {
+      var oldReference = ReferenceRegistry.findReference(referenceToItem);
+      expect(oldReference).toBe(null);
+    });
   });
 
   // and check the ImmutableGraphRegistry for lost objects also...
@@ -364,10 +399,11 @@ describe('WorldState.js', function() {
     imo.changeValueTo({
       bar: 'test2'
     });
-    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
-    expect(imo).not.toBe(imo2);
+    imo.afterChange(function() {
+      var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+      expect(imo).not.toBe(imo2);
+    });
   });
-
 
   it('should remove all links to unused imo objects when changing the reference to an unversioned value', function() {
     // so garbage collection can do its work
@@ -381,8 +417,10 @@ describe('WorldState.js', function() {
     imo.changeReferenceTo({
       bar: 'test2'
     });
-    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
-    expect(imo).not.toBe(imo2);
+    imo.afterChange(function() {
+      var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+      expect(imo).not.toBe(imo2);
+    });
   });
 
   it('should remove all links to unused imo objects when removing an unversioned value', function() {
@@ -394,8 +432,44 @@ describe('WorldState.js', function() {
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     imo.remove();
-    var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
-    expect(imo).not.toBe(imo2);
+    imo.afterChange(function() {
+      var imo2 = ImmutableGraphRegistry.getImmutableObject(exampleData);
+      expect(imo).not.toBe(imo2);
+    });
+  });
+
+  it('should handle 100k child operations under 1s', function(done) {
+    var exampleData = {
+      test: {
+        bla: {
+          items: []
+        }
+      },
+      other: {
+        items: []
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var items = imo.wrapped().test.wrapped().bla.wrapped().items;
+    var now = new Date();
+    console.time('Insert perf test');
+    for (var i = 0, l = 100000; i < l; i++) {
+      items.insert({
+        id: 2,
+        title: 'woop' + i
+      });
+    }
+    imo.afterChange(function(){
+      console.timeEnd('Insert perf test');
+      var later = new Date();
+      var duration = later.getTime() - now.getTime();
+      var d = new Date(duration);
+      expect(d.getSeconds()).toBeLessThan(1);
+      done();
+    });
+
+
+
   });
 
 });

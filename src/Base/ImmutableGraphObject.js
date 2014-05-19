@@ -6,6 +6,16 @@ var clone = require('./clone');
 var resolveObject = ReferenceRegistry.resolveObject;
 var removeReference = ReferenceRegistry.removeReference;
 
+function aggregateChangedChildren(fn) {
+  var __private = this.__private;
+  if (__private.currentChildAggregation) {
+    clearTimeout(__private.currentChildAggregation);
+  }
+  __private.currentChildAggregation = setTimeout(fn, 0);
+}
+
+var isArray = Array.isArray;
+
 
 
 /**
@@ -28,7 +38,12 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     refToObj: null,
     parents: [],
     saveHistory: false,
-    historyRefs: []
+    historyRefs: [],
+    changeListener: null,
+    changedKeys: {},
+    removeKeys: [],
+    currentChildAggregation: null,
+    currentChildEvent: null
   };
 
   this.changeReferenceTo(obj);
@@ -44,7 +59,16 @@ ImmutableGraphObject.prototype = {
     refToObj: null,
     parents: [],
     saveHistory: false,
-    historyRefs: []
+    historyRefs: [],
+    changeListener: null,
+    changedKeys: {},
+    removeKeys: [],
+    currentChildAggregation: null,
+    currentChildEvent: null
+  },
+
+  afterChange: function(fn) {
+    this.__private.changeListener = fn;
   },
 
   enableVersioning: function() {
@@ -132,21 +156,58 @@ ImmutableGraphObject.prototype = {
   },
 
   __childChanged: function(key, newValue) {
-    var __private = this.__private;
+    var self = this;
+    var __private = self.__private;
     var refToObj = __private.refToObj;
-    var newRefToObj = {ref: clone(refToObj.ref)};
-    if (!newValue && Array.isArray(refToObj.ref)) {
-      var newRef = newRefToObj.ref.slice();
-      newRef.splice(key, 1);
-      newRefToObj.ref = newRef;
-      this.length--;
+    var removeKeys = __private.removeKeys;
+    var changedKeys = __private.changedKeys;
+
+    if (!newValue && isArray(refToObj.ref)) {
+      removeKeys[removeKeys.length] = key;
     }
     else {
-      newRefToObj.ref[key] = newValue;
+      changedKeys[key] = newValue;
     }
 
-    setReferences(__private.refToObj, newRefToObj.ref);
-    this.changed();
+    aggregateChangedChildren.call(this, function() {
+      var __private = self.__private;
+      var refToObj = __private.refToObj;
+      var newRefToObj = {ref: clone(refToObj.ref)};
+      var changeListener = __private.changeListener;
+      var removeKeys = __private.removeKeys;
+
+      var i;
+      var l;
+      for (i = 0, l = removeKeys.length; i < l; i++) {
+        var removeKey = removeKeys[i];
+        newRefToObj.ref.splice(removeKey, 1);
+      }
+      __private.removeKeys = [];
+
+      var changedKeys = __private.changedKeys;
+      var keys = Object.keys(changedKeys);
+      for (i = 0, l = keys.length; i < l; i++) {
+        var changeKey = keys[i];
+        var value = changedKeys[changeKey];
+        newRefToObj.ref[changeKey] = value;
+      }
+      __private.changedKeys = {};
+
+      setReferences(__private.refToObj, newRefToObj.ref);
+
+      self.changed();
+      if (isArray(newRefToObj.ref)) {
+        self.length = newRefToObj.ref.length;
+      }
+      if (changeListener) {
+        if (__private.currentChildEvent) {
+          clearTimeout(__private.currentChildEvent);
+        }
+        __private.currentChildEvent = setTimeout(function(){
+          changeListener.apply();
+        }, 5); // TODO: refactor to not use a timeout
+      }
+    });
   },
 
   remove: function() {

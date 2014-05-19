@@ -40,7 +40,9 @@ ImmutableGraphArray.prototype = {
     saveHistory: false,
     historyRef: null,
     historyRefs: [],
-    cachedWhereResults: []
+    cachedWhereResults: [],
+    changedKeys: [],
+    removeKeys: []
   },
   length: 0,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
@@ -54,6 +56,7 @@ ImmutableGraphArray.prototype = {
   changed: ImmutableGraphObjectPrototype.changed,
   remove: ImmutableGraphObjectPrototype.remove,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
+  afterChange: ImmutableGraphObjectPrototype.afterChange,
 
   /**
    * Insert a new item into the array
@@ -61,7 +64,6 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newItem
    */
   insert: function(newItem) {
-    var __private = this.__private;
     this._insert(newItem);
     this.changed();
   },
@@ -108,13 +110,10 @@ ImmutableGraphArray.prototype = {
    * @param {[]} newItems
    */
   insertMulti: function(newItems) {
-    var __private = this.__private;
-
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
       this._insert(newItem);
     }
-
     this.changed();
   },
 

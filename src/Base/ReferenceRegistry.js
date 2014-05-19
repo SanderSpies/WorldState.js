@@ -1,5 +1,6 @@
 'use strict';
 
+
 /**
  * Keep track of references to objects.
  *
@@ -23,7 +24,9 @@ var ReferenceRegistry = {
     var ref = ReferenceRegistry.findReference(obj);
     if (ref) {
       var position = _references.indexOf(ref);
-      _references = _references.slice(0, position).concat(_references.slice(position + 1));
+      var newReferences = _references.slice();
+      newReferences.splice(position, 1);
+      _references = newReferences;
     }
   },
 
