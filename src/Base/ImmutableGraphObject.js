@@ -1,7 +1,8 @@
 'use strict';
 
-var ReferenceRegistry = require('./ReferenceRegistry');
+require('setimmediate');
 
+var ReferenceRegistry = require('./ReferenceRegistry');
 var clone = require('./clone');
 var resolveObject = ReferenceRegistry.resolveObject;
 var removeReference = ReferenceRegistry.removeReference;
@@ -9,9 +10,9 @@ var removeReference = ReferenceRegistry.removeReference;
 function aggregateChangedChildren(fn) {
   var __private = this.__private;
   if (__private.currentChildAggregation) {
-    clearTimeout(__private.currentChildAggregation);
+    clearImmediate(__private.currentChildAggregation);
   }
-  __private.currentChildAggregation = setTimeout(fn, 0);
+  __private.currentChildAggregation = setImmediate(fn);
 }
 
 var isArray = Array.isArray;
@@ -27,11 +28,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   if (!mergeWithExistingImmutableObject) {
     var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     mergeWithExistingImmutableObject =
-        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+      ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
-        ImmutableGraphRegistry.removeImmutableGraphObject;
+      ImmutableGraphRegistry.removeImmutableGraphObject;
   }
 
   this.__private = {
@@ -203,9 +204,9 @@ ImmutableGraphObject.prototype = {
         if (__private.currentChildEvent) {
           clearTimeout(__private.currentChildEvent);
         }
-        __private.currentChildEvent = setTimeout(function(){
+        __private.currentChildEvent = setTimeout(function() {
           changeListener.apply();
-        }, 5); // TODO: refactor to not use a timeout
+        }, 0);
       }
     });
   },

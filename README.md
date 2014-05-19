@@ -105,6 +105,15 @@ Getting the first item of an array:
 ```
 console.log('The first item is:', todoGraph.items().at(0).read());
 ```
+If you have performed an action like ``insert``, ``insertMulti``, ``changeValueTo`` or ``changeReferenceTo``, you must
+wait until the action has completed:
+
+```
+// perform action like insert, insertMulti, changeValueTo or changeReferenceTo
+todoGraph.afterChange(function() {
+    // changes are complete
+});
+```
 
 Finding an item:
 ```
