@@ -2,11 +2,19 @@
 
 require('setimmediate');
 
+/* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
+
 var clone = require('./clone');
 var resolveObject = ReferenceRegistry.resolveObject;
 var removeReference = ReferenceRegistry.removeReference;
 
+
+/**
+ * Bundle all child changes into 1
+ * @param {function} fn
+ * @this {ImmutableGraphObject}
+ */
 function aggregateChangedChildren(fn) {
   var __private = this.__private;
   if (__private.currentChildAggregation) {
@@ -20,7 +28,7 @@ var isArray = Array.isArray;
 
 
 /**
- *
+ * @lends {ImmutableGraphObject}
  * @param {{}} obj
  * @constructor
  */
@@ -28,11 +36,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   if (!mergeWithExistingImmutableObject) {
     var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     mergeWithExistingImmutableObject =
-      ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
-      ImmutableGraphRegistry.removeImmutableGraphObject;
+        ImmutableGraphRegistry.removeImmutableGraphObject;
   }
 
   this.__private = {
@@ -56,6 +64,9 @@ var setReferences;
 var removeImmutableGraphObject;
 
 ImmutableGraphObject.prototype = {
+  /**
+   * @private
+   */
   __private: {
     refToObj: null,
     parents: [],
@@ -68,15 +79,29 @@ ImmutableGraphObject.prototype = {
     currentChildEvent: null
   },
 
+  /**
+   * Executes after the current actions, like insert and
+   * changeValueTo, have completed
+   *
+   * @param {function} fn
+   */
   afterChange: function(fn) {
     this.__private.changeListener = fn;
   },
 
+  /**
+   * Enable versioning for this graph object
+   */
   enableVersioning: function() {
     var __private = this.__private;
     __private.saveHistory = true;
   },
 
+  /**
+   * Save current version
+   *
+   * @param {string} name
+   */
   saveVersion: function(name) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
@@ -86,15 +111,30 @@ ImmutableGraphObject.prototype = {
     };
   },
 
+  /**
+   * Get the stored versions of this graph object
+   *
+   * @return {[{ref:{}}]}
+   */
   getVersions: function() {
     return this.__private.historyRefs;
   },
 
+  /**
+   * Restore the given version of the graph
+   *
+   * @param {{ref:{}}} version
+   */
   restoreVersion: function(version) {
     var __private = this.__private;
     __private.refToObj = resolveObject(version.ref);
   },
 
+  /**
+   * Change the reference (pointing to a different memory address)
+   *
+   * @param {{ref:{}}} newObj
+   */
   changeReferenceTo: function(newObj) {
     var __private = this.__private;
     var oldRefToObj = __private.refToObj;
@@ -107,18 +147,28 @@ ImmutableGraphObject.prototype = {
     if (oldRef) {
       removeReference(oldRef);
     }
-    this.changed();
+    this._changed();
   },
 
+  /**
+   * Change the value (changing the value of the memory address)
+   *
+   * @param {{}} newValue
+   */
   changeValueTo: function(newValue) {
     var __private = this.__private;
     var oldRef = __private.refToObj.ref;
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
     removeReference(oldRef);
-    this.changed();
+    this._changed();
   },
 
+  /**
+   * Get a wrapped object
+   *
+   * @return {{}}
+   */
   wrapped: function() {
     var __private = this.__private;
     var refToObjRef = __private.refToObj.ref;
@@ -138,11 +188,21 @@ ImmutableGraphObject.prototype = {
     return wrap;
   },
 
+  /**
+   * Get the current object
+   *
+   * @return {{}}
+   */
   read: function() {
     return this.__private.refToObj.ref;
   },
 
-  changed: function() {
+  /**
+   * To inform that the graph has changed
+   *
+   * @private
+   */
+  _changed: function() {
     var __private = this.__private;
     var parents = __private.parents;
     var refToObj = __private.refToObj;
@@ -156,6 +216,13 @@ ImmutableGraphObject.prototype = {
     }
   },
 
+  /**
+   * Performed when a child has changed
+   *
+   * @param {string} key
+   * @param {{}} newValue
+   * @private
+   */
   __childChanged: function(key, newValue) {
     var self = this;
     var __private = self.__private;
@@ -196,7 +263,7 @@ ImmutableGraphObject.prototype = {
 
       setReferences(__private.refToObj, newRefToObj.ref);
 
-      self.changed();
+      self._changed();
       if (isArray(newRefToObj.ref)) {
         self.length = newRefToObj.ref.length;
       }
@@ -211,11 +278,14 @@ ImmutableGraphObject.prototype = {
     });
   },
 
+  /**
+   * Remove this graph object
+   */
   remove: function() {
     var __private = this.__private;
     removeReference(__private.refToObj.ref);
     removeImmutableGraphObject(__private.refToObj);
-    this.changed();
+    this._changed();
   }
 
 };

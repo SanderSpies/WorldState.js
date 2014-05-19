@@ -1,16 +1,28 @@
 'use strict';
 
+/* @type {ImmutableGraphArray} */
 var ImmutableGraphArray = require('./ImmutableGraphArray');
+/* @type {ImmutableGraphObject} */
 var ImmutableGraphObject = require('./ImmutableGraphObject');
+/* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
-var clone = require('./clone');
 
+var clone = require('./clone');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 
 var _arrays = [];
 var _objects = [];
 
+
+/**
+ * Add a parent to the immutable object
+ *
+ * @param {ImmutableGraphObject|ImmutableGraphArray} imo
+ * @param {ImmutableGraphObject|ImmutableGraphArray} newParent
+ * @param {string} parentKey
+ * @private
+ */
 function _addParent(imo, newParent, parentKey) {
   var i;
   var l;
@@ -32,10 +44,28 @@ function _addParent(imo, newParent, parentKey) {
   }
 }
 
+
+/**
+ * Find a reference in the given array
+ *
+ * @param {[]} objects
+ * @param {{}} obj
+ * @return {ImmutableGraphObject|ImmutableGraphArray}
+ * @private
+ */
 function _find(objects, obj) {
   return _findAll(objects, obj)[0];
 }
 
+
+/**
+ * Find all matching references in the given array
+ *
+ * @param {[]} objects
+ * @param {{}} obj
+ * @return {ImmutableGraphObject|ImmutableGraphArray}
+ * @private
+ */
 function _findAll(objects, obj) {
   var imos = [];
   for (var i = 0, l = objects.length; i < l; i++) {
@@ -48,6 +78,16 @@ function _findAll(objects, obj) {
   return imos;
 }
 
+
+/**
+ * Get an immutable object
+ *
+ * @param {{}} obj
+ * @param {ImmutableGraphObject|ImmutableGraphArray} parent
+ * @param {string} parentKey
+ * @return {ImmutableGraphObject}
+ * @private
+ */
 function _getImmutableObject(obj, parent, parentKey) {
   var imo = _find(_objects, obj);
   if (!imo) {
@@ -61,6 +101,16 @@ function _getImmutableObject(obj, parent, parentKey) {
   return imo;
 }
 
+
+/**
+ * Get an immutable array
+ *
+ * @param {[]} array
+ * @param {ImmutableGraphObject|ImmutableGraphArray} parent
+ * @param {string} parentKey
+ * @return {ImmutableGraphObject|ImmutableGraphArray}
+ * @private
+ */
 function _getImmutableArray(array, parent, parentKey) {
   var imo = _find(_arrays, array);
   if (!imo) {
@@ -74,8 +124,20 @@ function _getImmutableArray(array, parent, parentKey) {
   return imo;
 }
 
+
+/**
+ * The Immutable Graph Registry stores all the Immutable Objects for
+ * global manipulation
+ *
+ * @lends {ImmutableGraphRegistry}
+ */
 var ImmutableGraphRegistry = {
 
+  /**
+   * Merge ImmutableGraphObjects into one
+   *
+   * @param {ImmutableGraphObject|ImmutableGraphArray} imo
+   */
   mergeWithExistingImmutableObject: function(imo) {
     var imoPrivate = imo.__private;
     var imoRefToObj = imoPrivate.refToObj;
@@ -133,6 +195,14 @@ var ImmutableGraphRegistry = {
     }
   },
 
+  /**
+   * Get an immutable object
+   *
+   * @param {{ref:{}}} obj
+   * @param {ImmutableGraphObject|ImmutableGraphArray} parent
+   * @param {string} parentKey
+   * @return {ImmutableGraphObject|ImmutableGraphArray}
+   */
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
       return _getImmutableArray(obj, parent, parentKey);
@@ -142,6 +212,12 @@ var ImmutableGraphRegistry = {
     }
   },
 
+  /**
+   * Set the references to multiple immutable graph objects at once
+   *
+   * @param {{ref:{}}} reference
+   * @param {{}} newValue
+   */
   setReferences: function(reference, newValue) {
     var res;
     if (isArray(reference.ref)) {
@@ -157,6 +233,11 @@ var ImmutableGraphRegistry = {
     }
   },
 
+  /**
+   * Remove an immutable graph object
+   *
+   * @param {{ref:{}}} reference
+   */
   removeImmutableGraphObject: function(reference) {
     var res;
     if (isArray(reference)) {

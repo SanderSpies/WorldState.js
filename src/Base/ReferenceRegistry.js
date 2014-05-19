@@ -1,15 +1,22 @@
 'use strict';
 
-
-/**
- * Keep track of references to objects.
- *
- */
 var _references = [];
 var isArray = Array.isArray;
 
+
+/**
+ * Keeps track of references to objects
+ *
+ * @lends {ReferenceRegistry}
+ */
 var ReferenceRegistry = {
 
+  /**
+   * Find an existing reference
+   *
+   * @param {{}} obj
+   * @return {{ref:{}}|null}
+   */
   findReference: function(obj) {
     for (var i = 0, l = _references.length; i < l; i++) {
       var reference = _references[i];
@@ -20,6 +27,11 @@ var ReferenceRegistry = {
     return null;
   },
 
+  /**
+   * Remove an existing reference
+   *
+   * @param {{ref:{}}} obj
+   */
   removeReference: function(obj) {
     var ref = ReferenceRegistry.findReference(obj);
     if (ref) {
@@ -30,6 +42,12 @@ var ReferenceRegistry = {
     }
   },
 
+  /**
+   * Get an existing reference or create a new one
+   *
+   * @param {{}} obj
+   * @return {{ref:{}}}
+   */
   getReferenceTo: function(obj) {
     var reference = ReferenceRegistry.findReference(obj);
     if (reference) {
@@ -43,6 +61,12 @@ var ReferenceRegistry = {
     return ref;
   },
 
+  /**
+   * Resolve an object and it's inner objects to use reference objects
+   *
+   * @param {{}} obj
+   * @return {{ref: {}}}
+   */
   resolveObject: function(obj) {
     var val;
     var i;

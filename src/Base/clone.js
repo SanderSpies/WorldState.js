@@ -4,6 +4,7 @@ var isArray = Array.isArray;
 
 
 /**
+ * Internal object clone function
  *
  * @param {{}} obj
  * @return {{}}
@@ -18,6 +19,7 @@ function _cloneObject(obj) {
   }
   return newObj;
 }
+
 
 /**
  * Clone an object

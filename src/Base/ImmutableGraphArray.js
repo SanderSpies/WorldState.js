@@ -1,6 +1,8 @@
 'use strict';
 
+/* @type {ImmutableGraphObject} */
 var ImmutableGraphObject = require('./ImmutableGraphObject');
+/* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
@@ -8,9 +10,11 @@ var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var removeReference = ReferenceRegistry.removeReference;
 
 
+
 /**
  * ImmutableGraphArray
  *
+ * @lends {ImmutableGraphArray}
  * @param {[]} array
  * @constructor
  */
@@ -53,7 +57,7 @@ ImmutableGraphArray.prototype = {
   changeValueTo: ImmutableGraphObjectPrototype.changeValueTo,
   wrapped: ImmutableGraphObjectPrototype.wrapped,
   read: ImmutableGraphObjectPrototype.read,
-  changed: ImmutableGraphObjectPrototype.changed,
+  _changed: ImmutableGraphObjectPrototype._changed,
   remove: ImmutableGraphObjectPrototype.remove,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
@@ -65,7 +69,7 @@ ImmutableGraphArray.prototype = {
    */
   insert: function(newItem) {
     this._insert(newItem);
-    this.changed();
+    this._changed();
   },
 
   /**
@@ -114,14 +118,14 @@ ImmutableGraphArray.prototype = {
       var newItem = newItems[i];
       this._insert(newItem);
     }
-    this.changed();
+    this._changed();
   },
 
   /**
    * Retrieve an item from the array at the specified position
    *
    * @param {number} position
-   * @return {*}
+   * @return {ImmutableGraphObject|ImmutableGraphArray}
    */
   at: function(position) {
     var ref = this.__private.refToObj.ref[position].ref;

@@ -453,13 +453,13 @@ describe('WorldState.js', function() {
     var items = imo.wrapped().test.wrapped().bla.wrapped().items;
     var now = new Date();
     console.time('Insert perf test');
-    for (var i = 0, l = 100000; i < l; i++) {
+    for (var i = 0, l = 200000; i < l; i++) {
       items.insert({
         id: 2,
         title: 'woop' + i
       });
     }
-    imo.afterChange(function(){
+    imo.afterChange(function() {
       console.timeEnd('Insert perf test');
       var later = new Date();
       var duration = later.getTime() - now.getTime();
