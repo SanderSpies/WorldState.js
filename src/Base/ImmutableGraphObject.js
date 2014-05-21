@@ -6,8 +6,8 @@ require('setimmediate');
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
-var resolveObject = ReferenceRegistry.resolveObject;
 var removeReference = ReferenceRegistry.removeReference;
+var resolveObject = ReferenceRegistry.resolveObject;
 
 
 /**
@@ -52,7 +52,8 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null
+    currentChildEvent: null,
+    wrapper: null
   };
 
   this.changeReferenceTo(obj);
@@ -76,7 +77,8 @@ ImmutableGraphObject.prototype = {
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null
+    currentChildEvent: null,
+    wrapper: null
   },
 
   /**
@@ -286,6 +288,13 @@ ImmutableGraphObject.prototype = {
     removeReference(__private.refToObj.ref);
     removeImmutableGraphObject(__private.refToObj);
     this._changed();
+  },
+
+  /**
+   * @param {{}} wrapper
+   */
+  setWrapper: function(wrapper) {
+    this.__private.wrapper = wrapper;
   }
 
 };

@@ -46,7 +46,8 @@ ImmutableGraphArray.prototype = {
     historyRefs: [],
     cachedWhereResults: [],
     changedKeys: [],
-    removeKeys: []
+    removeKeys: [],
+    wrapper: null
   },
   length: 0,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
@@ -58,9 +59,10 @@ ImmutableGraphArray.prototype = {
   wrapped: ImmutableGraphObjectPrototype.wrapped,
   read: ImmutableGraphObjectPrototype.read,
   _changed: ImmutableGraphObjectPrototype._changed,
-  remove: ImmutableGraphObjectPrototype.remove,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
+  remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
+  setWrapper: ImmutableGraphObjectPrototype.setWrapper,
 
   /**
    * Insert a new item into the array
@@ -163,7 +165,7 @@ ImmutableGraphArray.prototype = {
         parentKeys[j] = i;
         j++;
         containers[containers.length] =
-          getImmutableObject(obj, this, i);
+            getImmutableObject(obj, this, i);
       }
     }
     return containers;

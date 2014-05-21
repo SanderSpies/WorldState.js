@@ -14,16 +14,17 @@ Although it's possible to only use the library, I would recommend using the gene
 the library. This way the cognitive strain of using this library is left to a minimum.
 
 Library features:
-- Immutable  (implemented)
+- Immutable
 - High performance (verification needed)
-- Recreating parent objects  (implemented)
-- Change by value  (implemented)
+- Recursive
+- Recreating parent objects
+- Change by value
 
   To change all the objects pointing at the same object at once
-- Change by reference  (implemented)
+- Change by reference
 
   To change only the current object
-- Versioning support (implemented)
+- Versioning support
 
   Easily jump to different versions the graph. This is handy for undo/redo support.
 - ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
@@ -134,22 +135,6 @@ If a new item is inserted with an id parameter that is already present, it will 
 
 You can also insert multiple values by using ``insertMulti``, which accepts an array.
 
-You can also use an object pool:
-```
-//Not implemented yet
-TodoGraphItem.setObjectPoolSize(1000);
-```
-
-Using a pooled object:
-```
-// Not implemented yet
-var item = TodoGraphItem.newInstance();
-var data = item.read();
-data.id = 1;
-data.title = 'bar';
-todoGraph.items().insert(item);
-```
-
 Changing a value:
 ```
 todoGraph.items().at(0).changeValueTo({
@@ -185,20 +170,7 @@ todoGraph.restoreVersion(versions[0]);
 
 Removing a part of the graph:
 ```
-//Not implemented yet
 todoGraph.items().at(1).remove();
-```
-
-Get the difference between two graphs:
-```
-// Not implemented yet
-var diff = todoGraph.diff(otherTodoGraph)
-```
-
-Merging two graphs
-```
-// Not implemented yet
-var mergedGraph = todoGraph.merge(otherTodoGraph);
 ```
 
 [More examples](EXAMPLES.md)

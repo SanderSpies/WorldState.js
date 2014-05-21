@@ -3,140 +3,56 @@
  */
 'use strict';
 
-var ImmutableGraphArray = require('worldstate/src/Base/ImmutableGraphArray');
+var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
+var ImmutableGraphRegistry =
+    require('worldstate/src/Base/ImmutableGraphRegistry');
 
 {RequireBlock}
 
 
 /**
- * {GraphName}
+ * A factory for {{GraphName}}
  *
- * @constructor
- * @lends {GraphName}
- * @param {{GraphChangeValueDoc}} obj JSON input data
+ * @lends {{GraphName}}
  */
-var {GraphName} = function {GraphName}(obj) {
-  this.__private.graph = new ImmutableGraphArray(obj);
-  this.length = obj.length;
+var {GraphName}Factory = {
+  /**
+   * @param {{GraphChangeValueDoc}} obj JSON input data
+   * @return {{GraphName}Prototype}
+   */
+  newInstance: function {GraphName}$newInstance(obj, parent, parentKey) {
+
+    /**
+     * {GraphName}
+     *
+     * @constructor
+     * @param {{GraphChangeValueDoc}} obj JSON input data
+     */
+    var {GraphName}Class = function {GraphName}Class(obj, parent, parentKey) {
+      this.__private.graph = ImmutableGraphRegistry.getImmutableObject(obj, parent, parentKey);
+      this.__private.graph.setWrapper(this);
+    };
+    {GraphName}Class.prototype = {GraphName}Prototype;
+    return new {GraphName}Class(obj, parent, parentKey);
+  }
 };
 
-{GraphName}.prototype = {
-  /* type {number} */
-  length: 0,
 
+/**
+ * @lends {{GraphName}Prototype}
+ */
+var {GraphName}Prototype = {
   /**
    * @private
    * @struct
    */
   __private: {
     graph: null,
-    wrappers: null
+    wrappers: {}
   },
 
-{GraphMethods}
-  /**
-   * Enable versioning
-   */
-  enableVersioning: function {GraphName}$enableVersioning() {
-    this.__private.graph.enableVersioning();
-  },
+  {SubFunctions}
 
-  /**
-   * Save a version (versioning must be enabled)
-   *
-   * @param {string} name name of the version
-   */
-  saveVersion: function {GraphName}$saveVersion(name) {
-    this.__private.graph.saveVersion(name);
-  },
-
-  /**
-   * Restore a version
-   *
-   * @param {string} name name of the version
-   */
-  restoreVersion: function {GraphName}$restoreVersion(name) {
-    this.__private.graph.restoreVersion(name);
-  },
-
-  /**
-   * Get all the versions
-   *
-   * @return {[{name:string, ref:object}]}
-   */
-  getVersions: function {GraphName}$getVersions() {
-    return this.__private.graph.historyRefs;
-  },
-
-  /**
-   * Change reference
-   *
-   * @param {{GraphChangeValueDoc}} obj
-   */
-  changeReferenceTo: function {GraphName}$changeReferenceTo(obj) {
-    this.__private.graph.changeReferenceTo(obj);
-  },
-
-  /**
-   * Change value
-   *
-   * @param {{GraphInsertDoc}} val
-   */
-  changeValueTo: function {GraphName}$changeValueTo(val) {
-    this.__private.graph.changeValueTo(val);
-  },
-
-  /**
-   * Get the actual immutable object
-   *
-   * @return {[]}
-   */
-  read: function {GraphName}$read() {
-    return this.__private.graph.__private.refToObj.ref;
-  },
-
-  /**
-   * Get items that have the given conditions
-   *
-   * @param {Object.<*, *>} conditions
-   * @param {boolean} cached
-   * @return {[{GraphInsertDoc}]}
-   */
-  where: function {GraphName}$where(conditions, cached) {
-    return this.__private.graph.where(conditions, cached);
-  },
-
-  /**
-   * Get item at given position
-   *
-   * @param {number} position
-   * @return {GraphInsertDoc}
-   */
-  at: function {GraphName}$at(position) {
-    return this.__private.graph.at(position);
-  },
-
-  /**
-   * Insert item
-   *
-   * @param {GraphInsertDoc} item
-   */
-  insert: function {GraphName}$insert(item) {
-    var realItem = item.__private.refToObj.ref;
-    this.__private.graph.insert(realItem);
-    this.length++;
-  },
-
-  /**
-   * Insert multiple items. Items with the same id property get replaced
-   * with the new version.
-   *
-   * @param {[{GraphInsertDoc}]} items
-   */
-  insertMulti: function {GraphName}$insertMulti(items) {
-    var nrInserted = this.__private.graph.insertMulti(items);
-    this.length += nrInserted;
-  }
 };
 
-module.exports = {GraphName};
+module.exports = {GraphName}Factory;

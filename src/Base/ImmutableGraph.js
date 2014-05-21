@@ -29,7 +29,9 @@ ImmutableGraphObject.ImmutableGraphRegistry = ImmutableGraphRegistry;
 /**
  * @lends {ImmutableGraph}
  */
-module.exports = {
+var ImmutableGraph = {
   Array: ImmutableGraphArray,
   Object: ImmutableGraphObject
 };
+
+module.exports = ImmutableGraph;

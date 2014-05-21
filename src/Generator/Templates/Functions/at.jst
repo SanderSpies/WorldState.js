@@ -1,0 +1,11 @@
+  /**
+   * Get item at given position
+   *
+   * @param {number} position
+   * @return {GraphInsertDoc}
+   * @this {{GraphName}Prototype}
+   */
+  at: function {GraphName}$at(position) {
+    var item = this.__private.graph.at(position);
+    return {SubGraphName}.newInstance(item.__private.refToObj.ref);
+  }

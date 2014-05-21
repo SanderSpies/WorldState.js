@@ -1,0 +1,15 @@
+  /**
+   * Insert multiple items. Items with the same id property get replaced
+   * with the new version.
+   *
+   * @param {[{GraphInsertDoc}]} items
+   * @this {{GraphName}Prototype}
+   */
+  insertMulti: function {GraphName}$insertMulti(items) {
+    var realItems = [];
+    for (var i = 0, l = items.length; i < l; i++) {
+      realItems[i] = items[i].__private.graph.__private.refToObj.ref;
+    }
+    var nrInserted = this.__private.graph.insertMulti(realItems);
+    this.length += nrInserted;
+  }

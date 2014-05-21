@@ -40,8 +40,3 @@ History / Undo / Redo
 In the previous sections we spoke about replacing objects with new objects, whereby the old object chains are
 cleaned up by the garbage collector. If we want to support history we need to save this chain of old objects,
 and be able to restore them. This should make jumping to different versions of the chains of objects very fast.
-
-Writing and reading
----
-Writing and reading should be seen as too different things, and should not be mixed up. Writing should happen
-whenever a command is performed, and reading should happen whenever the components are rendered on the screen.

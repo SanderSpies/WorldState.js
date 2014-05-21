@@ -74,7 +74,7 @@ describe('WorldState.js', function() {
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(testData);
     var deepItem = imo.wrapped().items.wrapped()[0].wrapped().bla.wrapped().
-      items.wrapped()[0];
+        items.wrapped()[0];
     var otherAreaItem = imo.wrapped().otherArea.wrapped();
 
     // here we make sure that the same object is used

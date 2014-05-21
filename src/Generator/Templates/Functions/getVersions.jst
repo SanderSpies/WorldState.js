@@ -1,0 +1,9 @@
+  /**
+   * Get all the versions
+   *
+   * @return {[{name:string, ref:object}]}
+   * @this {{GraphName}Prototype}
+   */
+  getVersions: function {GraphName}$getVersions() {
+    return this.__private.graph.historyRefs;
+  }

@@ -1,0 +1,10 @@
+  /**
+   * Executes after the current actions, like insert and
+   * changeValueTo, have completed
+   *
+   * @param {function} fn
+   * @this {{GraphName}Prototype}
+   */
+  afterChange: function {GraphName}$afterChange(fn) {
+    this.__private.graph.afterChange(fn);
+  }

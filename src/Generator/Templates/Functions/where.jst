@@ -1,0 +1,13 @@
+  /**
+   * Get items that have the given conditions
+   *
+   * @param {Object.<*, *>} conditions
+   * @param {boolean} cached
+   * @return {[{GraphInsertDoc}]}
+   * @this {{GraphName}Prototype}
+   */
+  where: function {GraphName}$where(conditions, cached) {
+    var realItems = this.__private.graph.where(conditions, cached);
+    var items = [];
+    return items;
+  }

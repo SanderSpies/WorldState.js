@@ -1,0 +1,11 @@
+  /**
+   * Insert item
+   *
+   * @param {GraphInsertDoc} item
+   * @this {{GraphName}Prototype}
+   */
+  insert: function {GraphName}$insert(item) {
+    var realItem = item.__private.graph.__private.refToObj.ref;
+    this.__private.graph.insert(realItem);
+    this.length++;
+  }
