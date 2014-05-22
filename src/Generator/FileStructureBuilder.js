@@ -44,11 +44,16 @@ var FileStructureBuilder = {
   },
 
   getObjectInfo: function(objName, obj) {
-    var GraphChangeValueDoc = '';
     var GraphReadDoc = '';
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        var val = obj[key];
+    var GraphChangeValueDoc = '';
+    var child = obj;
+    if (isArray) {
+      child = obj[0];
+    }
+
+    for (var key in child) {
+      if (child.hasOwnProperty(key)) {
+        var val = child[key];
         GraphChangeValueDoc += key + ':' +
             FileStructureBuilder.getType(val) + ',';
         if (typeof val !== 'object') {
@@ -58,20 +63,29 @@ var FileStructureBuilder = {
       }
     }
 
+
     GraphChangeValueDoc = GraphChangeValueDoc.length ? GraphChangeValueDoc.
         substr(0, GraphChangeValueDoc.length - 1) : GraphChangeValueDoc;
-    GraphChangeValueDoc = '{' + GraphChangeValueDoc + '}';
+    if (isArray) {
+      GraphChangeValueDoc = '[{' + GraphChangeValueDoc + '}]';
+    }
+    else {
+      GraphChangeValueDoc = '{' + GraphChangeValueDoc + '}';
+    }
 
     GraphReadDoc = GraphReadDoc.length ? GraphReadDoc.
         substr(0, GraphReadDoc.length - 1) : GraphReadDoc;
     GraphReadDoc = '{' + GraphReadDoc + '}';
+
+    var GraphInsertDoc = '{' + objName.substr(0, objName.length - 1) + '}';
 
     return {
       GraphName: objName,
       SubGraphName: objName.substr(0, objName.length - 1),
       graphName: objName[0].toUpperCase() + objName.substr(1),
       GraphChangeValueDoc: GraphChangeValueDoc,
-      GraphReadDoc: GraphReadDoc
+      GraphReadDoc: GraphReadDoc,
+      GraphInsertDoc: GraphInsertDoc
     };
   },
 
@@ -100,8 +114,8 @@ var FileStructureBuilder = {
         if (isNaN(key)) {
           var SubGraphName = key[0].toUpperCase() + key.substr(1);
           requires[requires.length] = FileStructureBuilder
-                .createFunction(TemplateConstants.__SUB_GRAPH_REQUIRE__,
-                  {SubGraphName: SubGraphName});
+            .createFunction(TemplateConstants.__SUB_GRAPH_REQUIRE__,
+              {SubGraphName: SubGraphName});
         }
       }
     }
@@ -137,8 +151,8 @@ var FileStructureBuilder = {
 
     if (isArray(obj)) {
       requireStatements = requireStatements.concat(
-        [FileStructureBuilder.createFunction(TemplateConstants.__SUB_GRAPH_REQUIRE__, {SubGraphName: info.SubGraphName})]
-      );
+          [FileStructureBuilder.createFunction(TemplateConstants.__SUB_GRAPH_REQUIRE__, {SubGraphName: info.SubGraphName})]
+        );
     }
 
     fileStructure.functions = functions.concat(customFunctions);
@@ -169,7 +183,7 @@ var FileStructureBuilder = {
           var SubGraphName = objName.substr(0, objName.length - 1);
           sub[sub.length] = {
             fileName: SubGraphName,
-            obj: val[0]
+            obj: val
           };
         }
       }
