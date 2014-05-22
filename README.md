@@ -30,7 +30,7 @@ Library features:
   Easily jump to different versions the graph. This is handy for undo/redo support.
 - ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
 
-[See jasmine tests for examples](tests/BaseTests.js)
+[See Jasmine tests for examples](tests/BaseTests.js)
 
 Added features by generated wrappers (not ready yet):
 - Easy to use
