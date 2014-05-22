@@ -46,8 +46,7 @@ ImmutableGraphArray.prototype = {
     historyRefs: [],
     cachedWhereResults: [],
     changedKeys: [],
-    removeKeys: [],
-    wrapper: null
+    removeKeys: []
   },
   length: 0,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
@@ -62,7 +61,6 @@ ImmutableGraphArray.prototype = {
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
-  setWrapper: ImmutableGraphObjectPrototype.setWrapper,
 
   /**
    * Insert a new item into the array

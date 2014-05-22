@@ -91,16 +91,22 @@ shopping.canvasItems().insert(
 //console.log(shopping.canvasItems().__private.graph.__private.parents);
 
 shopping.afterChange(function() {
+
   var a = shopping.canvasItems().at(1);
   var b = shopping.canvasItems().at(0);
+  console.log(a.__private === b.__private);
+  console.assert(a.read() !== b.read(), 'Should not be true of course');
+
+  var c = shopping.products().read();
   a.changeReferenceTo(
     b.read()
   );
+  var old = shopping.read();
   shopping.afterChange(function() {
-    console.log(b.read());
-    console.log(a.read());
-    console.log(shopping.canvasItems().at(1).read(), a.read());
+    //var x = a.read();
+    console.log(c === shopping.products().read());
 
+    console.log(shopping.canvasItems().at(1).read() === shopping.canvasItems().at(0).read());
     //console.log()
 
   });

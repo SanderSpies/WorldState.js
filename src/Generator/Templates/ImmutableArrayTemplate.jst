@@ -29,11 +29,16 @@ var {GraphName}Factory = {
      * @param {{GraphChangeValueDoc}} obj JSON input data
      */
     var {GraphName}Class = function {GraphName}Class(obj, parent, parentKey) {
+      this.__private = {
+        graph: null,
+        wrappers: {}
+      };
       this.__private.graph = ImmutableGraphRegistry.getImmutableObject(obj, parent, parentKey);
-      this.__private.graph.setWrapper(this);
     };
     {GraphName}Class.prototype = {GraphName}Prototype;
-    return new {GraphName}Class(obj, parent, parentKey);
+
+    var instance = new {GraphName}Class(obj, parent, parentKey);
+    return instance;
   }
 };
 

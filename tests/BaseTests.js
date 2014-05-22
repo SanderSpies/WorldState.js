@@ -140,6 +140,28 @@ describe('WorldState.js', function() {
     });
   });
 
+  it('should give the same immutable object back when using at twice', function(done){
+    var testData = {
+      bla: {
+        zzz: [
+          {id:1,
+           title: 'bla'}
+        ]
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(testData);
+    var a = imo.wrapped().bla.wrapped().zzz.at(0);
+    var oldValue = a.read();
+    a.changeValueTo({id:2, title:'zzz'});
+    imo.afterChange(function(){
+      var b = imo.wrapped().bla.wrapped().zzz.at(0);
+      var newValue = b.read();
+      expect(a).toBe(b);
+      expect(oldValue).not.toBe(newValue);
+      done();
+    });
+  });
+
   it('should replace an object within an Immutable array if the id\'s are the same', function(done) {
     var exampleData = [
       {

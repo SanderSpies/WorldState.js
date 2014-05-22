@@ -4,11 +4,12 @@ WorldState.js - a generator for immutable graphs
 
 Current version: pre 0.1
 
-DO NOT USE. Still getting everything ready for 0.1.
+DO NOT USE. Still getting everything ready for 0.1. The library features seem to be working for 0.1, however the
+wrappers and ReactWorldStateMixin still need extra work before I will call it a 0.1.
 
 Introduction
 ---
-This generator turns a plain object model into an immutable graph.
+This generator turns a JSON object model into an immutable graph.
 
 Although it's possible to only use the library, I would recommend using the generator for creating wrappers around
 the library. This way the cognitive strain of using this library is left to a minimum.
@@ -29,15 +30,18 @@ Library features:
   Easily jump to different versions the graph. This is handy for undo/redo support.
 - ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
 
+[See jasmine tests for examples](tests/BaseTests.js)
+
 Added features by generated wrappers (not ready yet):
 - Easy to use
-- JsDocs based on Closure (implemented)
+- JsDocs based on Closure
 
 Coming after 0.1:
+- Solve expected memory leak issues
 - Object pools
 - Diff/merge support
 - Closure Compiler Advanced Mode compatible
-- Branches  (?)
+- Branches (?)
 
 [Ideas behind the graph](GRAPH.md)
 

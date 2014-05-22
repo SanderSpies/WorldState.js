@@ -12,6 +12,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 
 /**
  * Bundle all child changes into 1
+ *
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
@@ -28,6 +29,8 @@ var isArray = Array.isArray;
 
 
 /**
+ * ImmutableGraphObject
+ *
  * @lends {ImmutableGraphObject}
  * @param {{}} obj
  * @constructor
@@ -52,8 +55,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null,
-    wrapper: null
+    currentChildEvent: null
   };
 
   this.changeReferenceTo(obj);
@@ -77,8 +79,7 @@ ImmutableGraphObject.prototype = {
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null,
-    wrapper: null
+    currentChildEvent: null
   },
 
   /**
@@ -266,6 +267,7 @@ ImmutableGraphObject.prototype = {
       setReferences(__private.refToObj, newRefToObj.ref);
 
       self._changed();
+
       if (isArray(newRefToObj.ref)) {
         self.length = newRefToObj.ref.length;
       }
@@ -288,13 +290,6 @@ ImmutableGraphObject.prototype = {
     removeReference(__private.refToObj.ref);
     removeImmutableGraphObject(__private.refToObj);
     this._changed();
-  },
-
-  /**
-   * @param {{}} wrapper
-   */
-  setWrapper: function(wrapper) {
-    this.__private.wrapper = wrapper;
   }
 
 };
