@@ -47,7 +47,7 @@ var FileStructureBuilder = {
     var GraphReadDoc = '';
     var GraphChangeValueDoc = '';
     var child = obj;
-    if (isArray) {
+    if (isArray(obj)) {
       child = obj[0];
     }
 
@@ -63,7 +63,6 @@ var FileStructureBuilder = {
       }
     }
 
-
     GraphChangeValueDoc = GraphChangeValueDoc.length ? GraphChangeValueDoc.
         substr(0, GraphChangeValueDoc.length - 1) : GraphChangeValueDoc;
     if (isArray) {
@@ -77,7 +76,7 @@ var FileStructureBuilder = {
         substr(0, GraphReadDoc.length - 1) : GraphReadDoc;
     GraphReadDoc = '{' + GraphReadDoc + '}';
 
-    var GraphInsertDoc = '{' + objName.substr(0, objName.length - 1) + '}';
+    var GraphInsertDoc = '{' + objName.substr(0, objName.length - 1) + 'Prototype}';
 
     return {
       GraphName: objName,
