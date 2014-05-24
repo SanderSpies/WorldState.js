@@ -236,10 +236,7 @@ describe('WorldState.js', function() {
           newData);
         imo.restoreVersion(imo.getVersions()[0]);
         //imo.afterChange(function() {
-        expect(imo.wrapped().otherOne.wrapped().child.read()).toEqual({
-          id: 1,
-          title: 'test'
-        });
+        expect(imo.wrapped().otherOne.wrapped().child.read().title).toEqual('test');
         expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
           imo.wrapped().parent.wrapped().items.at(0).read());
         done();
@@ -297,17 +294,17 @@ describe('WorldState.js', function() {
                 imo.saveVersion('5');
 
                 imo.restoreVersion(imo.getVersions()[0]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test'});
+                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test');
                 imo.restoreVersion(imo.getVersions()[1]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test1'});
+                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test1');
                 imo.restoreVersion(imo.getVersions()[2]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test2'});
+                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test2');
                 imo.restoreVersion(imo.getVersions()[3]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test3'});
+                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test3');
                 imo.restoreVersion(imo.getVersions()[4]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read()).toEqual({id: 1, title: 'test4'});
+                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test4');
                 imo.restoreVersion(imo.getVersions()[5]);
-                expect(item0.read()).toEqual({id: 1, title: 'test5'});
+                expect(item0.read().title).toEqual('test5');
                 expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
                 done();
               });
@@ -331,7 +328,7 @@ describe('WorldState.js', function() {
     var child = imo.wrapped().items.at(0);
     child.remove();
     imo.afterChange(function() {
-      expect(imo.wrapped().items.read()).toEqual([]);
+      expect(imo.wrapped().items.read().length).toEqual(0);
       expect(imo.wrapped().items.length).toBe(0);
     });
   });

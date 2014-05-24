@@ -1,7 +1,8 @@
 'use strict';
 
-var _references = [];
+var _references = {};
 var isArray = Array.isArray;
+var uniqueIdCounter = 0;
 
 
 /**
@@ -18,11 +19,9 @@ var ReferenceRegistry = {
    * @return {{ref:{}}|null}
    */
   findReference: function(obj) {
-    for (var i = 0, l = _references.length; i < l; i++) {
-      var reference = _references[i];
-      if (reference.ref === obj) {
-        return reference;
-      }
+    var reference = _references[obj.__worldStateUniqueId];
+    if (reference && reference.ref === obj) {
+      return reference;
     }
     return null;
   },
@@ -33,13 +32,7 @@ var ReferenceRegistry = {
    * @param {{ref:{}}} obj
    */
   removeReference: function(obj) {
-    var ref = ReferenceRegistry.findReference(obj);
-    if (ref) {
-      var position = _references.indexOf(ref);
-      var newReferences = _references.slice();
-      newReferences.splice(position, 1);
-      _references = newReferences;
-    }
+    delete _references[obj.__worldStateUniqueId];
   },
 
   /**
@@ -54,7 +47,10 @@ var ReferenceRegistry = {
       return reference;
     }
 
-    var ref = _references[_references.length] = {
+    var id = uniqueIdCounter++;
+    obj.__worldStateUniqueId = id;
+
+    var ref = _references[id] = {
       ref: obj
     };
 
