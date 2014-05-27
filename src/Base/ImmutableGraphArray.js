@@ -86,15 +86,17 @@ ImmutableGraphArray.prototype = {
     var alreadyInserted = false;
     var newItemId = newItem.ref.id;
     if (newItemId) {
-      var position = -1;
-      for (var i = 0, l = refToArrayRef.length; i < l; i++) {
+      var positions = [];
+      var i;
+      var l;
+      for (i = 0, l = refToArrayRef.length; i < l; i++) {
         if (refToArrayRef[i].ref.id === newItemId) {
-          position = i;
-          break;
+          positions[positions.length] = i;
         }
       }
 
-      if (position > -1) {
+      for (i = 0, l = positions.length; i < l; i++) {
+        var position = positions[i];
         alreadyInserted = true;
         removeReference(refToArrayRef[position].ref);
         refToArrayRef[position] = newItem;

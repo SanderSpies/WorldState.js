@@ -9,5 +9,9 @@
   where: function {GraphName}$where(conditions, cached) {
     var realItems = this.__private.graph.where(conditions, cached);
     var items = [];
+    for (var i = 0, l = realItems.length; i < l; i++) {
+      var realItem = realItems[i];
+      items[i] = {SubGraphName}.newInstance(realItem.read());
+    }
     return items;
   }

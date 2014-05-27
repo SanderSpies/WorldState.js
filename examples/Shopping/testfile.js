@@ -89,12 +89,12 @@ shopping.canvasItems().insert(
 );
 
 //console.log(shopping.canvasItems().__private.graph.__private.parents);
-
+var canvasItems = shopping.canvasItems();
 shopping.afterChange(function() {
 
   var a = shopping.canvasItems().at(1);
   var b = shopping.canvasItems().at(0);
-  console.log(a.__private === b.__private);
+  console.log(a.read() === b.read());
   console.assert(a.read() !== b.read(), 'Should not be true of course');
 
   var c = shopping.products().read();
@@ -106,7 +106,33 @@ shopping.afterChange(function() {
     //var x = a.read();
     console.log(c === shopping.products().read());
 
+    console.assert(a.read() === b.read(), 'Should be true of course');
+
+    a.changeValueTo({id:4, title:'yadayada'});
     console.log(shopping.canvasItems().at(1).read() === shopping.canvasItems().at(0).read());
+
+    shopping.afterChange(function(){
+      //"use strict";
+      console.log(b.read());
+      console.log(a.read());
+      console.log(canvasItems.where({id:4})[0].read().id);
+      canvasItems.insert(CanvasItem.newInstance({id:4, title:'brr'}));
+      shopping.afterChange(function(){
+        "use strict";
+        console.log(canvasItems.where({id:4})[0].read());
+        console.log(canvasItems.where({id:4})[1].read());
+        canvasItems.insertMulti([CanvasItem.newInstance({id:44, title:'zzz'})]);
+        shopping.afterChange(function(){
+          console.log(canvasItems.where({id:4})[0].read());
+          console.log(canvasItems.where({id:4})[1].read());
+          console.log(canvasItems.at(2).read());
+          console.log(shopping.read());
+        });
+      });
+    });
+
+
+
     //console.log()
 
   });

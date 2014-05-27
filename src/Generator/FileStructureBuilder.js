@@ -76,7 +76,7 @@ var FileStructureBuilder = {
         substr(0, GraphReadDoc.length - 1) : GraphReadDoc;
     GraphReadDoc = '{' + GraphReadDoc + '}';
 
-    var GraphInsertDoc = '{' + objName.substr(0, objName.length - 1) + 'Prototype}';
+    var GraphInsertDoc = objName.substr(0, objName.length - 1) + 'Prototype';
 
     return {
       GraphName: objName,
