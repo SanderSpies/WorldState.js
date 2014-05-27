@@ -11,7 +11,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 
 
 /**
- * Bundle all child changes into 1
+ * Bundle all child changes into one
  *
  * @param {function} fn
  * @this {ImmutableGraphObject}
@@ -44,6 +44,7 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
         ImmutableGraphRegistry.removeImmutableGraphObject;
+    changeReferenceId = ImmutableGraphRegistry.changeReferenceId;
   }
 
   this.__private = {
@@ -65,6 +66,7 @@ var getImmutableObject;
 var mergeWithExistingImmutableObject;
 var setReferences;
 var removeImmutableGraphObject;
+var changeReferenceId;
 
 ImmutableGraphObject.prototype = {
   /**
@@ -145,12 +147,19 @@ ImmutableGraphObject.prototype = {
     if (oldRefToObj) {
       oldRef = oldRefToObj.ref;
     }
-    __private.refToObj = resolveObject(newObj);
+
+    var x = resolveObject(newObj);
+    __private.refToObj = x;
     mergeWithExistingImmutableObject(this);
+    if (oldRef) {
+      changeReferenceId(this, x.ref.__worldStateUniqueId,
+          oldRef.__worldStateUniqueId);
+    }
+
     if (oldRef) {
       removeReference(oldRef);
     }
-    this._changed();
+    this.__changed();
   },
 
   /**
@@ -164,7 +173,7 @@ ImmutableGraphObject.prototype = {
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
     removeReference(oldRef);
-    this._changed();
+    this.__changed();
   },
 
   /**
@@ -205,7 +214,7 @@ ImmutableGraphObject.prototype = {
    *
    * @private
    */
-  _changed: function() {
+  __changed: function() {
     var __private = this.__private;
     var parents = __private.parents;
     var refToObj = __private.refToObj;
@@ -220,15 +229,61 @@ ImmutableGraphObject.prototype = {
   },
 
   /**
-   * Performed when a child has changed
+   * Gets executed to perform all the child changes at once
+   *
+   * @private
+   */
+  __aggregateChangedChildren: function() {
+    var __private = this.__private;
+    var refToObj = __private.refToObj;
+    var newRefToObj = {ref: clone(refToObj.ref)};
+    var changeListener = __private.changeListener;
+    var removeKeys = __private.removeKeys;
+
+    var i;
+    var l;
+    for (i = 0, l = removeKeys.length; i < l; i++) {
+      var removeKey = removeKeys[i];
+      newRefToObj.ref.splice(removeKey, 1);
+    }
+    __private.removeKeys = [];
+
+    var changedKeys = __private.changedKeys;
+    var keys = Object.keys(changedKeys);
+    for (i = 0, l = keys.length; i < l; i++) {
+      var changeKey = keys[i];
+      var value = changedKeys[changeKey];
+      newRefToObj.ref[changeKey] = value;
+    }
+    __private.changedKeys = {};
+    setReferences(__private.refToObj, newRefToObj.ref);
+    this.__changed();
+    if (isArray(newRefToObj.ref)) {
+      this.length = newRefToObj.ref.length;
+    }
+    if (changeListener) {
+      if (__private.currentChildEvent) {
+        clearTimeout(__private.currentChildEvent);
+      }
+      __private.currentChildEvent = setTimeout(function() {
+        changeListener.apply();
+      }, 0);
+    }
+  },
+
+  /**
+   * Performed when a child has changed.
+   *
+   * What's interesting here is that we combine all child changes using
+   * setImmediate, and wait using setTimeout(0). This is slower for simple
+   * operations, but faster when doing many operations at once.
    *
    * @param {string} key
-   * @param {{}} newValue
+   * @param {ImmutableGraphObject|ImmutableGraphArray} newValue
    * @private
    */
   __childChanged: function(key, newValue) {
-    var self = this;
-    var __private = self.__private;
+    var __private = this.__private;
     var refToObj = __private.refToObj;
     var removeKeys = __private.removeKeys;
     var changedKeys = __private.changedKeys;
@@ -240,45 +295,9 @@ ImmutableGraphObject.prototype = {
       changedKeys[key] = newValue;
     }
 
+    var self = this;
     aggregateChangedChildren.call(this, function() {
-      var __private = self.__private;
-      var refToObj = __private.refToObj;
-      var newRefToObj = {ref: clone(refToObj.ref)};
-      var changeListener = __private.changeListener;
-      var removeKeys = __private.removeKeys;
-
-      var i;
-      var l;
-      for (i = 0, l = removeKeys.length; i < l; i++) {
-        var removeKey = removeKeys[i];
-        newRefToObj.ref.splice(removeKey, 1);
-      }
-      __private.removeKeys = [];
-
-      var changedKeys = __private.changedKeys;
-      var keys = Object.keys(changedKeys);
-      for (i = 0, l = keys.length; i < l; i++) {
-        var changeKey = keys[i];
-        var value = changedKeys[changeKey];
-        newRefToObj.ref[changeKey] = value;
-      }
-      __private.changedKeys = {};
-
-      setReferences(__private.refToObj, newRefToObj.ref);
-
-      self._changed();
-
-      if (isArray(newRefToObj.ref)) {
-        self.length = newRefToObj.ref.length;
-      }
-      if (changeListener) {
-        if (__private.currentChildEvent) {
-          clearTimeout(__private.currentChildEvent);
-        }
-        __private.currentChildEvent = setTimeout(function() {
-          changeListener.apply();
-        }, 0);
-      }
+      self.__aggregateChangedChildren();
     });
   },
 
@@ -287,9 +306,10 @@ ImmutableGraphObject.prototype = {
    */
   remove: function() {
     var __private = this.__private;
-    removeReference(__private.refToObj.ref);
-    removeImmutableGraphObject(__private.refToObj);
-    this._changed();
+    var refToObj = __private.refToObj;
+    removeReference(refToObj.ref);
+    removeImmutableGraphObject(refToObj);
+    this.__changed();
   }
 
 };

@@ -11,8 +11,17 @@ var clone = require('./clone');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 
-var _arrays = [];
-var _objects = [];
+
+/**
+ * @type {Object.<number, object>}
+ */
+var _arrays = {};
+
+
+/**
+ * @type {Object.<number, object>}
+ */
+var _objects = {};
 
 
 /**
@@ -28,6 +37,8 @@ function _addParent(imo, newParent, parentKey) {
   var l;
   var existingParents = imo.__private.parents;
   var hasParent = false;
+
+  // check if the parent isn't already present
   for (i = 0, l = existingParents.length; i < l; i++) {
     var existingParent = existingParents[i];
     if (existingParent.parent === newParent) {
@@ -36,6 +47,7 @@ function _addParent(imo, newParent, parentKey) {
     }
   }
 
+  // if the parent is not present then add it
   if (!hasParent) {
     existingParents[existingParents.length] = {
       parent: newParent,
@@ -49,7 +61,7 @@ function _addParent(imo, newParent, parentKey) {
  * Find a reference in the given array
  *
  * @param {[]} objects
- * @param {{}} obj
+ * @param {{}|[]} obj
  * @return {ImmutableGraphObject|ImmutableGraphArray}
  * @private
  */
@@ -67,12 +79,15 @@ function _find(objects, obj) {
  * @private
  */
 function _findAll(objects, obj) {
+  var id = obj.__worldStateUniqueId;
   var imos = [];
-  for (var i = 0, l = objects.length; i < l; i++) {
-    var existingObject = objects[i];
-    var refToObj = existingObject.__private.refToObj;
-    if (refToObj && refToObj.ref === obj) {
-      imos[imos.length] = existingObject;
+  if (id && objects[id]) {
+    var data = objects[id];
+    for (var i = 0, l = data.length; i < l; i++) {
+      var existingObject = data[i];
+      if (existingObject.__private.refToObj.ref === obj) {
+        imos[imos.length] = existingObject;
+      }
     }
   }
   return imos;
@@ -89,15 +104,25 @@ function _findAll(objects, obj) {
  * @private
  */
 function _getImmutableObject(obj, parent, parentKey) {
+  // try to get an existing immutable object
   var imo = _find(_objects, obj);
+
+  // if we don't have one, create one
   if (!imo) {
     imo = new ImmutableGraphObject(obj);
+    var id = obj.__worldStateUniqueId;
+    if (!_objects[id]) {
+      _objects[id] = [];
+    }
+    var objects = _objects[id];
+    objects[objects.length] = imo;
   }
+
+  // add parent if necessary
   if (parent && parentKey != null) {
     _addParent(imo, parent, parentKey);
   }
 
-  _objects[_objects.length] = imo;
   return imo;
 }
 
@@ -112,26 +137,59 @@ function _getImmutableObject(obj, parent, parentKey) {
  * @private
  */
 function _getImmutableArray(array, parent, parentKey) {
+  // try to get an existing immutable array
   var imo = _find(_arrays, array);
+
+  // if we don't have one, create one
   if (!imo) {
     imo = new ImmutableGraphArray(array);
+    var id = array.__worldStateUniqueId;
+    if (!_arrays[id]) {
+      _arrays[id] = [];
+    }
+    var arrays = _arrays[id];
+    arrays[arrays.length] = imo;
   }
+
+  // add parent if necessary
   if (parent && parentKey != null) {
     _addParent(imo, parent, parentKey);
   }
 
-  _arrays[_arrays.length] = imo;
   return imo;
 }
 
 
 /**
+ * ImmutableGraphRegistry
+ *
  * The Immutable Graph Registry stores all the Immutable Objects for
  * global manipulation
  *
  * @lends {ImmutableGraphRegistry}
  */
 var ImmutableGraphRegistry = {
+
+  changeReferenceId: function(obj, newId, oldId) {
+    if (isArray(obj)) {
+      delete _arrays[oldId];
+      var arrays = _arrays[newId];
+      if (!arrays) {
+        _arrays[newId] = [];
+        arrays = _arrays[newId];
+      }
+      arrays[arrays.length] = obj;
+    }
+    else {
+      delete _objects[oldId];
+      var objects = _objects[newId];
+      if (!objects) {
+        _objects[newId] = [];
+        objects = _objects[newId];
+      }
+      objects[objects.length] = obj;
+    }
+  },
 
   /**
    * Merge ImmutableGraphObjects into one
@@ -155,12 +213,18 @@ var ImmutableGraphRegistry = {
 
     // ensure the parent is removed from the other children
     var otherImos = [];
-    for (i = 0, l = _objects.length; i < l; i++) {
-      var obj = _objects[i];
-      var objPrivate = obj.__private;
-      if (objPrivate.parents.indexOf(realParents[0]) > -1 &&
-          objPrivate.refToObj.ref !== imoRefToObj.ref) {
-        otherImos[otherImos.length] = obj;
+    var keys = Object.keys(_objects);
+    var key;
+    for (i = 0, l = keys.length; i < l; i++) {
+      key = keys[i];
+      var value = _objects[key];
+      for (var j = 0, l2 = value.length; j < l2; j++) {
+        var obj = value[j];
+        var objPrivate = obj.__private;
+        if (objPrivate.parents.indexOf(realParents[0]) > -1 &&
+            objPrivate.refToObj.ref !== imoRefToObj.ref) {
+          otherImos[otherImos.length] = obj;
+        }
       }
     }
 
@@ -178,10 +242,15 @@ var ImmutableGraphRegistry = {
     if (imoRefToObj) {
       var imoRefToObjRef = imoRefToObj.ref;
       var results = [];
-      for (i = 0, l = _objects.length; i < l; i++) {
-        var obj2 = _objects[i];
-        if (obj2.__private.refToObj.ref === imoRefToObjRef && obj2 !== imo) {
-          results[results.length] = obj2;
+
+      for (i = 0, l = keys.length; i < l; i++) {
+        key = keys[i];
+        var dd = _objects[key];
+        for (var j2 = 0, l3 = dd.length; j2 < l3; j2++) {
+          var obj2 = dd[j2];
+          if (obj2.__private.refToObj.ref === imoRefToObjRef && obj2 !== imo) {
+            results[results.length] = obj2;
+          }
         }
       }
 
@@ -219,6 +288,8 @@ var ImmutableGraphRegistry = {
    * @param {{}} newValue
    */
   setReferences: function(reference, newValue) {
+    var oldId = reference.ref.__worldStateUniqueId;
+
     var res;
     if (isArray(reference.ref)) {
       res = _findAll(_arrays, reference.ref);
@@ -226,10 +297,28 @@ var ImmutableGraphRegistry = {
     else {
       res = _findAll(_objects, reference.ref);
     }
-
     var newRef = getReferenceTo(newValue);
+
+    delete _objects[oldId];
+    delete _arrays[oldId];
+
     for (var i = 0, l = res.length; i < l; i++) {
-      res[i].__private.refToObj = newRef;
+      var res2 = res[i];
+      res2.__private.refToObj = newRef;
+      var id = newValue.__worldStateUniqueId;
+      if (isArray(newValue)) {
+        if (!_arrays[id]) {
+          _arrays[id] = [];
+        }
+
+        _arrays[id][_arrays[id].length] = res2;
+      }
+      else {
+        if (!_objects[id]) {
+          _objects[id] = [];
+        }
+        _objects[id][_objects[id].length] = res2;
+      }
     }
   },
 
@@ -239,26 +328,35 @@ var ImmutableGraphRegistry = {
    * @param {{ref:{}}} reference
    */
   removeImmutableGraphObject: function(reference) {
-    var res;
+    var foundImos;
+    var id = reference.ref.__worldStateUniqueId;
     if (isArray(reference)) {
-      res = _findAll(_arrays, reference.ref);
+      foundImos = _findAll(_arrays, reference.ref);
     }
     else {
-      res = _findAll(_objects, reference.ref);
+      foundImos = _findAll(_objects, reference.ref);
     }
-    for (var i = 0, l = res.length; i < l; i++) {
-      res[i].__private.refToObj = null;
-      var position = _objects.indexOf(res[i]);
-      if (position > -1) {
-        var newObjects = _objects.slice();
-        newObjects.splice(position, 1);
-        _objects = newObjects;
+
+    for (var i = 0, l = foundImos.length; i < l; i++) {
+      var imo = foundImos[i];
+      imo.__private.refToObj = null;
+      var objects = _objects[id];
+      if (objects) {
+        var position = objects.indexOf(imo);
+        if (position > -1) {
+          var newObjects = objects.slice();
+          newObjects.splice(position, 1);
+          _objects[id] = newObjects;
+        }
       }
-      position = _arrays.indexOf(res[i]);
-      if (position > -1) {
-        var newArrays = _arrays.slice();
-        newArrays.splice(position, 1);
-        _arrays = newArrays;
+      var arrays = _arrays[id];
+      if (arrays) {
+        position = arrays.indexOf(imo);
+        if (position > -1) {
+          var newArrays = arrays.slice();
+          newArrays.splice(position, 1);
+          _arrays[id] = newArrays;
+        }
       }
     }
   }

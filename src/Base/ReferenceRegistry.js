@@ -2,7 +2,7 @@
 
 var _references = {};
 var isArray = Array.isArray;
-var uniqueIdCounter = 0;
+var uniqueIdCounter = 1;
 
 
 /**

@@ -37,8 +37,6 @@ ImmutableGraphArray.prototype = {
    * @private
    */
   __private: {
-    connectionEndPoints: {},
-    connectionStartPoints: {},
     refToObj: null,
     parents: [],
     saveHistory: false,
@@ -57,8 +55,10 @@ ImmutableGraphArray.prototype = {
   changeValueTo: ImmutableGraphObjectPrototype.changeValueTo,
   wrapped: ImmutableGraphObjectPrototype.wrapped,
   read: ImmutableGraphObjectPrototype.read,
-  _changed: ImmutableGraphObjectPrototype._changed,
+  __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
+  __aggregateChangedChildren:
+      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -69,7 +69,7 @@ ImmutableGraphArray.prototype = {
    */
   insert: function(newItem) {
     this._insert(newItem);
-    this._changed();
+    this.__changed();
   },
 
   /**
@@ -118,7 +118,7 @@ ImmutableGraphArray.prototype = {
       var newItem = newItems[i];
       this._insert(newItem);
     }
-    this._changed();
+    this.__changed();
   },
 
   /**
