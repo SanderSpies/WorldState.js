@@ -1,19 +1,25 @@
 'use strict';
 
+
+/**
+ *
+ * @type {{shouldComponentUpdate: shouldComponentUpdate}}
+ */
 var ReactWorldStateMixin = {
 
+  /**
+   * @param {{}} nextProps
+   * @return {boolean}
+   * @this {ReactComponent}
+   */
   shouldComponentUpdate: function(nextProps) {
     for (var key in nextProps) {
       if (!nextProps.hasOwnProperty(key)) {
         continue;
       }
-      var __oldProps = this.__oldProps;
-      if (!__oldProps) {
-        this.__oldProps = {};
-      }
+      var oldProp = this.props[key].read();
       var nextProp = nextProps[key].read();
-      if (__oldProps[key] !== nextProp) {
-        __oldProps[key] = nextProp;
+      if (oldProp !== nextProp) {
         return true;
       }
     }

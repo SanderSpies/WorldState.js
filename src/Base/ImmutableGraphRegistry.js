@@ -170,6 +170,17 @@ function _getImmutableArray(array, parent, parentKey) {
  */
 var ImmutableGraphRegistry = {
 
+  getObjects: function() {
+    return _objects;
+  },
+
+  /**
+   * Change the reference id and ensures it's correct within the registry
+   *
+   * @param {ImmutableGraphObject|ImmutableGraphArray} obj
+   * @param {number} newId
+   * @param {number} oldId
+   */
   changeReferenceId: function(obj, newId, oldId) {
     if (isArray(obj)) {
       delete _arrays[oldId];
@@ -188,6 +199,40 @@ var ImmutableGraphRegistry = {
         objects = _objects[newId];
       }
       objects[objects.length] = obj;
+    }
+  },
+
+  /**
+   * Recursively restore references
+   *
+   * @param {{ref:{}}} oldRef
+   * @param {{ref:{}}} newRef
+   */
+  restoreReferences: function(oldRef, newRef) {
+    var imoId = oldRef.ref.__worldStateUniqueId;
+    var imos = _objects[imoId] || _arrays[imoId];
+
+    if (!imos) {
+      return;
+    }
+
+    if (oldRef !== newRef) {
+      for (var i = 0, l = imos.length; i < l; i++) {
+        var imo = imos[i];
+        imo.__private.refToObj = newRef;
+        ImmutableGraphRegistry.changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
+            oldRef.ref.__worldStateUniqueId);
+      }
+
+      var newRefRef = newRef.ref;
+      var oldRefRef = oldRef.ref;
+      for (var key in newRefRef) {
+        var value = newRefRef[key];
+        if (typeof value === 'object') {
+          ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
+              newRefRef[key]);
+        }
+      }
     }
   },
 

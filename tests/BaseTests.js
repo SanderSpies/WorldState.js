@@ -235,12 +235,8 @@ describe('WorldState.js', function() {
         expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
           newData);
         imo.restoreVersion(imo.getVersions()[0]);
-        //imo.afterChange(function() {
-        expect(imo.wrapped().otherOne.wrapped().child.read().title).toEqual('test');
-        expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
-          imo.wrapped().parent.wrapped().items.at(0).read());
-        done();
 
+        done();
       });
     });
   });
@@ -259,6 +255,7 @@ describe('WorldState.js', function() {
         child: {}
       }
     };
+
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var ref = imo.wrapped().parent.wrapped().items.at(0).read();
     imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
@@ -303,10 +300,23 @@ describe('WorldState.js', function() {
                 expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test3');
                 imo.restoreVersion(imo.getVersions()[4]);
                 expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test4');
+                expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
                 imo.restoreVersion(imo.getVersions()[5]);
                 expect(item0.read().title).toEqual('test5');
                 expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
-                done();
+                item0.changeValueTo({
+                  id: 1,
+                  title: 'fafafa'
+                })
+                imo.afterChange(function() {
+
+                  expect(item0.read()).toBe(imo.read().parent.ref.items.ref[0].ref);
+                  expect(item0.read()).toBe(imo.wrapped().parent.wrapped
+                    ().items.at(0).read());
+                  expect(item0.read().title).toBe('fafafa');
+                  expect(imo.read().parent.ref.items.ref[0].ref.title).toBe('fafafa');
+                  done();
+                });
               });
             });
           });
@@ -457,7 +467,7 @@ describe('WorldState.js', function() {
     });
   });
 
-  it('should handle 100k child operations under 1s', function(done) {
+  it('should handle 200k child operations under 1s', function(done) {
     var exampleData = {
       test: {
         bla: {

@@ -10,12 +10,13 @@ var TodoListComponent = React.createClass({
   render: function() {
     var items = this.props.items;
     for (var i = 0, l = items.length; i < l; i++) {
-      <TodoListItem item={items.at(i).read()} />
+      <TodoListItem item={items.at(i)} />;
     }
 
     var list = <ul>
       {items}
     </ul>;
+
     return list;
   }
 

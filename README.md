@@ -4,8 +4,8 @@ WorldState.js - a generator for immutable graphs
 
 Current version: pre 0.1
 
-DO NOT USE. Still getting everything ready for 0.1. The library features seem to be working for 0.1, however the
-wrappers and ReactWorldStateMixin still need extra work before I will call it a 0.1.
+DO NOT USE. Still getting everything ready for 0.1. The library + wrapper features seem to be working for 0.1,
+however the ReactWorldStateMixin still need extra work before I will call it a 0.1.
 
 Introduction
 ---
@@ -32,16 +32,18 @@ Library features:
 
 [See Jasmine tests for examples](tests/BaseTests.js)
 
-Added features by generated wrappers (not ready yet):
+Added features by generated wrappers:
 - Easy to use
 - JsDocs based on Closure
 
 Coming after 0.1:
+- Jasmine tests for wrappers
 - Solve expected memory leak issues
 - Object pools
 - Diff/merge support
 - Closure Compiler Advanced Mode compatible
-- Branches (?)
+- Branches
+- Grunt + Gulp support
 
 [Ideas behind the graph](GRAPH.md)
 
@@ -103,7 +105,7 @@ The {TodoGraph} annotation is added for autocomplete support.
 
 Loading data into the graph (you might want to use [superagent](https://github.com/visionmedia/superagent)):
 ```
-var todoGraph = new TodoGraph({/*data*/});
+var todoGraph = TodoGraph.newInstance({/*data*/});
 ```
 
 Getting the first item of an array:
@@ -168,8 +170,10 @@ todoGraph.items().at(0).changeValueTo({
     title: 'bla',
     isComplete: true
 });
-var versions = todoGraph.getVersions();
-todoGraph.restoreVersion(versions[0]);
+todoGraph.afterChange(function(){
+    var versions = todoGraph.getVersions();
+    todoGraph.restoreVersion(versions[0]);
+});
 ```
 
 Removing a part of the graph:

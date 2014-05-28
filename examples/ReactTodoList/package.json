@@ -1,0 +1,13 @@
+{
+  "name": "ReactTodoList",
+  "private": true,
+  "devDependencies": {
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-browserify": "2.1.0"
+  },
+  "dependencies": {
+    "react": "0.10",
+    "worldstate": "0.0.13"
+  }
+}
