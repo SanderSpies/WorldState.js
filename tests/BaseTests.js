@@ -235,7 +235,8 @@ describe('WorldState.js', function() {
         expect(imo.wrapped().otherOne.wrapped().child.read()).toBe(
           newData);
         imo.restoreVersion(imo.getVersions()[0]);
-
+        expect(imo.wrapped().otherOne.wrapped().child.read().title).toEqual('test');
+        expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toBe('test');
         done();
       });
     });

@@ -219,8 +219,10 @@ var ImmutableGraphRegistry = {
     if (oldRef !== newRef) {
       for (var i = 0, l = imos.length; i < l; i++) {
         var imo = imos[i];
-        imo.__private.refToObj = newRef;
-        ImmutableGraphRegistry.changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
+        ImmutableGraphRegistry.
+            setReferences(imo.__private.refToObj, newRef.ref);
+        ImmutableGraphRegistry.
+            changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
             oldRef.ref.__worldStateUniqueId);
       }
 
@@ -229,8 +231,10 @@ var ImmutableGraphRegistry = {
       for (var key in newRefRef) {
         var value = newRefRef[key];
         if (typeof value === 'object') {
-          ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
-              newRefRef[key]);
+          if (oldRefRef[key].ref !== newRefRef[key].ref) {
+            ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
+                newRefRef[key]);
+          }
         }
       }
     }
