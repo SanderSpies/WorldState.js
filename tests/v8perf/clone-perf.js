@@ -12,7 +12,7 @@ var foo = {
     name: 'x',
     items: [
       {
-        id: (1)|0,
+        id: 1,
         title: 'sdfsd'
       }
     ]

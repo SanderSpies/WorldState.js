@@ -23,7 +23,9 @@ var TemplateConstants = {
   __SUB_GRAPH_REQUIRE__: fs.readFileSync(__dirname + '/Templates/Functions/__subGraphRequire__.jst', { encoding:'utf8'}),
   IMMUTABLE_GRAPH_OBJECT_TEMPLATE: fs.readFileSync(__dirname + '/Templates/ImmutableObjectTemplate.jst', { encoding:'utf8'}),
   IMMUTABLE_GRAPH_ARRAY_TEMPLATE: fs.readFileSync(__dirname + '/Templates/ImmutableArrayTemplate.jst', { encoding:'utf8'}),
-  AFTER_CHANGE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/afterChange.jst', { encoding:'utf8'})
+  AFTER_CHANGE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/afterChange.jst', { encoding:'utf8'}),
+  REMOVE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/remove.jst', { encoding:'utf8'}),
+  LENGTH_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/length.jst', { encoding:'utf8'})
 };
 
 module.exports = TemplateConstants;

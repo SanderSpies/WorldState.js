@@ -1,7 +1,10 @@
+/**
+ * @jsx React.DOM
+ */
 'use strict';
 
 var React = require('react');
-var WorldStateMixin = require('worldstate/Helpers/ReactWorldStateMixin');
+var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
 var TodoListItemComponent = React.createClass({
 
@@ -9,8 +12,9 @@ var TodoListItemComponent = React.createClass({
 
   render: function() {
     var props = this.props;
+    var i = props.item.read();
     var item = <li onClick={this.onClick}>
-      {props.text}
+      {i.text}
     </li>;
     return item;
   },

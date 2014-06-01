@@ -1,7 +1,13 @@
+/**
+ * @jsx React.DOM
+ */
 'use strict';
 
 var React = require('react');
-var WorldStateMixin = require('worldstate/Helpers/ReactWorldStateMixin');
+var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
+
+var TodoListItem = require('./TodoListItemComponent');
+
 
 var TodoListComponent = React.createClass({
 
@@ -9,12 +15,15 @@ var TodoListComponent = React.createClass({
 
   render: function() {
     var items = this.props.items;
-    for (var i = 0, l = items.length; i < l; i++) {
-      <TodoListItem item={items.at(i)} />;
+    var res = [];
+    console.log('bla:', items.length());
+    var l = items.read().length;
+    for (var i = 0; i < l; i++) {
+      res.push(<TodoListItem item={items.at(i)} />);
     }
 
-    var list = <ul>
-      {items}
+    var list = <ul id="TodoList">
+      {res}
     </ul>;
 
     return list;

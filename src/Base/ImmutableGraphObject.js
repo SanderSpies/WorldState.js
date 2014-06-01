@@ -9,6 +9,8 @@ var clone = require('./clone');
 var removeReference = ReferenceRegistry.removeReference;
 var resolveObject = ReferenceRegistry.resolveObject;
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
+var isArray = Array.isArray;
+
 
 /**
  * Bundle all child changes into one
@@ -23,8 +25,6 @@ function aggregateChangedChildren(fn) {
   }
   __private.currentChildAggregation = setImmediate(fn);
 }
-
-var isArray = Array.isArray;
 
 
 
@@ -137,14 +137,7 @@ ImmutableGraphObject.prototype = {
     var oldRefToObj = __private.refToObj;
     var newRefToObj = getReferenceTo(version.ref);
 
-    var parent = this.__private.parents[0];
     restoreReferences(oldRefToObj, newRefToObj);
-
-    // compare stuff 1 by 1, set if not ===
-
-    //console.log('from:', oldRefToObj, 'to:', newRefToObj);
-
-    __private.refToObj = resolveObject(version.ref);
   },
 
   /**
@@ -319,7 +312,8 @@ ImmutableGraphObject.prototype = {
   remove: function() {
     var __private = this.__private;
     var refToObj = __private.refToObj;
-    removeReference(refToObj.ref);
+    var refToObjRef = refToObj.ref;
+    removeReference(refToObjRef);
     removeImmutableGraphObject(refToObj);
     this.__changed();
   }

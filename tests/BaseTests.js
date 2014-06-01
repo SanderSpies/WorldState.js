@@ -254,12 +254,16 @@ describe('WorldState.js', function() {
       },
       otherOne: {
         child: {}
+      },
+      dontChangeMe: {
+
       }
     };
 
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var ref = imo.wrapped().parent.wrapped().items.at(0).read();
     imo.wrapped().otherOne.wrapped().child.changeReferenceTo(ref);
+    var dontChangeMe = imo.wrapped().dontChangeMe.read();
     imo.afterChange(function() {
       imo.enableVersioning();
       imo.saveVersion('Initial');
@@ -308,7 +312,7 @@ describe('WorldState.js', function() {
                 item0.changeValueTo({
                   id: 1,
                   title: 'fafafa'
-                })
+                });
                 imo.afterChange(function() {
 
                   expect(item0.read()).toBe(imo.read().parent.ref.items.ref[0].ref);
@@ -316,6 +320,13 @@ describe('WorldState.js', function() {
                     ().items.at(0).read());
                   expect(item0.read().title).toBe('fafafa');
                   expect(imo.read().parent.ref.items.ref[0].ref.title).toBe('fafafa');
+
+                  // this should not have changed from when we started
+                  expect(dontChangeMe).toBe(imo.wrapped().dontChangeMe.read());
+
+                  imo.restoreVersion(imo.getVersions()[0]);
+                  expect(item0.read().title).toBe('test');
+
                   done();
                 });
               });
@@ -498,6 +509,12 @@ describe('WorldState.js', function() {
       done();
     });
 
+    console.time('Insert plain array test');
+    var a = [];
+    for (var i = 0, l = 200000; i < l; i++) {
+      a.push({id: 2, title: 'bla' + i});
+    }
+    console.timeEnd('Insert plain array test');
 
 
   });

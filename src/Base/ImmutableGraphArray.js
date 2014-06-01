@@ -23,7 +23,6 @@ var ImmutableGraphArray = function ImmutableGraphArray(array) {
     getImmutableObject =
         require('./ImmutableGraphRegistry').getImmutableObject;
   }
-
   ImmutableGraphObject.call(this, array);
   this.length = array.length;
 };

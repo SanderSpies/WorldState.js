@@ -10,6 +10,4 @@
     for (var i = 0, l = items.length; i < l; i++) {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
-    var nrInserted = this.__private.graph.insertMulti(realItems);
-    this.length += nrInserted;
   }

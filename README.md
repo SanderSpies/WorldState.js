@@ -1,48 +1,50 @@
-WorldState.js - a generator for immutable graphs
+WorldState.js - pre 0.1 - a generator for immutable graphs
 ===
 [![Build Status](https://travis-ci.org/SanderSpies/WorldState.js.svg?branch=master)](https://travis-ci.org/SanderSpies/WorldState.js)
 
 Current version: pre 0.1
 
-DO NOT USE. Still getting everything ready for 0.1. The library + wrapper features seem to be working for 0.1,
-however the ReactWorldStateMixin still need extra work before I will call it a 0.1.
+DO NOT USE. Still need to get ReactWorldStateMixin working properly and give proof with a simple Todo example.
 
 Introduction
 ---
 This generator turns a JSON object model into an immutable graph.
 
-Although it's possible to only use the library, I would recommend using the generator for creating wrappers around
-the library. This way the cognitive strain of using this library is left to a minimum.
-
-Library features:
+Features for 0.1
+---
 - Immutable
-- High performance (verification needed)
-- Recursive
+- High performance
+- Straight forward usage
+- Generated JsDocs for great auto-complete support
+- Support for recursive structures
 - Recreating parent objects
 - Change by value
 
   To change all the objects pointing at the same object at once
 - Change by reference
 
-  To change only the current object
+  To change only the current object to point to a new or existing reference
 - Versioning support
 
   Easily jump to different versions the graph. This is handy for undo/redo support.
 - ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
+- Warning: stuff might not work completely as advertised - if you come across anything, please file an issue
 
-[See Jasmine tests for examples](tests/BaseTests.js)
+Although it's possible to only use the library, I would recommend using the generator for creating wrappers around
+the library. This way the cognitive strain of using this library is left to a minimum.
 
-Added features by generated wrappers:
-- Easy to use
-- JsDocs based on Closure
+[See Jasmine tests for library / non-wrapper examples](tests/BaseTests.js)
 
-Coming after 0.1:
+After 0.1:
+- Insert at position
+- Branches
 - Jasmine tests for wrappers
 - Solve expected memory leak issues
+- Add support for non object arrays - expect this not to work properly for now
+- Generator support for recursive structures
 - Object pools
 - Diff/merge support
 - Closure Compiler Advanced Mode compatible
-- Branches
 - Grunt + Gulp support
 
 [Ideas behind the graph](GRAPH.md)
@@ -153,13 +155,10 @@ All the objects using this reference will get this value.
 
 Changing a reference:
 ```
-todoGraph.items().at(0).changeReferenceTo({
-    id: 3,
-    title: 'bla',
-    isComplete: true
-});
+var somewhereElseInTheGraph = todoGraph.items.at(0);
+todoGraph.items().at(1).changeReferenceTo(somewhereElseInTheGraph.read());
 ```
-You can point to an existing reference if you want to use the same values.
+Now both items will be changed at the same the time when using changeValueTo :-).
 
 Saving and restoring a version:
 ```
@@ -187,11 +186,29 @@ FAQ
 ---
 - Why no support for feature XYZ?
 
-  Feel free to open an issue for the feature that you are missing.
+  Feel free to open an issue for any feature that you are missing, and perhaps even do a pull request.
 
 - Which browsers are supported?
 
-  IE8+, latest Chrome, Firefox, Safari, Opera.
+  IE8+, latest Chrome, Firefox, Safari, Opera. Although I might be lying, haven't really checked seriously. IE8 would
+  most likely require some polyfills (for Object.keys at least).
+
+- How does WorldState.js compare to Backbone.js Models and Collections?
+
+  WorldState.js has been created for applications that render everything from the top, while Backbone.js has a focus on
+  data close to the views. By doing so, WorldState.js gives developers simplicity when maintaining their codebase.
+  Besides this: recursive structures, differentiate between value and reference, time travel support, and great IDE
+  auto-complete support to avoid guess work.
+
+- What about mori and Om?
+
+  WorldState.js has been inspired by the great work that @swannodette did on mori and Om, however both feel kind of
+  awkward to use within JavaScript in my personal opinion.
+
+- Are we cool?
+
+  Yeah, we cool.
+
 
 LICENSE
 ---

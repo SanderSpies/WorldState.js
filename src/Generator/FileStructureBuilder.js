@@ -12,14 +12,16 @@ var ObjectFunctionTemplates = [
   TemplateConstants.READ_FUNCTION,
   TemplateConstants.RESTORE_VERSION_FUNCTION,
   TemplateConstants.SAVE_VERSION_FUNCTION,
-  TemplateConstants.AFTER_CHANGE_FUNCTION
+  TemplateConstants.AFTER_CHANGE_FUNCTION,
+  TemplateConstants.REMOVE_FUNCTION
 ];
 
 var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
   TemplateConstants.AT_FUNCTION,
   TemplateConstants.INSERT_FUNCTION,
   TemplateConstants.INSERT_MULTI_FUNCTION,
-  TemplateConstants.WHERE_FUNCTION
+  TemplateConstants.WHERE_FUNCTION,
+  TemplateConstants.LENGTH_FUNCTION
 ]);
 
 var FileStructureBuilder = {

@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 
 var _references = {};
 var isArray = Array.isArray;
@@ -38,7 +38,7 @@ var ReferenceRegistry = {
   /**
    * Get an existing reference or create a new one
    *
-   * @param {{}} obj
+   * @param {{__worldStateUniqueId:number}} obj
    * @return {{ref:{}}}
    */
   getReferenceTo: function(obj) {

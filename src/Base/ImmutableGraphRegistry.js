@@ -170,10 +170,6 @@ function _getImmutableArray(array, parent, parentKey) {
  */
 var ImmutableGraphRegistry = {
 
-  getObjects: function() {
-    return _objects;
-  },
-
   /**
    * Change the reference id and ensures it's correct within the registry
    *
@@ -316,7 +312,7 @@ var ImmutableGraphRegistry = {
   /**
    * Get an immutable object
    *
-   * @param {{ref:{}}} obj
+   * @param {{ref:{}|[]}} obj
    * @param {ImmutableGraphObject|ImmutableGraphArray} parent
    * @param {string} parentKey
    * @return {ImmutableGraphObject|ImmutableGraphArray}

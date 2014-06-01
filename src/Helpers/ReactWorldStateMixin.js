@@ -6,6 +6,7 @@
  * @type {{shouldComponentUpdate: shouldComponentUpdate}}
  */
 var ReactWorldStateMixin = {
+  __oldProp: {},
 
   /**
    * @param {{}} nextProps
@@ -14,16 +15,21 @@ var ReactWorldStateMixin = {
    */
   shouldComponentUpdate: function(nextProps) {
     for (var key in nextProps) {
-      if (!nextProps.hasOwnProperty(key)) {
+      if (!nextProps.hasOwnProperty(key) || !nextProps[key].read) {
         continue;
       }
-      var oldProp = this.props[key].read();
-      var nextProp = nextProps[key].read();
-      if (oldProp !== nextProp) {
+      var nextPropKey = nextProps[key].read();
+      if (!this.__oldProp[key]) {
+        this.__oldProp[key] = nextPropKey;
         return true;
       }
+      else {
+        if (this.__oldProp[key] !== nextPropKey) {
+          this.__oldProp[key] = nextPropKey;
+          return true;
+        }
+      }
     }
-
     return false;
   }
 };

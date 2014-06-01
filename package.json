@@ -6,12 +6,12 @@
     "name": "Sander Spies",
     "email": "sandermail@gmail.com"
   },
-  "version": "0.0.15",
+  "version": "0.0.16",
   "bin": {
     "worldstate": "src/Generator/Generator.js"
   },
   "bugs": {
-    "url":"https://github.com/SanderSpies/WorldState.js"
+    "url":"https://github.com/SanderSpies/WorldState.js/issues"
   },
   "license": "MIT",
 
