@@ -16,17 +16,18 @@ var TodoListComponent = React.createClass({
   render: function() {
     var items = this.props.items;
     var res = [];
-    console.log('bla:', items.length());
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
-      res.push(<TodoListItem item={items.at(i)} />);
+      res.push(<TodoListItem key={i} item={items.at(i)} />);
     }
 
-    var list = <header id="header">
+    var list = <div>
+
+      <header id="header">
      <h1>Todos</h1>
      <input placeholder="What needs to be done?" id="new-todo" />
      <section id="main">
-      <input checked="checked" type="checkbox" id="toggle-all" />
+      <input readOnly={true} checked="checked" type="checkbox" id="toggle-all" />
       <ul id="todo-list">
         {res}
       </ul>
@@ -40,7 +41,8 @@ var TodoListComponent = React.createClass({
         <li></li>
        </ul>
      </footer>
-    </header>;
+    </header>
+    </div>;
 
     return list;
   }

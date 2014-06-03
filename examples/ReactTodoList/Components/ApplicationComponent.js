@@ -18,11 +18,9 @@ var Item = require('../Graph/Item');
 
 var TodoListComponent = require('./TodoListComponent');
 
-console.log(TodoList);
-
 var todoList = TodoList.newInstance({
   items: [
-    {id:1, text: 'dddd'}
+
   ]
 });
 
@@ -32,7 +30,6 @@ var ApplicationComponent = React.createClass({
 
   render: function() {
     var todoList = this.props.todoList;
-    //console.log('render:', todoList.items().read());
     return <TodoListComponent items={todoList.items()} />;
   }
 
@@ -40,10 +37,11 @@ var ApplicationComponent = React.createClass({
 
 
 
-React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'));
+React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'));
 
 setTimeout(function(){
   console.time('Adding 200 items');
+
   for (var i = 0, l = 200; i < l; i++) {
     todoList.items().insert(Item.newInstance({
       text: 'something' + i,
@@ -53,16 +51,15 @@ setTimeout(function(){
 
   todoList.afterChange(function(){
     requestAnimationFrame(function(){
-      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'), function() {
         console.timeEnd('Adding 200 items');
       });
     });
   });
 
-}, 100);
+}, 300);
 
 setTimeout(function() {
-  //console.log('start');
   console.time('Change 200 items');
 
   for (var i = 0, l = 200; i < l; i++) {
@@ -74,13 +71,13 @@ setTimeout(function() {
 
   todoList.afterChange(function(){
     requestAnimationFrame(function(){
-      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'), function() {
         console.timeEnd('Change 200 items');
       });
     });
   });
 
-}, 200);
+}, 600);
 
 setTimeout(function() {
   console.time('Remove 200 items');
@@ -91,42 +88,45 @@ setTimeout(function() {
 
   todoList.afterChange(function(){
     requestAnimationFrame(function(){
-      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'), function() {
         console.timeEnd('Remove 200 items');
       });
     });
   });
 
-}, 300);
+}, 900);
 
 setTimeout(function(){
   var items = [];
   for (var i = 0, l = 200; i < l; i++) {
     items[i] = {text: 'another' + i, id:900000 + i}
   }
-  console.time('Add 200 items at once (raw)');
   var old = todoList.items().read();
+  console.time('Add 200 items at once (raw)');
   todoList.items().insertMultiRaw(items);
   todoList.afterChange(function(){
+
     requestAnimationFrame(function(){
-      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'), function() {
         console.timeEnd('Add 200 items at once (raw)');
       });
     });
   });
-}, 400);
+}, 1200);
 
 setTimeout(function(){
   console.time('Remove at once');
+
   todoList.items().remove();
   todoList.afterChange(function(){
     requestAnimationFrame(function(){
-      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-        console.timeEnd('Remove at once');
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('todoapp'), function() {
+
       });
+      console.timeEnd('Remove at once');
     });
   });
-}, 500);
+}, 1500);
 
 
 

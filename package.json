@@ -6,7 +6,7 @@
     "name": "Sander Spies",
     "email": "sandermail@gmail.com"
   },
-  "version": "0.0.19",
+  "version": "0.0.20",
   "bin": {
     "worldstate": "src/Generator/Generator.js"
   },

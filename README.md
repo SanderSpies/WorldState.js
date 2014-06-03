@@ -26,6 +26,7 @@ Although it's possible to only use the library, I would recommend using the gene
 the library. This way the cognitive strain of using this library is left to a minimum.
 
 [See Jasmine tests for library / non-wrapper examples](tests/BaseTests.js)
+
 [Ideas behind the graph](GRAPH.md)
 
 Installation
