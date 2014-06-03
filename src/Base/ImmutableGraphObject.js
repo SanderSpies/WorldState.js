@@ -39,11 +39,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   if (!mergeWithExistingImmutableObject) {
     var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     mergeWithExistingImmutableObject =
-        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+      ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
-        ImmutableGraphRegistry.removeImmutableGraphObject;
+      ImmutableGraphRegistry.removeImmutableGraphObject;
     changeReferenceId = ImmutableGraphRegistry.changeReferenceId;
     restoreReferences = ImmutableGraphRegistry.restoreReferences;
   }
@@ -158,7 +158,7 @@ ImmutableGraphObject.prototype = {
     mergeWithExistingImmutableObject(this);
     if (oldRef) {
       changeReferenceId(this, x.ref.__worldStateUniqueId,
-          oldRef.__worldStateUniqueId);
+        oldRef.__worldStateUniqueId);
     }
 
     if (oldRef) {
@@ -288,6 +288,7 @@ ImmutableGraphObject.prototype = {
    * @private
    */
   __childChanged: function(key, newValue) {
+    console.log('child change:', key, newValue);
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var removeKeys = __private.removeKeys;

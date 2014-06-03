@@ -14,8 +14,7 @@ Features for 0.1
 ---
 - Immutable
 - High performance
-- Straight forward usage
-- Generated JsDocs for great auto-complete support
+- Generated JsDocs for auto-complete support
 - Support for complex structures
 - Recreating parent objects
 - Change by value or reference
