@@ -20,6 +20,7 @@ var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
   TemplateConstants.AT_FUNCTION,
   TemplateConstants.INSERT_FUNCTION,
   TemplateConstants.INSERT_MULTI_FUNCTION,
+  TemplateConstants.INSERT_MULTI_RAW_FUNCTION,
   TemplateConstants.WHERE_FUNCTION,
   TemplateConstants.LENGTH_FUNCTION
 ]);

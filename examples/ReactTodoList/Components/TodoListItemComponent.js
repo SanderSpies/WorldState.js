@@ -14,7 +14,11 @@ var TodoListItemComponent = React.createClass({
     var props = this.props;
     var i = props.item.read();
     var item = <li onClick={this.onClick}>
-      {i.text}
+      <div className="view">
+        <input type="checkbox" className="toggle" />
+        <label>{i.text}</label>
+      </div>
+      <input className="edit" />
     </li>;
     return item;
   },

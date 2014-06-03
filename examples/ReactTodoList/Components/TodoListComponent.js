@@ -22,9 +22,25 @@ var TodoListComponent = React.createClass({
       res.push(<TodoListItem item={items.at(i)} />);
     }
 
-    var list = <ul id="TodoList">
-      {res}
-    </ul>;
+    var list = <header id="header">
+     <h1>Todos</h1>
+     <input placeholder="What needs to be done?" id="new-todo" />
+     <section id="main">
+      <input checked="checked" type="checkbox" id="toggle-all" />
+      <ul id="todo-list">
+        {res}
+      </ul>
+     </section>
+     <footer id="footer">
+       <span id="todo-count">
+       </span>
+       <ul id="filters">
+        <li></li>
+        <li></li>
+        <li></li>
+       </ul>
+     </footer>
+    </header>;
 
     return list;
   }

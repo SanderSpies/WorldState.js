@@ -1,0 +1,10 @@
+  /**
+   * Insert multiple items. Items with the same id property get replaced
+   * with the new version.
+   *
+   * @param {[{GraphInsertDoc}]} items
+   * @this {{GraphName}Prototype}
+   */
+  insertMultiRaw: function {GraphName}$insertMultiRaw(items) {
+    this.__private.graph.insertMulti(items);
+  }

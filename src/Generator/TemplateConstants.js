@@ -19,6 +19,7 @@ var TemplateConstants = {
   AT_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/at.jst', { encoding:'utf8'}),
   INSERT_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/insert.jst', { encoding:'utf8'}),
   INSERT_MULTI_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/insertMulti.jst', { encoding:'utf8'}),
+  INSERT_MULTI_RAW_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/insertMultiRaw.jst', { encoding:'utf8'}),
   __SUB_GRAPH_WRAPPER__: fs.readFileSync(__dirname + '/Templates/Functions/__subGraphWrapper__.jst', { encoding:'utf8'}),
   __SUB_GRAPH_REQUIRE__: fs.readFileSync(__dirname + '/Templates/Functions/__subGraphRequire__.jst', { encoding:'utf8'}),
   IMMUTABLE_GRAPH_OBJECT_TEMPLATE: fs.readFileSync(__dirname + '/Templates/ImmutableObjectTemplate.jst', { encoding:'utf8'}),

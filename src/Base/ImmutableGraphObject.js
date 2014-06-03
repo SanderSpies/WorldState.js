@@ -315,6 +315,9 @@ ImmutableGraphObject.prototype = {
     var refToObjRef = refToObj.ref;
     removeReference(refToObjRef);
     removeImmutableGraphObject(refToObj);
+    if (isArray(refToObjRef)) {
+      refToObj.ref = [];
+    }
     this.__changed();
   }
 

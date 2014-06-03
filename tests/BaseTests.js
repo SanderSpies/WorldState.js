@@ -196,11 +196,14 @@ describe('WorldState.js', function() {
           bla: 'yyy'
         }
       ];
+      var old1 = array.wrapped()[0].wrapped().foo.read();
       array.wrapped()[0].wrapped().foo.insertMulti(newMultiple);
       array.afterChange(function() {
         expect(array.wrapped()[0].wrapped().foo.read().length).toBe(2);
+        expect(old1).not.toBe(array.wrapped()[0].wrapped().foo.read());
+        done();
       });
-      done();
+
     });
   });
 
@@ -348,10 +351,12 @@ describe('WorldState.js', function() {
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     var child = imo.wrapped().items.at(0);
+    var old1 = imo.wrapped().items.read();
     child.remove();
     imo.afterChange(function() {
       expect(imo.wrapped().items.read().length).toEqual(0);
       expect(imo.wrapped().items.length).toBe(0);
+      expect(imo.wrapped().items.read()).not.toBe(old1);
     });
   });
 

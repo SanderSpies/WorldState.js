@@ -32,7 +32,7 @@ var ApplicationComponent = React.createClass({
 
   render: function() {
     var todoList = this.props.todoList;
-    console.log('render:', todoList.items().read());
+    //console.log('render:', todoList.items().read());
     return <TodoListComponent items={todoList.items()} />;
   }
 
@@ -43,8 +43,8 @@ var ApplicationComponent = React.createClass({
 React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'));
 
 setTimeout(function(){
-  console.time('Adding 210 items');
-  for (var i = 0, l = 210; i < l; i++) {
+  console.time('Adding 200 items');
+  for (var i = 0, l = 200; i < l; i++) {
     todoList.items().insert(Item.newInstance({
       text: 'something' + i,
       id: i
@@ -52,18 +52,20 @@ setTimeout(function(){
   }
 
   todoList.afterChange(function(){
-    React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-      console.timeEnd('Adding 210 items');
+    requestAnimationFrame(function(){
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+        console.timeEnd('Adding 200 items');
+      });
     });
   });
 
 }, 100);
 
 setTimeout(function() {
-  console.log('start');
-  console.time('Change 5 items');
+  //console.log('start');
+  console.time('Change 200 items');
 
-  for (var i = 0, l = 5; i < l; i++) {
+  for (var i = 0, l = 200; i < l; i++) {
     todoList.items().at(i).changeValueTo({
       text: 'change' + i,
       id: 10000 + i
@@ -71,41 +73,62 @@ setTimeout(function() {
   }
 
   todoList.afterChange(function(){
-    React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-      console.timeEnd('Change 5 items');
+    requestAnimationFrame(function(){
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+        console.timeEnd('Change 200 items');
+      });
     });
   });
 
-}, 1000);
-
-setTimeout(function(){
-  console.log('oh hai there');
-  todoList.items().at(0).changeValueTo({
-    text:'fafafa',
-    id: 1
-  });
-  todoList.afterChange(function(){
-    React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-      console.log('oh hai 2');
-    });
-  });
-}, 3000);
+}, 200);
 
 setTimeout(function() {
   console.time('Remove 200 items');
+
   for (var i = 0, l = 200; i < 200; i++){
     todoList.items().at(0).remove();
   }
 
   todoList.afterChange(function(){
-    React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-      console.timeEnd('Remove 200 items');
+    requestAnimationFrame(function(){
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+        console.timeEnd('Remove 200 items');
+      });
     });
   });
 
-}, 5000);
+}, 300);
 
+setTimeout(function(){
+  var items = [];
+  for (var i = 0, l = 200; i < l; i++) {
+    items[i] = {text: 'another' + i, id:900000 + i}
+  }
+  console.time('Add 200 items at once (raw)');
+  var old = todoList.items().read();
+  todoList.items().insertMultiRaw(items);
+  todoList.afterChange(function(){
+    requestAnimationFrame(function(){
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+        console.timeEnd('Add 200 items at once (raw)');
+      });
+    });
+  });
+}, 400);
 
+setTimeout(function(){
+  console.log('a');
+  console.time('Remove at once');
+  todoList.items().remove();
+  todoList.afterChange(function(){
+    requestAnimationFrame(function(){
+      React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+        console.log('b');
+        console.timeEnd('Remove at once');
+      });
+    });
+  });
+}, 500);
 
 
 

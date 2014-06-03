@@ -20,14 +20,16 @@ var removeReference = ReferenceRegistry.removeReference;
  */
 var ImmutableGraphArray = function ImmutableGraphArray(array) {
   if (!getImmutableObject) {
-    getImmutableObject =
-        require('./ImmutableGraphRegistry').getImmutableObject;
+    var ImmutableGraphRegistry = require('./ImmutableGraphRegistry')
+    getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
+    setReferences = ImmutableGraphRegistry.setReferences;
   }
   ImmutableGraphObject.call(this, array);
   this.length = array.length;
 };
 var ImmutableGraphObjectPrototype = ImmutableGraphObject.prototype;
 var getImmutableObject;
+var setReferences;
 
 // public API
 ImmutableGraphArray.prototype = {
@@ -67,7 +69,12 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newItem
    */
   insert: function(newItem) {
+    var __private = this.__private;
+    var oldRefToObj = __private.refToObj;
+    var oldRefToObjRef = oldRefToObj.ref;
     this._insert(newItem);
+    setReferences(oldRefToObj, clone(oldRefToObjRef));
+    removeReference(oldRefToObjRef);
     this.__changed();
   },
 
@@ -115,10 +122,17 @@ ImmutableGraphArray.prototype = {
    * @param {[]} newItems
    */
   insertMulti: function(newItems) {
+    var __private = this.__private;
+    var oldRefToObj = __private.refToObj;
+    var oldRefToObjRef = oldRefToObj.ref;
+
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
       this._insert(newItem);
     }
+
+    setReferences(oldRefToObj, clone(oldRefToObjRef));
+    removeReference(oldRefToObjRef);
     this.__changed();
   },
 
