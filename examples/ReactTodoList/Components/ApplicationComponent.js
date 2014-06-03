@@ -117,13 +117,11 @@ setTimeout(function(){
 }, 400);
 
 setTimeout(function(){
-  console.log('a');
   console.time('Remove at once');
   todoList.items().remove();
   todoList.afterChange(function(){
     requestAnimationFrame(function(){
       React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
-        console.log('b');
         console.timeEnd('Remove at once');
       });
     });

@@ -288,7 +288,6 @@ ImmutableGraphObject.prototype = {
    * @private
    */
   __childChanged: function(key, newValue) {
-    console.log('child change:', key, newValue);
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var removeKeys = __private.removeKeys;
