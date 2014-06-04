@@ -31,6 +31,11 @@ var ReactWorldStateMixin = {
       }
     }
     return false;
+  },
+
+  // do NOT remove this!
+  componentDidMount: function() {
+    this.__oldProp = {};
   }
 };
 
