@@ -97,6 +97,9 @@ console.log('The first item is:', todoGraph.items().at(0).read());
 If you have performed an action like ``insert``, ``insertMulti``, ``changeValueTo`` or ``changeReferenceTo``, you must
 wait until the action has completed:
 
+Warning: when you modify objects outside of WorldState.js, like ``foo.read().title = 'bla'``, you violate the
+immutability of the object.
+
 ```
 // perform action like insert, insertMulti, changeValueTo or changeReferenceTo
 todoGraph.afterChange(function() {

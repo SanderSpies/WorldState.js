@@ -8,6 +8,9 @@ var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
 var TodoListItem = require('./TodoListItemComponent');
 
+var CommandKeys = require('../Commands/CommandKeys');
+var CommandRegistry = require('../Commands/CommandRegistry');
+require('../Commands/AddTodoItemCommand');
 
 var TodoListComponent = React.createClass({
 
@@ -25,7 +28,7 @@ var TodoListComponent = React.createClass({
 
       <header id="header">
      <h1>Todos</h1>
-     <input placeholder="What needs to be done?" id="new-todo" />
+     <input placeholder="What needs to be done?" id="new-todo" ref="newTodo" onKeyPress={this._onKeyPress} />
      <section id="main">
       <input readOnly={true} checked="checked" type="checkbox" id="toggle-all" />
       <ul id="todo-list">
@@ -45,6 +48,13 @@ var TodoListComponent = React.createClass({
     </div>;
 
     return list;
+  },
+  _onKeyPress: function(e) {
+    if (e.keyCode === 13) {
+      var domNode = this.refs.newTodo.getDOMNode();
+      CommandRegistry.executeCommand(CommandKeys.AddTodoItem, {text: domNode.value});
+      domNode.value = '';
+    }
   }
 
 });

@@ -13,18 +13,20 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
   render: function() {
     var props = this.props;
     var i = props.item.read();
-    var item = React.DOM.li( {onClick:this.onClick}, 
+    var item = React.DOM.li(null, 
       React.DOM.div( {className:"view"}, 
         React.DOM.input( {type:"checkbox", className:"toggle"} ),
-        React.DOM.label(null, i.text)
+        React.DOM.label(null, i.text),
+        React.DOM.button( {className:"destroy", onClick:this.onDeleteClick})
       ),
       React.DOM.input( {className:"edit"} )
     );
     return item;
   },
 
-  onClick: function() {
-    console.log('CLICK')
+  onDeleteClick: function() {
+    console.log('clicked remove on item:', this.props.item.read().text);
+    this.props.item.remove();
   }
 
 });

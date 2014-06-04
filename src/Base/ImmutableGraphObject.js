@@ -26,6 +26,22 @@ function aggregateChangedChildren(fn) {
   __private.currentChildAggregation = setImmediate(fn);
 }
 
+function reIndex(self) {
+  var __private = self.__private;
+  var refToObjRef = __private.refToObj.ref;
+
+  var childImos = [];
+  for (var i = 0, l = refToObjRef.length; i < l; i++) {
+    var parents = getImmutableObject(refToObjRef[i].ref).__private.parents;
+    for (var j = 0, l2 = parents.length; j < l2; j++) {
+      var parent = parents[j];
+      if (parent.parent === self) {
+        parent.parentKey = i;
+        break;
+      }
+    }
+  }
+}
 
 
 /**
@@ -242,6 +258,7 @@ ImmutableGraphObject.prototype = {
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var newRefToObj = {ref: clone(refToObj.ref)};
+    var newRefToObjRef = newRefToObj.ref;
     var changeListener = __private.changeListener;
     var removeKeys = __private.removeKeys;
 
@@ -249,8 +266,9 @@ ImmutableGraphObject.prototype = {
     var l;
     for (i = 0, l = removeKeys.length; i < l; i++) {
       var removeKey = removeKeys[i];
-      newRefToObj.ref.splice(removeKey, 1);
+      newRefToObjRef.splice(removeKey, 1);
     }
+
     __private.removeKeys = [];
 
     var changedKeys = __private.changedKeys;
@@ -258,13 +276,14 @@ ImmutableGraphObject.prototype = {
     for (i = 0, l = keys.length; i < l; i++) {
       var changeKey = keys[i];
       var value = changedKeys[changeKey];
-      newRefToObj.ref[changeKey] = value;
+      newRefToObjRef[changeKey] = value;
     }
     __private.changedKeys = {};
-    setReferences(__private.refToObj, newRefToObj.ref);
+    setReferences(__private.refToObj, newRefToObjRef);
     this.__changed();
-    if (isArray(newRefToObj.ref)) {
-      this.length = newRefToObj.ref.length;
+    if (isArray(newRefToObjRef)) {
+      this.length = newRefToObjRef.length;
+      reIndex(this);
     }
     if (changeListener) {
       if (__private.currentChildEvent) {

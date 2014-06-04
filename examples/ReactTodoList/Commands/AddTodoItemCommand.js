@@ -7,7 +7,7 @@ var CommandRegistry = require('./CommandRegistry');
 /**
  * @type {ItemsPrototype}
  */
-var items = require('../Graph/TodoList').items();
+var graph = require('../Graph/Graph').graph;
 
 /**
  * @type {Item}
@@ -22,12 +22,16 @@ var AddTodoItemCommand = {
    * @param {{text:string}} opt
    */
   execute: function(opt) {
+    var text = opt.text;
+    if (!text || text.trim() === '') {
+      return;
+    }
     var todoListItem = {
       text: opt.text,
       isComplete: false
     };
-    items.insert(Item.newInstance(todoListItem));
-    items.saveVersion('Added todo item ' + opt.text);
+    graph.items().insert(Item.newInstance(todoListItem));
+    graph.items().saveVersion('Added todo item ' + opt.text);
   }
 };
 

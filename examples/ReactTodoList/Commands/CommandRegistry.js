@@ -4,12 +4,13 @@ var commands = {};
 
 var CommandRegistry = {
 
-  registerCommand: function() {
-
+  registerCommand: function(commandKey, command) {
+    commands[commandKey] = command;
   },
 
-  executeCommand: function() {
-
+  executeCommand: function(commandKey, options) {
+    var command = commands[commandKey];
+    command.execute(options);
   }
 
 };
