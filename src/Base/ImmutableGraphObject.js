@@ -18,8 +18,8 @@ var isArray = Array.isArray;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
-function aggregateChangedChildren(fn) {
-  var __private = this.__private;
+function aggregateChangedChildren(self, fn) {
+  var __private = self.__private;
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
@@ -153,7 +153,8 @@ ImmutableGraphObject.prototype = {
     var oldRefToObj = __private.refToObj;
     var newRefToObj = getReferenceTo(version.ref);
 
-    restoreReferences(oldRefToObj, newRefToObj);
+    restoreReferences(oldRefToObj, newRefToObj, true);
+    this.__changed();
   },
 
   /**
@@ -320,7 +321,7 @@ ImmutableGraphObject.prototype = {
     }
 
     var self = this;
-    aggregateChangedChildren.call(this, function() {
+    aggregateChangedChildren(this, function() {
       self.__aggregateChangedChildren();
     });
   },

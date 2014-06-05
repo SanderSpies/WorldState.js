@@ -18,7 +18,11 @@ var RemoveTodoItemCommand = {
     var item = opt.item;
     var text = item.read().text;
     item.remove();
-    graph.items().saveVersion('Removed todo item ' + text);
+    var items = graph.items();
+    var old = items.__private.graph.__private.changeListener;
+    items.afterChange(function(){
+      items.saveVersion('Removed todo item ' + text);
+    });
   }
 
 };

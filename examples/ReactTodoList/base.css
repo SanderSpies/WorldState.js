@@ -559,4 +559,30 @@ hr {
 }
 
 
+/* UNDO REDO LIST */
+.UndoRedoList {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, .6);
+}
 
+.UndoRedoList ul {
+    padding: 5px;
+    list-style: none;
+}
+
+.UndoRedoList h1 {
+    margin-left: 10px;
+}
+
+.UndoRedoList li {
+    cursor: pointer;
+}
+
+.UndoRedoList li:hover {
+    text-decoration: underline;
+}

@@ -204,7 +204,7 @@ var ImmutableGraphRegistry = {
    * @param {{ref:{}}} oldRef
    * @param {{ref:{}}} newRef
    */
-  restoreReferences: function(oldRef, newRef) {
+  restoreReferences: function(oldRef, newRef, isTop) {
     if (oldRef) {
       var imoId = oldRef.ref.__worldStateUniqueId;
       var imos = _objects[imoId] || _arrays[imoId];
@@ -214,6 +214,9 @@ var ImmutableGraphRegistry = {
       }
 
       if (oldRef !== newRef) {
+        if (isTop) {
+          newRef = getReferenceTo(clone(newRef.ref));
+        }
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.

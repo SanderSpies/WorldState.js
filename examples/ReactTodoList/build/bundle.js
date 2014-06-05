@@ -33,7 +33,6 @@ var AddTodoItemCommand = {
     };
     graph.items().insert(Item.newInstance(todoListItem));
     graph.items().saveVersion('Added todo item ' + opt.text);
-    console.log(graph.items().getVersions());
   }
 };
 
@@ -95,7 +94,13 @@ var RemoveTodoItemCommand = {
     var item = opt.item;
     var text = item.read().text;
     item.remove();
-    graph.items().saveVersion('Removed todo item ' + text);
+    var items = graph.items();
+    var old = items.__private.graph.__private.changeListener;
+    items.afterChange(function(){
+      items.saveVersion('Removed todo item ' + text);
+      
+    });
+
   }
 
 };
@@ -717,6 +722,7 @@ var todoList = TodoList.newInstance({
 
 graph.graph = todoList;
 graph.graph.items().enableVersioning();
+graph.graph.items().saveVersion('Initial');
 
 var TodoListComponent = require('./TodoListComponent');
 var UndoRedoListComponent = require('./UndoRedoListComponent');
@@ -937,6 +943,7 @@ module.exports = TodoListItemComponent;
  */
 'use strict';
 
+var clone = require('worldstate/src/Base/clone')
 var React = require('react');
 
 var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListComponent',
@@ -945,22 +952,23 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
     var position = e.target.dataset.position;
     var version = this.props.items.getVersions()[position];
     this.props.items.restoreVersion(version);
-    this.props.items.__private.graph.__changed();
   },
 
   render: function() {
     var props = this.props;
     var versions = props.items.getVersions();
-    if(!versions){
+    if (!versions) {
       return React.DOM.div(null );
     }
     var lis = [];
     for (var i = 0, l = versions.length; i < l; i++) {
       var version = versions[i];
-      lis[i] = React.DOM.div( {onClick:this.restore, 'data-position':i}, version.name);
+      lis[i] = React.DOM.li( {onClick:this.restore, 'data-position':i}, version.name);
     }
 
     return React.DOM.aside( {className:"UndoRedoList"}, 
+        React.DOM.h1(null, "Restore a different version:"),
+
         React.DOM.ul(null, 
           lis
         )
@@ -971,7 +979,7 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
 
 module.exports = UndoRedoListComponent;
 
-},{"react":148}],13:[function(require,module,exports){
+},{"react":148,"worldstate/src/Base/clone":154}],13:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -18758,8 +18766,8 @@ var isArray = Array.isArray;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
-function aggregateChangedChildren(fn) {
-  var __private = this.__private;
+function aggregateChangedChildren(self, fn) {
+  var __private = self.__private;
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
@@ -18893,7 +18901,8 @@ ImmutableGraphObject.prototype = {
     var oldRefToObj = __private.refToObj;
     var newRefToObj = getReferenceTo(version.ref);
 
-    restoreReferences(oldRefToObj, newRefToObj);
+    restoreReferences(oldRefToObj, newRefToObj, true);
+    this.__changed();
   },
 
   /**
@@ -19060,7 +19069,7 @@ ImmutableGraphObject.prototype = {
     }
 
     var self = this;
-    aggregateChangedChildren.call(this, function() {
+    aggregateChangedChildren(this, function() {
       self.__aggregateChangedChildren();
     });
   },
@@ -19300,7 +19309,7 @@ var ImmutableGraphRegistry = {
    * @param {{ref:{}}} oldRef
    * @param {{ref:{}}} newRef
    */
-  restoreReferences: function(oldRef, newRef) {
+  restoreReferences: function(oldRef, newRef, isTop) {
     if (oldRef) {
       var imoId = oldRef.ref.__worldStateUniqueId;
       var imos = _objects[imoId] || _arrays[imoId];
@@ -19310,6 +19319,9 @@ var ImmutableGraphRegistry = {
       }
 
       if (oldRef !== newRef) {
+        if (isTop) {
+          newRef = getReferenceTo(clone(newRef.ref));
+        }
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.

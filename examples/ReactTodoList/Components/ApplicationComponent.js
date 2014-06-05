@@ -26,6 +26,7 @@ var todoList = TodoList.newInstance({
 
 graph.graph = todoList;
 graph.graph.items().enableVersioning();
+graph.graph.items().saveVersion('Initial');
 
 var TodoListComponent = require('./TodoListComponent');
 var UndoRedoListComponent = require('./UndoRedoListComponent');
