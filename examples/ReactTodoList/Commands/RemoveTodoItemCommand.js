@@ -4,10 +4,7 @@ var CommandKeys = require('./CommandKeys');
 var CommandRegistry = require('./CommandRegistry');
 
 
-/**
- * @type {ItemsPrototype}
- */
-var items = require('../Graph/TodoList').items();
+var graph = require('../Graph/Graph').graph;
 
 /**
  * Remove a todo item
@@ -15,15 +12,15 @@ var items = require('../Graph/TodoList').items();
 var RemoveTodoItemCommand = {
 
   /**
-   * @param {{id:number}} opt
+   * @param {{item:Item}} opt
    */
   execute: function(opt) {
-    var id = opt.id;
-    var item = items.where({__worldStateUniqueId: id})[0];
+    var item = opt.item;
     var text = item.read().text;
     item.remove();
-    items.saveVersion('Removed todo item ' + text);
+    graph.items().saveVersion('Removed todo item ' + text);
   }
+
 };
 
 CommandRegistry.registerCommand(CommandKeys.RemoveTodoItem, RemoveTodoItemCommand);

@@ -6,6 +6,11 @@
 var React = require('react');
 var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
+var CommandKeys = require('../Commands/CommandKeys');
+var CommandRegistry = require('../Commands/CommandRegistry');
+require('../Commands/RemoveTodoItemCommand');
+
+
 var TodoListItemComponent = React.createClass({displayName: 'TodoListItemComponent',
 
   mixins: [WorldStateMixin],
@@ -25,8 +30,7 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
   },
 
   onDeleteClick: function() {
-    console.log('clicked remove on item:', this.props.item.read().text);
-    this.props.item.remove();
+    CommandRegistry.executeCommand(CommandKeys.RemoveTodoItem, {item: this.props.item});
   }
 
 });

@@ -32,6 +32,7 @@ var AddTodoItemCommand = {
     };
     graph.items().insert(Item.newInstance(todoListItem));
     graph.items().saveVersion('Added todo item ' + opt.text);
+    console.log(graph.items().getVersions());
   }
 };
 

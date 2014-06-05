@@ -205,31 +205,33 @@ var ImmutableGraphRegistry = {
    * @param {{ref:{}}} newRef
    */
   restoreReferences: function(oldRef, newRef) {
-    var imoId = oldRef.ref.__worldStateUniqueId;
-    var imos = _objects[imoId] || _arrays[imoId];
+    if (oldRef) {
+      var imoId = oldRef.ref.__worldStateUniqueId;
+      var imos = _objects[imoId] || _arrays[imoId];
 
-    if (!imos) {
-      return;
-    }
-
-    if (oldRef !== newRef) {
-      for (var i = 0, l = imos.length; i < l; i++) {
-        var imo = imos[i];
-        ImmutableGraphRegistry.
-            setReferences(imo.__private.refToObj, newRef.ref);
-        ImmutableGraphRegistry.
-            changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
-            oldRef.ref.__worldStateUniqueId);
+      if (!imos) {
+        return;
       }
 
-      var newRefRef = newRef.ref;
-      var oldRefRef = oldRef.ref;
-      for (var key in newRefRef) {
-        var value = newRefRef[key];
-        if (typeof value === 'object') {
-          if (oldRefRef[key].ref !== newRefRef[key].ref) {
-            ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
+      if (oldRef !== newRef) {
+        for (var i = 0, l = imos.length; i < l; i++) {
+          var imo = imos[i];
+          ImmutableGraphRegistry.
+            setReferences(imo.__private.refToObj, newRef.ref);
+          ImmutableGraphRegistry.
+            changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
+              oldRef.ref.__worldStateUniqueId);
+        }
+
+        var newRefRef = newRef.ref;
+        var oldRefRef = oldRef.ref;
+        for (var key in newRefRef) {
+          var value = newRefRef[key];
+          if (typeof value === 'object') {
+            if (oldRefRef[key] !== newRefRef[key] || oldRefRef[key].ref !== newRefRef[key].ref) {
+              ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
                 newRefRef[key]);
+            }
           }
         }
       }
@@ -267,7 +269,7 @@ var ImmutableGraphRegistry = {
         var obj = value[j];
         var objPrivate = obj.__private;
         if (objPrivate.parents.indexOf(realParents[0]) > -1 &&
-            objPrivate.refToObj.ref !== imoRefToObj.ref) {
+          objPrivate.refToObj.ref !== imoRefToObj.ref) {
           otherImos[otherImos.length] = obj;
         }
       }
@@ -302,7 +304,7 @@ var ImmutableGraphRegistry = {
       if (results.length) {
         var resultPrivate = results[0].__private;
         resultPrivate.parents =
-            resultPrivate.parents.concat(imoPrivate.parents);
+          resultPrivate.parents.concat(imoPrivate.parents);
         imoPrivate.parents = resultPrivate.parents;
         imoPrivate.refToObj = resultPrivate.refToObj;
       }

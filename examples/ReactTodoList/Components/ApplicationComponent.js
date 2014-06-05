@@ -25,9 +25,10 @@ var todoList = TodoList.newInstance({
 
 
 graph.graph = todoList;
+graph.graph.items().enableVersioning();
 
 var TodoListComponent = require('./TodoListComponent');
-
+var UndoRedoListComponent = require('./UndoRedoListComponent');
 
 var ApplicationComponent = React.createClass({
 
@@ -37,13 +38,15 @@ var ApplicationComponent = React.createClass({
     var todoList = graph.graph;
     return <div>
       <div style={{textAlign: 'center', marginTop:20}}>
-        <input type="button" onClick={add200} value="Add 200 items"/>
-        <input type="button" onClick={change200} value="Change 200 items"/>
-        <input type="button" onClick={remove200} value="Remove 200 items"/>
+        <input type="button" onClick={add200} value="Add 200 items 1 by 1"/>
+        <input type="button" onClick={add200AtOnce} value="Add 200 items at once"/>
+        <input type="button" onClick={change200} value="Change 200 items 1 by 1"/>
+        <input type="button" onClick={remove200} value="Remove 200 items 1 by 1"/>
       </div>
       <section id="todoapp">
         <TodoListComponent items={todoList.items()} />
       </section>
+      <UndoRedoListComponent items={todoList.items()} />
     </div>;
   }
 
@@ -73,6 +76,25 @@ function add200() {
       });
     });
   });
+}
+
+function add200AtOnce() {
+
+  console.time('Add 200 items at once (raw)');
+  var items = [];
+  for (var i = 0, l = 200; i < l; i++) {
+      items[i] = {text: 'another' + i, id:900000 + i}
+    }
+
+    todoList.items().insertMultiRaw(items);
+    todoList.afterChange(function(){
+
+      requestAnimationFrame(function(){
+        React.renderComponent(<ApplicationComponent todoList={todoList} />, document.getElementById('container'), function() {
+          console.timeEnd('Add 200 items at once (raw)');
+        });
+      });
+    });
 }
 
 function change200(){
