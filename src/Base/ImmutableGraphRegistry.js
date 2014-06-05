@@ -114,6 +114,7 @@ function _getImmutableObject(obj, parent, parentKey) {
     if (!_objects[id]) {
       _objects[id] = [];
     }
+
     var objects = _objects[id];
     objects[objects.length] = imo;
   }
@@ -220,7 +221,7 @@ var ImmutableGraphRegistry = {
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.
-            setReferences(imo.__private.refToObj, newRef.ref);
+            setReferences(imo.__private.refToObj, newRef.ref, true);
           ImmutableGraphRegistry.
             changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
               oldRef.ref.__worldStateUniqueId);

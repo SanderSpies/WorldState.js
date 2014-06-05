@@ -98,9 +98,7 @@ var RemoveTodoItemCommand = {
     var old = items.__private.graph.__private.changeListener;
     items.afterChange(function(){
       items.saveVersion('Removed todo item ' + text);
-      
     });
-
   }
 
 };
@@ -19214,11 +19212,13 @@ function _getImmutableObject(obj, parent, parentKey) {
 
   // if we don't have one, create one
   if (!imo) {
+    console.log('creating a new object for:', obj);
     imo = new ImmutableGraphObject(obj);
     var id = obj.__worldStateUniqueId;
     if (!_objects[id]) {
       _objects[id] = [];
     }
+
     var objects = _objects[id];
     objects[objects.length] = imo;
   }
@@ -19325,7 +19325,7 @@ var ImmutableGraphRegistry = {
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.
-            setReferences(imo.__private.refToObj, newRef.ref);
+            setReferences(imo.__private.refToObj, newRef.ref, true);
           ImmutableGraphRegistry.
             changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
               oldRef.ref.__worldStateUniqueId);
