@@ -338,7 +338,7 @@ var ImmutableGraphRegistry = {
    * @param {{ref:{}}} reference
    * @param {{}} newValue
    */
-  setReferences: function(reference, newValue) {
+  setReferences: function(reference, newValue, reset) {
     var oldId = reference.ref.__worldStateUniqueId;
 
     var res;
@@ -358,14 +358,14 @@ var ImmutableGraphRegistry = {
       res2.__private.refToObj = newRef;
       var id = newValue.__worldStateUniqueId;
       if (isArray(newValue)) {
-        if (!_arrays[id]) {
+        if (!_arrays[id] || reset) {
           _arrays[id] = [];
         }
 
         _arrays[id][_arrays[id].length] = res2;
       }
       else {
-        if (!_objects[id]) {
+        if (!_objects[id] || reset) {
           _objects[id] = [];
         }
         _objects[id][_objects[id].length] = res2;
