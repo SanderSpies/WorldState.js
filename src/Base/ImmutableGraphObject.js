@@ -338,6 +338,15 @@ ImmutableGraphObject.prototype = {
       refToObj.ref = [];
     }
     this.__changed();
+  },
+
+  /**
+   * Get the WorldState.js generated id
+   *
+   * @return {number}
+   */
+  generatedId: function() {
+    return this.__private.refToObj.ref.__worldStateUniqueId;
   }
 
 };

@@ -229,6 +229,15 @@ var ItemPrototype = {
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
+  },
+
+  /**
+   * Get the WorldState.js generated id
+   *
+   * @return {number}
+   */
+  generatedId: function() {
+    return this.__private.graph.generatedId();
   }
 
 };
@@ -385,6 +394,15 @@ var ItemsPrototype = {
   },
 
   /**
+   * Get the WorldState.js generated id
+   *
+   * @return {number}
+   */
+  generatedId: function() {
+    return this.__private.graph.generatedId();
+  },
+
+  /**
    * Get item at given position
    *
    * @param {number} position
@@ -461,7 +479,6 @@ var ItemsPrototype = {
 };
 
 module.exports = ItemsFactory;
-
 
 },{"./Item":5,"worldstate/src/Base/ImmutableGraphObject":149,"worldstate/src/Base/ImmutableGraphRegistry":150}],7:[function(require,module,exports){
 /**
@@ -615,6 +632,15 @@ var TodoListPrototype = {
   },
 
   /**
+   * Get the WorldState.js generated id
+   *
+   * @return {number}
+   */
+  generatedId: function() {
+    return this.__private.graph.generatedId();
+  },
+
+  /**
    * @this {TodoList}
    * @return {ItemsPrototype}
    */
@@ -671,16 +697,81 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
 
   render: function() {
     var todoList = graph.graph;
-    return TodoListComponent( {items:todoList.items()} );
+    return React.DOM.div(null, 
+      React.DOM.div( {style:{textAlign: 'center', marginTop:20}}, 
+        React.DOM.input( {type:"button", onClick:add200, value:"Add 200 items"}),
+        React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items"}),
+        React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items"})
+      ),
+      React.DOM.section( {id:"todoapp"}, 
+        TodoListComponent( {items:todoList.items()} )
+      )
+    );
   }
 
 });
 
-React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('todoapp'));
+React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
 
 todoList.afterChange(function() {
-  React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('todoapp'));
+  React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
 });
+
+var idCounter = 0;
+function add200() {
+  console.time('Adding 200 items');
+
+  for (var i = 0, l = 200; i < l; i++) {
+    todoList.items().insert(Item.newInstance({
+      text: 'something' + i,
+      id: idCounter++
+    }));
+  }
+
+  todoList.afterChange(function(){
+    requestAnimationFrame(function(){
+      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
+        console.timeEnd('Adding 200 items');
+      });
+    });
+  });
+}
+
+function change200(){
+  console.time('Change 200 items');
+
+  for (var i = 0, l = 200; i < l; i++) {
+    todoList.items().at(i).changeValueTo({
+      text: 'change' + i,
+      id: 10000 + i
+    });
+  }
+
+  todoList.afterChange(function(){
+    requestAnimationFrame(function(){
+      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
+        console.timeEnd('Change 200 items');
+      });
+    });
+  });
+}
+
+function remove200() {
+  console.time('Remove 200 items');
+
+  for (var i = 0, l = 200; i < 200; i++){
+    todoList.items().at(0).remove();
+  }
+
+  todoList.afterChange(function(){
+    requestAnimationFrame(function(){
+      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
+        console.timeEnd('Remove 200 items');
+      });
+    });
+  });
+}
+
 
 module.exports = ApplicationComponent;
 
@@ -708,7 +799,8 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var res = [];
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
-      res.push(TodoListItem( {key:i, item:items.at(i)} ));
+      var item = items.at(i);
+      res.push(TodoListItem( {key:item.generatedId(), item:item} ));
     }
 
     var list = React.DOM.div(null, 
@@ -18891,6 +18983,15 @@ ImmutableGraphObject.prototype = {
       refToObj.ref = [];
     }
     this.__changed();
+  },
+
+  /**
+   * Get the WorldState.js generated id
+   *
+   * @return {number}
+   */
+  generatedId: function() {
+    return this.__private.refToObj.ref.__worldStateUniqueId;
   }
 
 };
@@ -19492,6 +19593,14 @@ var ReactWorldStateMixin = {
   // do NOT remove this!
   componentDidMount: function() {
     this.__oldProp = {};
+    var nextProps = this.props;
+    for (var key in nextProps) {
+      if (!nextProps.hasOwnProperty(key) || !nextProps[key].read) {
+        continue;
+      }
+      var nextPropKey = nextProps[key].read();
+      this.__oldProp[key] = nextPropKey;
+    }
   }
 };
 

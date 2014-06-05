@@ -21,7 +21,8 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var res = [];
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
-      res.push(TodoListItem( {key:i, item:items.at(i)} ));
+      var item = items.at(i);
+      res.push(TodoListItem( {key:item.generatedId(), item:item} ));
     }
 
     var list = React.DOM.div(null, 
