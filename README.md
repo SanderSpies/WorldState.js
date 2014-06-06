@@ -49,7 +49,6 @@ Then add it to your project's package.json:
     }
 }
 ```
-Note: as I'm still getting everything ready for 0.1, the 0.1 release is not on NPM yet.
 
 Getting started
 ---
