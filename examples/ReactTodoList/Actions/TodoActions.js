@@ -124,12 +124,15 @@ var TodoActions = {
     }, true);
   },
 
+  /**
+   * Set a filter
+   */
   setFilter: function(opt) {
     console.time('Set filter');
     var newValue = clone(todoListGraph.read());
     newValue.filter = opt.filter;
     todoListGraph.changeValueTo(newValue);
-    console.log('done!');
+    todoListGraph.__private.graph.__informChangeListener();
   },
 
   /**
@@ -144,7 +147,7 @@ var TodoActions = {
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
       items.saveVersion('Removed all completed items');
-    });
+    }, true);
   }
 
 };

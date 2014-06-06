@@ -23,9 +23,10 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
       var item = items.at(i);
-      if (filter === 1 && item.read().isComplete) {
+      var isComplete = item.read().isComplete;
+      if (filter === 1 && isComplete) {
         continue;
-      } else if (filter === 2 && !item.read().isComplete) {
+      } else if (filter === 2 && !isComplete) {
         continue;
       }
       todoComponents.push(TodoListItem( {key:item.generatedId(), item:item} ));

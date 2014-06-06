@@ -260,19 +260,6 @@ ImmutableGraphObject.prototype = {
         parent.parent.__childChanged(parent.parentKey, refToObj);
       }
     }
-
-    var changeListener = __private.changeListener;
-    if (changeListener) {
-      if (__private.currentChildEvent) {
-        clearTimeout(__private.currentChildEvent);
-      }
-      __private.currentChildEvent = setTimeout(function() {
-        changeListener.apply(__private.changeListener);
-        if (__private.changeListenerOnce) {
-          __private.changeListener = null;
-        }
-      }, 0);
-    }
   },
 
   /**
@@ -285,7 +272,6 @@ ImmutableGraphObject.prototype = {
     var refToObj = __private.refToObj;
     var newRefToObj = {ref: clone(refToObj.ref)};
     var newRefToObjRef = newRefToObj.ref;
-
     var removeKeys = __private.removeKeys;
 
     var i;
@@ -310,6 +296,24 @@ ImmutableGraphObject.prototype = {
     if (isArray(newRefToObjRef)) {
       this.length = newRefToObjRef.length;
       updateChildrenParentKeys(this);
+    }
+
+    this.__informChangeListener();
+  },
+
+  __informChangeListener: function() {
+    var __private = this.__private;
+    var changeListener = __private.changeListener;
+    if (changeListener) {
+      if (__private.currentChildEvent) {
+        clearTimeout(__private.currentChildEvent);
+      }
+      __private.currentChildEvent = setTimeout(function() {
+        changeListener.apply(__private.changeListener);
+        if (__private.changeListenerOnce) {
+          __private.changeListener = null;
+        }
+      }, 0);
     }
   },
 

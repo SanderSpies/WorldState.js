@@ -1,15 +1,13 @@
 TodoList written with React.js and WorldState.js
 ===
-As I was lazy, this isn't a proper TodoMVC example. For now it's mostly a demo of what is possible when combining
-React.js with WorldState.js.
+In [TodoActions.js](Actions/TodoActions.js) the modifications to the graph happen.
 
-Features:
-- add an item
-- remove an item
-- remove all
-- check all
+In [TodoListComponent.js](Components/TodoListComponent.js) and
+[TodoListItemComponent.js](Components/TodoListItemComponent.js) you can see how WorldState.js is being used for reading
+data.
 
-Make sure WorldState.js is installed globally:
+And if you want to generate the graph yourself:
+
 ```
 npm install -g worldstate
 ```

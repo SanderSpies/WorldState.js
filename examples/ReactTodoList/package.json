@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "react": "0.10",
-    "worldstate": "0.0.29"
+    "worldstate": "0.31"
   }
 }

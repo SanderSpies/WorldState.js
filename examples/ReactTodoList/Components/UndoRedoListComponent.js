@@ -25,7 +25,6 @@ var UndoRedoListComponent = React.createClass({
       var version = versions[i];
       lis[i] = <li onClick={this.restore} data-position={i}>{version.name}</li>;
     }
-
     return <aside className="UndoRedoList">
         <h1>Restore a different version:</h1>
         <ul>

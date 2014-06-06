@@ -125,12 +125,15 @@ var TodoActions = {
     }, true);
   },
 
+  /**
+   * Set a filter
+   */
   setFilter: function(opt) {
     console.time('Set filter');
     var newValue = clone(todoListGraph.read());
     newValue.filter = opt.filter;
     todoListGraph.changeValueTo(newValue);
-    console.log('done!');
+    todoListGraph.__private.graph.__informChangeListener();
   },
 
   /**
@@ -145,7 +148,7 @@ var TodoActions = {
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
       items.saveVersion('Removed all completed items');
-    });
+    }, true);
   }
 
 };
@@ -917,9 +920,10 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
       var item = items.at(i);
-      if (filter === 1 && item.read().isComplete) {
+      var isComplete = item.read().isComplete;
+      if (filter === 1 && isComplete) {
         continue;
-      } else if (filter === 2 && !item.read().isComplete) {
+      } else if (filter === 2 && !isComplete) {
         continue;
       }
       todoComponents.push(TodoListItem( {key:item.generatedId(), item:item} ));
@@ -1085,7 +1089,6 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
       var version = versions[i];
       lis[i] = React.DOM.li( {onClick:this.restore, 'data-position':i}, version.name);
     }
-
     return React.DOM.aside( {className:"UndoRedoList"}, 
         React.DOM.h1(null, "Restore a different version:"),
         React.DOM.ul(null, 
@@ -18723,6 +18726,7 @@ ImmutableGraphArray.prototype = {
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
       ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+  __informChangeListener: ImmutableGraphObjectPrototype.__informChangeListener,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -19114,19 +19118,6 @@ ImmutableGraphObject.prototype = {
         parent.parent.__childChanged(parent.parentKey, refToObj);
       }
     }
-
-    var changeListener = __private.changeListener;
-    if (changeListener) {
-      if (__private.currentChildEvent) {
-        clearTimeout(__private.currentChildEvent);
-      }
-      __private.currentChildEvent = setTimeout(function() {
-        changeListener.apply(__private.changeListener);
-        if (__private.changeListenerOnce) {
-          __private.changeListener = null;
-        }
-      }, 0);
-    }
   },
 
   /**
@@ -19139,7 +19130,6 @@ ImmutableGraphObject.prototype = {
     var refToObj = __private.refToObj;
     var newRefToObj = {ref: clone(refToObj.ref)};
     var newRefToObjRef = newRefToObj.ref;
-
     var removeKeys = __private.removeKeys;
 
     var i;
@@ -19164,6 +19154,24 @@ ImmutableGraphObject.prototype = {
     if (isArray(newRefToObjRef)) {
       this.length = newRefToObjRef.length;
       updateChildrenParentKeys(this);
+    }
+
+    this.__informChangeListener();
+  },
+
+  __informChangeListener: function() {
+    var __private = this.__private;
+    var changeListener = __private.changeListener;
+    if (changeListener) {
+      if (__private.currentChildEvent) {
+        clearTimeout(__private.currentChildEvent);
+      }
+      __private.currentChildEvent = setTimeout(function() {
+        changeListener.apply(__private.changeListener);
+        if (__private.changeListenerOnce) {
+          __private.changeListener = null;
+        }
+      }, 0);
     }
   },
 
