@@ -20,7 +20,7 @@ var removeReference = ReferenceRegistry.removeReference;
  */
 var ImmutableGraphArray = function ImmutableGraphArray(array) {
   if (!getImmutableObject) {
-    var ImmutableGraphRegistry = require('./ImmutableGraphRegistry')
+    var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
   }
@@ -33,21 +33,8 @@ var setReferences;
 
 // public API
 ImmutableGraphArray.prototype = {
-
-  /**
-   * @private
-   */
-  __private: {
-    refToObj: null,
-    parents: [],
-    saveHistory: false,
-    historyRef: null,
-    historyRefs: [],
-    cachedWhereResults: [],
-    changedKeys: [],
-    removeKeys: []
-  },
   length: 0,
+  __private: ImmutableGraphObjectPrototype.__private,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
   saveVersion: ImmutableGraphObjectPrototype.saveVersion,
   restoreVersion: ImmutableGraphObjectPrototype.restoreVersion,
@@ -59,7 +46,7 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -178,7 +165,7 @@ ImmutableGraphArray.prototype = {
         parentKeys[j] = i;
         j++;
         containers[containers.length] =
-          getImmutableObject(obj, this, i);
+            getImmutableObject(obj, this, i);
       }
     }
     return containers;

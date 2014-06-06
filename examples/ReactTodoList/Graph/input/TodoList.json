@@ -3,7 +3,10 @@
     {
       "id": 1,
       "text": "",
-      "isComplete": false
+      "isComplete": false,
+      "editMode": false
     }
-  ]
+  ],
+
+  "filter": 1
 }

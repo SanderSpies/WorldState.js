@@ -1,6 +1,3 @@
-To create the graph for the shopping list:
-
-```
-worldstate Graph/input Graph
-```
-
+Shopping list
+===
+A more advanced example for 0.2

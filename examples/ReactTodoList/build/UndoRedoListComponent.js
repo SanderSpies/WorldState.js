@@ -28,7 +28,6 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
 
     return React.DOM.aside( {className:"UndoRedoList"}, 
         React.DOM.h1(null, "Restore a different version:"),
-
         React.DOM.ul(null, 
           lis
         )

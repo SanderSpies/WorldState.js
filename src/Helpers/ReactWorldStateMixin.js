@@ -15,7 +15,14 @@ var ReactWorldStateMixin = {
    */
   shouldComponentUpdate: function(nextProps) {
     for (var key in nextProps) {
-      if (!nextProps.hasOwnProperty(key) || !nextProps[key].read) {
+      var type = typeof (nextProps[key]);
+      if (type === 'string' || type === 'boolean' || type === 'number') {
+        if (this.__oldProp[key] !== nextProps[key]) {
+          return true;
+        }
+        continue;
+      }
+      else if (!nextProps.hasOwnProperty(key) || !nextProps[key] || !nextProps[key].read) {
         continue;
       }
       var nextPropKey = nextProps[key].read();
@@ -38,7 +45,12 @@ var ReactWorldStateMixin = {
     this.__oldProp = {};
     var nextProps = this.props;
     for (var key in nextProps) {
-      if (!nextProps.hasOwnProperty(key) || !nextProps[key].read) {
+      var type = typeof (nextProps[key]);
+      if (type === 'string' || type === 'boolean' || type === 'number') {
+        this.__oldProp[key] = nextProps[key];
+        continue;
+      }
+      else if (!nextProps.hasOwnProperty(key) || !nextProps[key] || !nextProps[key].read) {
         continue;
       }
       var nextPropKey = nextProps[key].read();

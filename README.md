@@ -4,13 +4,16 @@ WorldState.js - pre 0.1 - a generator for immutable graphs
 
 Current version: pre 0.1
 
-DO NOT USE. Still need to get ReactWorldStateMixin working properly and give proof with a simple Todo example.
+ROUGH EDGES. TODO example is pretty much complete, only need to do cleaning up before calling it a 0.1
 
 Introduction
 ---
 This generator turns a JSON object model into an immutable graph.
 
-Features for 0.1
+You can use this immutable graph as input for rendering your interface from the top node, and efficiently decide what
+needs to happen or not through strict equal checks.
+
+Features
 ---
 - Immutable
 - High performance
@@ -19,7 +22,7 @@ Features for 0.1
 - Recreating parent objects
 - Change by value or reference
 - Versioning support
-- ReactWorldStateMixin to make implementing WorldState.js with React easy (not ready yet)
+- ReactWorldStateMixin to make implementing WorldState.js with React easy
 - Warning: stuff might not work completely as advertised - if you come across anything, please file an issue
 
 Although it's possible to only use the library, I would recommend using the generator for creating wrappers around

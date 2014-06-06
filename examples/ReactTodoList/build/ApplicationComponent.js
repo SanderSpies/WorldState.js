@@ -5,38 +5,26 @@
 
 var React = require('react');
 var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
-var ImmutableGraphRegistry = require('worldstate/src/Base/ImmutableGraphRegistry');
-/**
- * @type {TodoList}
- */
-var TodoList = require('../Graph/TodoList');
 
 /**
  * @type {Item}
  */
 var Item = require('../Graph/Item');
 
-var graph = require('../Graph/Graph');
-var todoList = TodoList.newInstance({
-  items: [
-
-  ]
-});
-
-
-graph.graph = todoList;
-graph.graph.items().enableVersioning();
-graph.graph.items().saveVersion('Initial');
+var todoList = require('../Graph/Graph');
 
 var TodoListComponent = require('./TodoListComponent');
 var UndoRedoListComponent = require('./UndoRedoListComponent');
+
+var TodoActions = require('../Actions/TodoActions');
 
 var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent',
 
   mixins: [WorldStateMixin],
 
   render: function() {
-    var todoList = graph.graph;
+    var filter;
+
     return React.DOM.div(null, 
       React.DOM.div( {style:{textAlign: 'center', marginTop:20}}, 
         React.DOM.input( {type:"button", onClick:add200, value:"Add 200 items 1 by 1"}),
@@ -45,12 +33,23 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
         React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"})
       ),
       React.DOM.section( {id:"todoapp"}, 
-        TodoListComponent( {items:todoList.items()} )
+        TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
       ),
       UndoRedoListComponent( {items:todoList.items()} )
     );
   }
+});
 
+window.addEventListener('hashchange', function(e){
+  var filter = 0;
+  var hash = location.hash;
+  if (hash === '#Active') {
+    filter = 1;
+  }
+  else if (hash === '#Completed') {
+    filter = 2;
+  }
+  TodoActions.setFilter({filter: filter});
 });
 
 React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
@@ -59,6 +58,8 @@ todoList.afterChange(function() {
   React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
 });
 
+
+// testing code
 var idCounter = 0;
 function add200() {
   console.time('Adding 200 items');

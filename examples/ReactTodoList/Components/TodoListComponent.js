@@ -8,21 +8,34 @@ var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
 var TodoListItem = require('./TodoListItemComponent');
 
-var CommandKeys = require('../Commands/CommandKeys');
-var CommandRegistry = require('../Commands/CommandRegistry');
-require('../Commands/AddTodoItemCommand');
+var TodoActions = require('../Actions/TodoActions');
 
 var TodoListComponent = React.createClass({
 
   mixins: [WorldStateMixin],
 
   render: function() {
-    var items = this.props.items;
-    var res = [];
+    var props = this.props;
+    var items = props.items;
+    var filter = props.filter;
+
+    var todoComponents = [];
     var l = items.read().length;
     for (var i = 0; i < l; i++) {
       var item = items.at(i);
-      res.push(<TodoListItem key={item.generatedId()} item={item} />);
+      if (filter === 1 && item.read().isComplete) {
+        continue;
+      } else if (filter === 2 && !item.read().isComplete) {
+        continue;
+      }
+      todoComponents.push(<TodoListItem key={item.generatedId()} item={item} />);
+    }
+
+    var todoCount = items.where({isComplete:false}).length;
+    var completed = items.length() - todoCount;
+    var completeBtn;
+    if (completed > 0) {
+      completeBtn = <button onClick={this.onClearCompletedClick} id="clear-completed">Clear completed ({completed})</button>;
     }
 
     var list = <div>
@@ -31,31 +44,42 @@ var TodoListComponent = React.createClass({
      <h1>Todos</h1>
      <input placeholder="What needs to be done?" id="new-todo" ref="newTodo" onKeyPress={this._onKeyPress} />
      <section id="main">
-      <input readOnly={true} checked="checked" type="checkbox" id="toggle-all" />
+      <input readOnly={true} checked={todoCount === 0} ref="checkbox" onChange={this.onAllChange} type="checkbox" id="toggle-all" />
       <ul id="todo-list">
-        {res}
+        {todoComponents}
       </ul>
      </section>
      <footer id="footer">
        <span id="todo-count">
+        <strong>{todoCount} </strong>
+        items left
        </span>
        <ul id="filters">
-        <li></li>
-        <li></li>
-        <li></li>
+        <li><a href="#">All </a></li>
+        <li><a href="#Active"> Active </a></li>
+        <li><a href="#Completed">Completed</a></li>
        </ul>
+        {completeBtn}
      </footer>
     </header>
     </div>;
-
     return list;
   },
+
   _onKeyPress: function(e) {
     if (e.keyCode === 13) {
       var domNode = this.refs.newTodo.getDOMNode();
-      CommandRegistry.executeCommand(CommandKeys.AddTodoItem, {text: domNode.value});
+      TodoActions.addTodoItem({text: domNode.value});
       domNode.value = '';
     }
+  },
+
+  onAllChange: function() {
+    TodoActions.updateAllTodoItems({checked: this.refs.checkbox.getDOMNode().checked});
+  },
+
+  onClearCompletedClick: function() {
+    TodoActions.removeCompletedTodo();
   }
 
 });
