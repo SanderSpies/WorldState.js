@@ -13,9 +13,7 @@ This generator turns a JSON object model into an immutable graph.
 You can use this immutable graph as input for rendering your interface from the top node, and efficiently decide what
 needs to happen or not through strict equal checks.
 
-[TodoList example](http://htmlpreview.github.io/?https://github.com/SanderSpies/WorldState.js/blob/master/examples/ReactTodoList/index.html)
-
-(Warning: kinda borked right now due to using htmlpreview. If you want to have the best experience: run it locally!)
+[TodoList example](https://rawgit.com/SanderSpies/WorldState.js/master/examples/ReactTodoList/index.html)
 
 Features
 ---
