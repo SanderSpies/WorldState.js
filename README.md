@@ -1,10 +1,10 @@
-WorldState.js - pre 0.1 - a generator for immutable graphs
+WorldState.js - 0.1 - a generator for immutable graphs
 ===
 [![Build Status](https://travis-ci.org/SanderSpies/WorldState.js.svg?branch=master)](https://travis-ci.org/SanderSpies/WorldState.js)
 
-Current version: pre 0.1
+Current version: 0.1
 
-ROUGH EDGES. TODO example is pretty much complete, only need to do cleaning up before calling it a 0.1
+ROUGH EDGES
 
 Introduction
 ---
@@ -14,6 +14,8 @@ You can use this immutable graph as input for rendering your interface from the 
 needs to happen or not through strict equal checks.
 
 [TodoList example](http://htmlpreview.github.io/?https://github.com/SanderSpies/WorldState.js/blob/master/examples/ReactTodoList/index.html)
+
+(Warning: kinda borked right now due to using htmlpreview. If you want to have the best experience: run it locally!)
 
 Features
 ---

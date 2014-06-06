@@ -18725,7 +18725,7 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
   __informChangeListener: ImmutableGraphObjectPrototype.__informChangeListener,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
@@ -18845,7 +18845,7 @@ ImmutableGraphArray.prototype = {
         parentKeys[j] = i;
         j++;
         containers[containers.length] =
-            getImmutableObject(obj, this, i);
+          getImmutableObject(obj, this, i);
       }
     }
     return containers;
