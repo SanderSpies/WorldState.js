@@ -12,7 +12,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
-
+var isBusy = false;
 
 /**
  * Bundle all child changes into one
@@ -26,6 +26,7 @@ function aggregateChangedChildren(self, fn) {
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
+  isBusy = true;
   __private.currentChildAggregation = setImmediate(fn);
 }
 
@@ -246,11 +247,12 @@ ImmutableGraphObject.prototype = {
   /**
    * To inform that the graph has changed
    *
+   * @param {{parents:{}}} opt
    * @private
    */
-  __changed: function() {
+  __changed: function(opt) {
     var __private = this.__private;
-    var parents = __private.parents;
+    var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
     var i;
     var l;
@@ -270,6 +272,9 @@ ImmutableGraphObject.prototype = {
   __aggregateChangedChildren: function() {
     var __private = this.__private;
     var refToObj = __private.refToObj;
+
+    ReferenceRegistry.removeReference(refToObj.ref);
+
     var newRefToObj = {ref: clone(refToObj.ref)};
     var newRefToObjRef = newRefToObj.ref;
     var removeKeys = __private.removeKeys;
@@ -306,14 +311,18 @@ ImmutableGraphObject.prototype = {
     var changeListener = __private.changeListener;
     if (changeListener) {
       if (__private.currentChildEvent) {
-        clearTimeout(__private.currentChildEvent);
+        clearImmediate(__private.currentChildEvent);
       }
-      __private.currentChildEvent = setTimeout(function() {
-        changeListener.apply(__private.changeListener);
-        if (__private.changeListenerOnce) {
-          __private.changeListener = null;
+
+      isBusy = false;
+      __private.currentChildEvent = setImmediate(function() {
+        if (!isBusy) {
+          changeListener.apply(__private.changeListener);
+          if (__private.changeListenerOnce) {
+            __private.changeListener = null;
+          }
         }
-      }, 0);
+      });
     }
   },
 
@@ -355,11 +364,12 @@ ImmutableGraphObject.prototype = {
     var refToObj = __private.refToObj;
     var refToObjRef = refToObj.ref;
     removeReference(refToObjRef);
-    removeImmutableGraphObject(refToObj);
+    var parents = __private.parents;
+    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
     if (isArray(refToObjRef)) {
       refToObj.ref = [];
     }
-    this.__changed();
+    this.__changed({parents: parents});
   },
 
   /**
@@ -369,6 +379,22 @@ ImmutableGraphObject.prototype = {
    */
   generatedId: function() {
     return this.__private.refToObj.ref.__worldStateUniqueId;
+  },
+
+  /**
+   * Change one or more properties of this object
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    var __private = this.__private;
+    var newValue = clone(__private.refToObj.ref);
+    for (var key in newProperties) {
+      if (newProperties.hasOwnProperty(key)) {
+        newValue[key] = newProperties[key];
+      }
+    }
+    this.changeValueTo(newValue);
   }
 
 };

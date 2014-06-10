@@ -34,6 +34,10 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
     return item;
   },
 
+  componentDidMount: function() {
+
+  },
+
   onDeleteClick: function() {
     TodoActions.removeTodoItem({item: this.props.item});
     this.delete = true;

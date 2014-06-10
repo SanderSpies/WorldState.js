@@ -5,5 +5,8 @@
    * @this {{GraphName}Prototype}
    */
   read: function {GraphName}$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   }

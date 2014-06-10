@@ -57,7 +57,7 @@ var ItemsPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
@@ -65,6 +65,7 @@ var ItemsPrototype = {
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -75,6 +76,7 @@ var ItemsPrototype = {
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -84,6 +86,7 @@ var ItemsPrototype = {
    */
   enableVersioning: function Items$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -103,6 +106,9 @@ var ItemsPrototype = {
    * @this {ItemsPrototype}
    */
   read: function Items$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -114,6 +120,7 @@ var ItemsPrototype = {
    */
   restoreVersion: function Items$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -124,6 +131,7 @@ var ItemsPrototype = {
    */
   saveVersion: function Items$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -145,6 +153,7 @@ var ItemsPrototype = {
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -154,6 +163,16 @@ var ItemsPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   },
 
   /**
@@ -177,6 +196,7 @@ var ItemsPrototype = {
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
+    return this;
   },
 
   /**
@@ -192,6 +212,7 @@ var ItemsPrototype = {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
     this.insertMultiRaw(realItems);
+    return this;
   },
 
   /**
@@ -203,6 +224,7 @@ var ItemsPrototype = {
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
+    return this;
   },
 
   /**

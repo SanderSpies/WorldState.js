@@ -58,7 +58,7 @@ var ItemPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
@@ -66,6 +66,7 @@ var ItemPrototype = {
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -76,6 +77,7 @@ var ItemPrototype = {
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -85,6 +87,7 @@ var ItemPrototype = {
    */
   enableVersioning: function Item$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -104,6 +107,9 @@ var ItemPrototype = {
    * @this {ItemPrototype}
    */
   read: function Item$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -115,6 +121,7 @@ var ItemPrototype = {
    */
   restoreVersion: function Item$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -125,6 +132,7 @@ var ItemPrototype = {
    */
   saveVersion: function Item$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -146,6 +154,7 @@ var ItemPrototype = {
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -155,6 +164,16 @@ var ItemPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   }
 
 };

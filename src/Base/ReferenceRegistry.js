@@ -1,6 +1,7 @@
 'use strict';
 
-var _references = {};
+var _arrayReferences = [];
+var _objectReferences = [];
 var isArray = Array.isArray;
 var uniqueIdCounter = 1;
 
@@ -12,14 +13,24 @@ var uniqueIdCounter = 1;
  */
 var ReferenceRegistry = {
 
-  /**
-   * Find an existing reference
-   *
-   * @param {{}} obj
-   * @return {{ref:{}}|null}
-   */
-  findReference: function(obj) {
-    var reference = _references[obj.__worldStateUniqueId];
+  _getArrayReferences: function() {
+    return _arrayReferences;
+  },
+
+  _getObjectReferences: function() {
+    return _objectReferences;
+  },
+
+  findObjectReference: function(obj) {
+    var reference = _objectReferences[obj.__worldStateUniqueId];
+    if (reference && reference.ref === obj) {
+      return reference;
+    }
+    return null;
+  },
+
+  findArrayReference: function(obj) {
+    var reference = _arrayReferences[obj.__worldStateUniqueId];
     if (reference && reference.ref === obj) {
       return reference;
     }
@@ -32,7 +43,8 @@ var ReferenceRegistry = {
    * @param {{ref:{}}} obj
    */
   removeReference: function(obj) {
-    delete _references[obj.__worldStateUniqueId];
+    delete _objectReferences[obj.__worldStateUniqueId];
+    delete _arrayReferences[obj.__worldStateUniqueId];
   },
 
   /**
@@ -42,18 +54,33 @@ var ReferenceRegistry = {
    * @return {{ref:{}}}
    */
   getReferenceTo: function(obj) {
-    var reference = ReferenceRegistry.findReference(obj);
-    if (reference) {
-      return reference;
+    var reference;
+    var izArray = isArray(obj);
+    if (obj.__worldStateUniqueId) {
+      if (izArray) {
+        reference = ReferenceRegistry.findArrayReference(obj);
+      }
+      else {
+        reference = ReferenceRegistry.findObjectReference(obj);
+      }
+      if (reference) {
+        return reference;
+      }
     }
-
     var id = uniqueIdCounter++;
     obj.__worldStateUniqueId = id;
 
-    var ref = _references[id] = {
-      ref: obj
-    };
-
+    var ref;
+    if (izArray) {
+      ref = _arrayReferences[id] = {
+        ref: obj
+      };
+    }
+    else {
+      ref = _objectReferences[id] = {
+        ref: obj
+      };
+    }
     return ref;
   },
 

@@ -61,19 +61,21 @@ var TodoActions = {
    */
   updateTodoItem: function(opt) {
     console.time('Update todo item');
-    var item = opt.item.read();
-    var newValue = clone(item);
-    opt.text && (newValue.text = opt.text);
-    'isComplete' in opt && (newValue.isComplete = opt.isComplete);
+    var item = opt.item;
 
-    if (newValue.text === item.text &&
-        newValue.isComplete === item.isComplete) {
+    var oldText = item.read().text;
+    var oldIsComplete = item.read().isComplete;
+
+    if (opt.text === oldText &&
+      opt.isComplete === oldIsComplete) {
       return;
     }
 
-    var oldText = item.text;
-    var oldIsComplete = item.isComplete;
-    opt.item.changeValueTo(newValue);
+    item.changePropertiesTo({
+      isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
+      text: 'text' in opt ? opt.text : oldText
+    });
+
     items.afterChange(function() {
       console.timeEnd('Update todo item');
       items.saveVersion('Changed todo item from ' + oldText + ' ' +
@@ -88,7 +90,7 @@ var TodoActions = {
    */
   removeAllTodoItems: function() {
     items.remove();
-    items.saveVersion('Removed all todo items');
+    // items.saveVersion('Removed all todo items');
   },
 
   /**
@@ -98,9 +100,9 @@ var TodoActions = {
    */
   toggleEditMode: function(opt) {
     var item = opt.item;
-    var newValue = clone(item.read());
-    newValue.editMode = !newValue.editMode;
-    item.changeValueTo(newValue);
+    item.changePropertiesTo({
+      editMode: !item.read().editMode
+    });
   },
 
   /**
@@ -110,17 +112,12 @@ var TodoActions = {
    */
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
-    var checked = opt.checked;
-    var itemsRead = clone(items.read());
-    for (var i = 0, l = itemsRead.length; i < l; i++) {
-      var item = clone(itemsRead[i].ref);
-      item.isComplete = checked;
-      itemsRead[i].ref = item;
-    }
-    items.changeValueTo(itemsRead);
+    items.changePropertiesTo({
+      isComplete: opt.checked
+    });
     items.afterChange(function() {
       console.timeEnd('Update all todo items');
-      items.saveVersion((checked ? 'Checked' : 'Unchecked') +
+      items.saveVersion((opt.checked ? 'Checked' : 'Unchecked') +
           ' all todo list items');
     }, true);
   },
@@ -130,9 +127,10 @@ var TodoActions = {
    */
   setFilter: function(opt) {
     console.time('Set filter');
-    var newValue = clone(todoListGraph.read());
-    newValue.filter = opt.filter;
-    todoListGraph.changeValueTo(newValue);
+    todoListGraph.changePropertiesTo({
+      filter: opt.filter
+    });
+
     todoListGraph.__private.graph.__informChangeListener();
   },
 
@@ -234,7 +232,7 @@ var ItemPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
@@ -242,6 +240,7 @@ var ItemPrototype = {
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -252,6 +251,7 @@ var ItemPrototype = {
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -261,6 +261,7 @@ var ItemPrototype = {
    */
   enableVersioning: function Item$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -280,6 +281,9 @@ var ItemPrototype = {
    * @this {ItemPrototype}
    */
   read: function Item$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -291,6 +295,7 @@ var ItemPrototype = {
    */
   restoreVersion: function Item$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -301,6 +306,7 @@ var ItemPrototype = {
    */
   saveVersion: function Item$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -322,6 +328,7 @@ var ItemPrototype = {
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -331,6 +338,16 @@ var ItemPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   }
 
 };
@@ -397,7 +414,7 @@ var ItemsPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
@@ -405,6 +422,7 @@ var ItemsPrototype = {
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -415,6 +433,7 @@ var ItemsPrototype = {
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -424,6 +443,7 @@ var ItemsPrototype = {
    */
   enableVersioning: function Items$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -443,6 +463,9 @@ var ItemsPrototype = {
    * @this {ItemsPrototype}
    */
   read: function Items$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -454,6 +477,7 @@ var ItemsPrototype = {
    */
   restoreVersion: function Items$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -464,6 +488,7 @@ var ItemsPrototype = {
    */
   saveVersion: function Items$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -485,6 +510,7 @@ var ItemsPrototype = {
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -494,6 +520,16 @@ var ItemsPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   },
 
   /**
@@ -517,6 +553,7 @@ var ItemsPrototype = {
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
+    return this;
   },
 
   /**
@@ -532,6 +569,7 @@ var ItemsPrototype = {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
     this.insertMultiRaw(realItems);
+    return this;
   },
 
   /**
@@ -543,6 +581,7 @@ var ItemsPrototype = {
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
+    return this;
   },
 
   /**
@@ -636,7 +675,7 @@ var TodoListPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{items:Array,filter:number}]} obj
@@ -644,6 +683,7 @@ var TodoListPrototype = {
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -654,6 +694,7 @@ var TodoListPrototype = {
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -663,6 +704,7 @@ var TodoListPrototype = {
    */
   enableVersioning: function TodoList$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -682,6 +724,9 @@ var TodoListPrototype = {
    * @this {TodoListPrototype}
    */
   read: function TodoList$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -693,6 +738,7 @@ var TodoListPrototype = {
    */
   restoreVersion: function TodoList$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -703,6 +749,7 @@ var TodoListPrototype = {
    */
   saveVersion: function TodoList$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -724,6 +771,7 @@ var TodoListPrototype = {
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -733,6 +781,16 @@ var TodoListPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   },
 
   /**
@@ -775,19 +833,24 @@ var UndoRedoListComponent = require('./UndoRedoListComponent');
 
 var TodoActions = require('../Actions/TodoActions');
 
+var start = window.performance.now();
+
+var ReferenceRegistry = require('worldstate/src/Base/ReferenceRegistry');
+var ImmutableGraphRegistry = require('worldstate/src/Base/ImmutableGraphRegistry');
+
+
 var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent',
 
   mixins: [WorldStateMixin],
 
   render: function() {
-    var filter;
-
     return React.DOM.div(null, 
       React.DOM.div( {style:{textAlign: 'center', marginTop:20}}, 
         React.DOM.input( {type:"button", onClick:add200, value:"Add 200 items 1 by 1"}),
         React.DOM.input( {type:"button", onClick:add200AtOnce, value:"Add 200 items at once"}),
         React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items 1 by 1"}),
-        React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"})
+        React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"}),
+        React.DOM.input( {type:"button", onClick:removeAll, value:"Remove all items at once"})
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
@@ -812,89 +875,72 @@ window.addEventListener('hashchange', function(e){
 React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
 
 todoList.afterChange(function() {
-  React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
+ // requestAnimationFrame(function() {
+    React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
+      var end = window.performance.now();
+      var duration = end - start;
+
+      console.log('Duration:', duration);
+    });
+ // });
 });
 
 
 // testing code
 var idCounter = 0;
 function add200() {
-  console.time('Adding 200 items');
-
+  start = window.performance.now();
   for (var i = 0, l = 200; i < l; i++) {
     todoList.items().insert(Item.newInstance({
       text: 'something' + i,
       id: idCounter++
     }));
   }
-
-  todoList.afterChange(function(){
-    requestAnimationFrame(function(){
-      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
-        console.timeEnd('Adding 200 items');
-      });
-    });
-  });
 }
 
 function add200AtOnce() {
-
-  console.time('Add 200 items at once (raw)');
-  var items = [];
-  for (var i = 0, l = 200; i < l; i++) {
-      items[i] = {text: 'another' + i, id:900000 + i}
+  requestAnimationFrame(function(){
+    start = window.performance.now();
+    var items = [];
+    for (var i = 0, l = 200; i < l; i++) {
+      items[i] = {text: 'another' + i, id: 900000 + i}
     }
 
     todoList.items().insertMultiRaw(items);
-    todoList.afterChange(function(){
-
-      requestAnimationFrame(function(){
-        React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
-          console.timeEnd('Add 200 items at once (raw)');
-        });
-      });
-    });
+  });
 }
 
-function change200(){
-  console.time('Change 200 items');
-
+function change200() {
+  start = window.performance.now();
   for (var i = 0, l = 200; i < l; i++) {
     todoList.items().at(i).changeValueTo({
       text: 'change' + i,
       id: 10000 + i
     });
   }
-
-  todoList.afterChange(function(){
-    requestAnimationFrame(function(){
-      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
-        console.timeEnd('Change 200 items');
-      });
-    });
-  });
 }
 
 function remove200() {
-  console.time('Remove 200 items');
+  requestAnimationFrame(function(){
+    start = window.performance.now();
+    for (var i = 0, l = 200; i < l; l--) {
+      var item = todoList.items().at(l - 1);
+      item.remove();
+    }
+  });
+}
 
-  for (var i = 0, l = 200; i < 200; i++){
-    todoList.items().at(0).remove();
-  }
-
-  todoList.afterChange(function(){
-    requestAnimationFrame(function(){
-      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function() {
-        console.timeEnd('Remove 200 items');
-      });
-    });
+function removeAll() {
+  requestAnimationFrame(function(){
+    start = window.performance.now();
+    TodoActions.removeAllTodoItems();
   });
 }
 
 
 module.exports = ApplicationComponent;
 
-},{"../Actions/TodoActions":1,"../Graph/Graph":2,"../Graph/Item":3,"./TodoListComponent":7,"./UndoRedoListComponent":9,"react":145,"worldstate/src/Helpers/ReactWorldStateMixin":152}],7:[function(require,module,exports){
+},{"../Actions/TodoActions":1,"../Graph/Graph":2,"../Graph/Item":3,"./TodoListComponent":7,"./UndoRedoListComponent":9,"react":145,"worldstate/src/Base/ImmutableGraphRegistry":149,"worldstate/src/Base/ReferenceRegistry":150,"worldstate/src/Helpers/ReactWorldStateMixin":152}],7:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -917,25 +963,27 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var filter = props.filter;
 
     var todoComponents = [];
-    var l = items.read().length;
-    for (var i = 0; i < l; i++) {
-      var item = items.at(i);
-      var isComplete = item.read().isComplete;
-      if (filter === 1 && isComplete) {
-        continue;
-      } else if (filter === 2 && !isComplete) {
-        continue;
+    var itemsRead = items.read();
+    if (itemsRead) {
+      var l = itemsRead.length;
+      for (var i = 0; i < l; i++) {
+        var item = items.at(i);
+        var isComplete = item.read().isComplete;
+        if (filter === 1 && isComplete) {
+          continue;
+        } else if (filter === 2 && !isComplete) {
+          continue;
+        }
+        todoComponents[todoComponents.length] = TodoListItem( {key:item.generatedId(), item:item} );
       }
-      todoComponents.push(TodoListItem( {key:item.generatedId(), item:item} ));
-    }
 
-    var todoCount = items.where({isComplete:false}).length;
-    var completed = items.length() - todoCount;
-    var completeBtn;
-    if (completed > 0) {
-      completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");
+      var todoCount = items.where({isComplete:false}).length;
+      var completed = items.length() - todoCount;
+      var completeBtn;
+      if (completed > 0) {
+        completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");
+      }
     }
-
     var list = React.DOM.div(null, 
 
       React.DOM.header( {id:"header"}, 
@@ -1021,6 +1069,10 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
     return item;
   },
 
+  componentDidMount: function() {
+
+  },
+
   onDeleteClick: function() {
     TodoActions.removeTodoItem({item: this.props.item});
     this.delete = true;
@@ -1087,7 +1139,7 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
     var lis = [];
     for (var i = 0, l = versions.length; i < l; i++) {
       var version = versions[i];
-      lis[i] = React.DOM.li( {onClick:this.restore, 'data-position':i}, version.name);
+      lis[i] = React.DOM.li( {key:i, onClick:this.restore, 'data-position':i}, version.name);
     }
     return React.DOM.aside( {className:"UndoRedoList"}, 
         React.DOM.h1(null, "Restore a different version:"),
@@ -18763,7 +18815,7 @@ ImmutableGraphArray.prototype = {
       var i;
       var l;
       for (i = 0, l = refToArrayRef.length; i < l; i++) {
-        if (refToArrayRef[i].ref.id === newItemId) {
+        if (refToArrayRef[i] && refToArrayRef[i].ref.id === newItemId) {
           positions[positions.length] = i;
         }
       }
@@ -18848,7 +18900,34 @@ ImmutableGraphArray.prototype = {
           getImmutableObject(obj, this, i);
       }
     }
+
+    // todo move function outside
+    containers.changePropertiesTo = function() {
+
+    };
+
     return containers;
+  },
+
+  /**
+   * Change the properties for all the children of this array
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    var __private = this.__private;
+    var newArray = clone(__private.refToObj.ref);
+    for (var i = 0, l = newArray.length; i < l; i++) {
+      var item = clone(newArray[i].ref);
+      for (var key in newProperties) {
+        if (newProperties.hasOwnProperty(key)) {
+          item[key] = newProperties[key];
+        }
+      }
+
+      newArray[i].ref = item;
+    }
+    this.changeValueTo(newArray);
   }
 
 };
@@ -18870,7 +18949,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
-
+var isBusy = false;
 
 /**
  * Bundle all child changes into one
@@ -18884,6 +18963,7 @@ function aggregateChangedChildren(self, fn) {
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
+  isBusy = true;
   __private.currentChildAggregation = setImmediate(fn);
 }
 
@@ -19104,11 +19184,12 @@ ImmutableGraphObject.prototype = {
   /**
    * To inform that the graph has changed
    *
+   * @param {{parents:{}}} opt
    * @private
    */
-  __changed: function() {
+  __changed: function(opt) {
     var __private = this.__private;
-    var parents = __private.parents;
+    var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
     var i;
     var l;
@@ -19128,6 +19209,9 @@ ImmutableGraphObject.prototype = {
   __aggregateChangedChildren: function() {
     var __private = this.__private;
     var refToObj = __private.refToObj;
+
+    ReferenceRegistry.removeReference(refToObj.ref);
+
     var newRefToObj = {ref: clone(refToObj.ref)};
     var newRefToObjRef = newRefToObj.ref;
     var removeKeys = __private.removeKeys;
@@ -19164,14 +19248,18 @@ ImmutableGraphObject.prototype = {
     var changeListener = __private.changeListener;
     if (changeListener) {
       if (__private.currentChildEvent) {
-        clearTimeout(__private.currentChildEvent);
+        clearImmediate(__private.currentChildEvent);
       }
-      __private.currentChildEvent = setTimeout(function() {
-        changeListener.apply(__private.changeListener);
-        if (__private.changeListenerOnce) {
-          __private.changeListener = null;
+
+      isBusy = false;
+      __private.currentChildEvent = setImmediate(function() {
+        if (!isBusy) {
+          changeListener.apply(__private.changeListener);
+          if (__private.changeListenerOnce) {
+            __private.changeListener = null;
+          }
         }
-      }, 0);
+      });
     }
   },
 
@@ -19213,11 +19301,12 @@ ImmutableGraphObject.prototype = {
     var refToObj = __private.refToObj;
     var refToObjRef = refToObj.ref;
     removeReference(refToObjRef);
-    removeImmutableGraphObject(refToObj);
+    var parents = __private.parents;
+    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
     if (isArray(refToObjRef)) {
       refToObj.ref = [];
     }
-    this.__changed();
+    this.__changed({parents: parents});
   },
 
   /**
@@ -19227,6 +19316,22 @@ ImmutableGraphObject.prototype = {
    */
   generatedId: function() {
     return this.__private.refToObj.ref.__worldStateUniqueId;
+  },
+
+  /**
+   * Change one or more properties of this object
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    var __private = this.__private;
+    var newValue = clone(__private.refToObj.ref);
+    for (var key in newProperties) {
+      if (newProperties.hasOwnProperty(key)) {
+        newValue[key] = newProperties[key];
+      }
+    }
+    this.changeValueTo(newValue);
   }
 
 };
@@ -19249,15 +19354,15 @@ var isArray = Array.isArray;
 
 
 /**
- * @type {Object.<number, object>}
+ * @type {Array.<ImmutableGraphArray>}
  */
-var _arrays = {};
+var _arrays = [];
 
 
 /**
- * @type {Object.<number, object>}
+ * @type {Object.<ImmutableGraphObject>}
  */
-var _objects = {};
+var _objects = [];
 
 
 /**
@@ -19406,6 +19511,14 @@ function _getImmutableArray(array, parent, parentKey) {
  * @lends {ImmutableGraphRegistry}
  */
 var ImmutableGraphRegistry = {
+
+  _getObjects: function() {
+    return _objects;
+  },
+
+  _getArrays: function() {
+    return _arrays;
+  },
 
   /**
    * Change the reference id and ensures it's correct within the registry
@@ -19561,10 +19674,13 @@ var ImmutableGraphRegistry = {
    */
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
-      return _getImmutableArray(obj, parent, parentKey);
+
+      var array = _getImmutableArray(obj, parent, parentKey);
+      return array;
     }
     else if (typeof obj === 'object') {
-      return _getImmutableObject(obj, parent, parentKey);
+      var obj2 = _getImmutableObject(obj, parent, parentKey);
+      return obj2;
     }
   },
 
@@ -19609,6 +19725,20 @@ var ImmutableGraphRegistry = {
     }
   },
 
+  removeImmutableGraphObjectChildren: function(parents) {
+    for (var i = 0, l = parents.length; i < l; i++) {
+      var parent = parents[i];
+      var parentRef = parent.__private.refToObj.ref;
+      var keys = Object.keys(parentRef);
+      for (var j = 0, l2 = keys.length; j < l2; j++) {
+        var key = keys[j];
+        if (typeof (parentRef[key]) === 'object') {
+          this.removeImmutableGraphObject(parentRef[key]);
+        }
+      }
+    }
+  },
+
   /**
    * Remove an immutable graph object
    *
@@ -19617,36 +19747,38 @@ var ImmutableGraphRegistry = {
   removeImmutableGraphObject: function(reference) {
     var foundImos;
     var id = reference.ref.__worldStateUniqueId;
-    if (isArray(reference)) {
+    if (isArray(reference.ref)) {
       foundImos = _findAll(_arrays, reference.ref);
     }
     else {
       foundImos = _findAll(_objects, reference.ref);
     }
 
+    this.removeImmutableGraphObjectChildren(foundImos);
+
     for (var i = 0, l = foundImos.length; i < l; i++) {
       var imo = foundImos[i];
-      imo.__private.refToObj = null;
-      var objects = _objects[id];
-      if (objects) {
-        var position = objects.indexOf(imo);
-        if (position > -1) {
-          var newObjects = objects.slice();
-          newObjects.splice(position, 1);
-          _objects[id] = newObjects;
-        }
+      var imoPrivate = imo.__private;
+
+      if (isArray(imoPrivate.refToObj.ref)) {
+        imoPrivate.refToObj.ref = [];
       }
-      var arrays = _arrays[id];
-      if (arrays) {
-        position = arrays.indexOf(imo);
-        if (position > -1) {
-          var newArrays = arrays.slice();
-          newArrays.splice(position, 1);
-          _arrays[id] = newArrays;
-        }
+      else {
+        imoPrivate.refToObj = null;
       }
+      delete _objects[id];
+      delete _arrays[id];
+
+      imo.__private.historyRefs = null;
+      var parents = imo.__private.parents;
+      for (var j = 0, l2 = parents.length; j < l2; j++) {
+        var parent = parents[j];
+        var parentRef = parent.parent.__private.refToObj.ref;
+      }
+      imo.__private.parents = [];
     }
   }
+
 };
 
 module.exports = ImmutableGraphRegistry;
@@ -19654,7 +19786,8 @@ module.exports = ImmutableGraphRegistry;
 },{"./ImmutableGraphArray":147,"./ImmutableGraphObject":148,"./ReferenceRegistry":150,"./clone":151}],150:[function(require,module,exports){
 'use strict';
 
-var _references = {};
+var _arrayReferences = [];
+var _objectReferences = [];
 var isArray = Array.isArray;
 var uniqueIdCounter = 1;
 
@@ -19666,14 +19799,24 @@ var uniqueIdCounter = 1;
  */
 var ReferenceRegistry = {
 
-  /**
-   * Find an existing reference
-   *
-   * @param {{}} obj
-   * @return {{ref:{}}|null}
-   */
-  findReference: function(obj) {
-    var reference = _references[obj.__worldStateUniqueId];
+  _getArrayReferences: function() {
+    return _arrayReferences;
+  },
+
+  _getObjectReferences: function() {
+    return _objectReferences;
+  },
+
+  findObjectReference: function(obj) {
+    var reference = _objectReferences[obj.__worldStateUniqueId];
+    if (reference && reference.ref === obj) {
+      return reference;
+    }
+    return null;
+  },
+
+  findArrayReference: function(obj) {
+    var reference = _arrayReferences[obj.__worldStateUniqueId];
     if (reference && reference.ref === obj) {
       return reference;
     }
@@ -19686,7 +19829,8 @@ var ReferenceRegistry = {
    * @param {{ref:{}}} obj
    */
   removeReference: function(obj) {
-    delete _references[obj.__worldStateUniqueId];
+    delete _objectReferences[obj.__worldStateUniqueId];
+    delete _arrayReferences[obj.__worldStateUniqueId];
   },
 
   /**
@@ -19696,18 +19840,33 @@ var ReferenceRegistry = {
    * @return {{ref:{}}}
    */
   getReferenceTo: function(obj) {
-    var reference = ReferenceRegistry.findReference(obj);
-    if (reference) {
-      return reference;
+    var reference;
+    var izArray = isArray(obj);
+    if (obj.__worldStateUniqueId) {
+      if (izArray) {
+        reference = ReferenceRegistry.findArrayReference(obj);
+      }
+      else {
+        reference = ReferenceRegistry.findObjectReference(obj);
+      }
+      if (reference) {
+        return reference;
+      }
     }
-
     var id = uniqueIdCounter++;
     obj.__worldStateUniqueId = id;
 
-    var ref = _references[id] = {
-      ref: obj
-    };
-
+    var ref;
+    if (izArray) {
+      ref = _arrayReferences[id] = {
+        ref: obj
+      };
+    }
+    else {
+      ref = _objectReferences[id] = {
+        ref: obj
+      };
+    }
     return ref;
   },
 
@@ -19813,16 +19972,18 @@ var ReactWorldStateMixin = {
    */
   shouldComponentUpdate: function(nextProps) {
     for (var key in nextProps) {
-      var type = typeof (nextProps[key]);
+      var nextPropsKey = nextProps[key];
+      var type = typeof (nextPropsKey);
       if (type === 'string' || type === 'boolean' || type === 'number') {
-        if (this.__oldProp[key] !== nextProps[key]) {
+        if (this.__oldProp[key] !== nextPropsKey) {
           return true;
         }
         continue;
       }
-      else if (!nextProps.hasOwnProperty(key) || !nextProps[key] || !nextProps[key].read) {
+      else if (!nextProps.hasOwnProperty(key) || !nextPropsKey || !nextPropsKey.read) {
         continue;
       }
+
       var nextPropKey = nextProps[key].read();
       if (!this.__oldProp[key]) {
         this.__oldProp[key] = nextPropKey;
@@ -19838,7 +19999,6 @@ var ReactWorldStateMixin = {
     return false;
   },
 
-  // do NOT remove this!
   componentDidMount: function() {
     this.__oldProp = {};
     var nextProps = this.props;

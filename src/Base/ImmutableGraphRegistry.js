@@ -13,15 +13,15 @@ var isArray = Array.isArray;
 
 
 /**
- * @type {Object.<number, object>}
+ * @type {Array.<ImmutableGraphArray>}
  */
-var _arrays = {};
+var _arrays = [];
 
 
 /**
- * @type {Object.<number, object>}
+ * @type {Object.<ImmutableGraphObject>}
  */
-var _objects = {};
+var _objects = [];
 
 
 /**
@@ -170,6 +170,14 @@ function _getImmutableArray(array, parent, parentKey) {
  * @lends {ImmutableGraphRegistry}
  */
 var ImmutableGraphRegistry = {
+
+  _getObjects: function() {
+    return _objects;
+  },
+
+  _getArrays: function() {
+    return _arrays;
+  },
 
   /**
    * Change the reference id and ensures it's correct within the registry
@@ -325,10 +333,13 @@ var ImmutableGraphRegistry = {
    */
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
-      return _getImmutableArray(obj, parent, parentKey);
+
+      var array = _getImmutableArray(obj, parent, parentKey);
+      return array;
     }
     else if (typeof obj === 'object') {
-      return _getImmutableObject(obj, parent, parentKey);
+      var obj2 = _getImmutableObject(obj, parent, parentKey);
+      return obj2;
     }
   },
 
@@ -373,6 +384,20 @@ var ImmutableGraphRegistry = {
     }
   },
 
+  removeImmutableGraphObjectChildren: function(parents) {
+    for (var i = 0, l = parents.length; i < l; i++) {
+      var parent = parents[i];
+      var parentRef = parent.__private.refToObj.ref;
+      var keys = Object.keys(parentRef);
+      for (var j = 0, l2 = keys.length; j < l2; j++) {
+        var key = keys[j];
+        if (typeof (parentRef[key]) === 'object') {
+          this.removeImmutableGraphObject(parentRef[key]);
+        }
+      }
+    }
+  },
+
   /**
    * Remove an immutable graph object
    *
@@ -381,36 +406,32 @@ var ImmutableGraphRegistry = {
   removeImmutableGraphObject: function(reference) {
     var foundImos;
     var id = reference.ref.__worldStateUniqueId;
-    if (isArray(reference)) {
+    if (isArray(reference.ref)) {
       foundImos = _findAll(_arrays, reference.ref);
     }
     else {
       foundImos = _findAll(_objects, reference.ref);
     }
 
+    this.removeImmutableGraphObjectChildren(foundImos);
+
     for (var i = 0, l = foundImos.length; i < l; i++) {
       var imo = foundImos[i];
       imo.__private.refToObj = null;
-      var objects = _objects[id];
-      if (objects) {
-        var position = objects.indexOf(imo);
-        if (position > -1) {
-          var newObjects = objects.slice();
-          newObjects.splice(position, 1);
-          _objects[id] = newObjects;
-        }
+
+      delete _objects[id];
+      delete _arrays[id];
+
+      imo.__private.historyRefs = null;
+      var parents = imo.__private.parents;
+      for (var j = 0, l2 = parents.length; j < l2; j++) {
+        var parent = parents[j];
+        var parentRef = parent.parent.__private.refToObj.ref;
       }
-      var arrays = _arrays[id];
-      if (arrays) {
-        position = arrays.indexOf(imo);
-        if (position > -1) {
-          var newArrays = arrays.slice();
-          newArrays.splice(position, 1);
-          _arrays[id] = newArrays;
-        }
-      }
+      imo.__private.parents = [];
     }
   }
+
 };
 
 module.exports = ImmutableGraphRegistry;

@@ -59,7 +59,7 @@ var TodoListPrototype = {
     wrappers: {}
   },
 
-  /**
+    /**
    * Change reference
    *
    * @param {[{items:Array,filter:number}]} obj
@@ -67,6 +67,7 @@ var TodoListPrototype = {
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
+    return this;
   },
 
   /**
@@ -77,6 +78,7 @@ var TodoListPrototype = {
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
+    return this;
   },
 
   /**
@@ -86,6 +88,7 @@ var TodoListPrototype = {
    */
   enableVersioning: function TodoList$enableVersioning() {
     this.__private.graph.enableVersioning();
+    return this;
   },
 
   /**
@@ -105,6 +108,9 @@ var TodoListPrototype = {
    * @this {TodoListPrototype}
    */
   read: function TodoList$read() {
+    if (!this.__private.graph.__private.refToObj) {
+      return null;
+    }
     return this.__private.graph.__private.refToObj.ref;
   },
 
@@ -116,6 +122,7 @@ var TodoListPrototype = {
    */
   restoreVersion: function TodoList$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
+    return this;
   },
 
   /**
@@ -126,6 +133,7 @@ var TodoListPrototype = {
    */
   saveVersion: function TodoList$saveVersion(name) {
     this.__private.graph.saveVersion(name);
+    return this;
   },
 
   /**
@@ -147,6 +155,7 @@ var TodoListPrototype = {
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
+    return this;
   },
 
   /**
@@ -156,6 +165,16 @@ var TodoListPrototype = {
    */
   generatedId: function() {
     return this.__private.graph.generatedId();
+  },
+
+  /**
+   * Change one or more properties at once
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   },
 
   /**

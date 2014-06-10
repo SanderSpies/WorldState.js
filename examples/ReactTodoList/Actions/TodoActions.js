@@ -60,19 +60,21 @@ var TodoActions = {
    */
   updateTodoItem: function(opt) {
     console.time('Update todo item');
-    var item = opt.item.read();
-    var newValue = clone(item);
-    opt.text && (newValue.text = opt.text);
-    'isComplete' in opt && (newValue.isComplete = opt.isComplete);
+    var item = opt.item;
 
-    if (newValue.text === item.text &&
-        newValue.isComplete === item.isComplete) {
+    var oldText = item.read().text;
+    var oldIsComplete = item.read().isComplete;
+
+    if (opt.text === oldText &&
+      opt.isComplete === oldIsComplete) {
       return;
     }
 
-    var oldText = item.text;
-    var oldIsComplete = item.isComplete;
-    opt.item.changeValueTo(newValue);
+    item.changePropertiesTo({
+      isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
+      text: 'text' in opt ? opt.text : oldText
+    });
+
     items.afterChange(function() {
       console.timeEnd('Update todo item');
       items.saveVersion('Changed todo item from ' + oldText + ' ' +
@@ -87,7 +89,7 @@ var TodoActions = {
    */
   removeAllTodoItems: function() {
     items.remove();
-    items.saveVersion('Removed all todo items');
+    // items.saveVersion('Removed all todo items');
   },
 
   /**
@@ -97,9 +99,9 @@ var TodoActions = {
    */
   toggleEditMode: function(opt) {
     var item = opt.item;
-    var newValue = clone(item.read());
-    newValue.editMode = !newValue.editMode;
-    item.changeValueTo(newValue);
+    item.changePropertiesTo({
+      editMode: !item.read().editMode
+    });
   },
 
   /**
@@ -109,17 +111,13 @@ var TodoActions = {
    */
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
-    var checked = opt.checked;
-    var itemsRead = clone(items.read());
-    for (var i = 0, l = itemsRead.length; i < l; i++) {
-      var item = clone(itemsRead[i].ref);
-      item.isComplete = checked;
-      itemsRead[i].ref = item;
-    }
-    items.changeValueTo(itemsRead);
+    items.changePropertiesTo({
+      isComplete: opt.checked
+    });
+
     items.afterChange(function() {
       console.timeEnd('Update all todo items');
-      items.saveVersion((checked ? 'Checked' : 'Unchecked') +
+      items.saveVersion((opt.checked ? 'Checked' : 'Unchecked') +
           ' all todo list items');
     }, true);
   },
@@ -129,9 +127,10 @@ var TodoActions = {
    */
   setFilter: function(opt) {
     console.time('Set filter');
-    var newValue = clone(todoListGraph.read());
-    newValue.filter = opt.filter;
-    todoListGraph.changeValueTo(newValue);
+    todoListGraph.changePropertiesTo({
+      filter: opt.filter
+    });
+
     todoListGraph.__private.graph.__informChangeListener();
   },
 

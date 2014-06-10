@@ -373,7 +373,7 @@ describe('WorldState.js', function() {
       bar: 'test2'
     });
     imo.afterChange(function() {
-      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      var oldReference = ReferenceRegistry.findObjectReference(referenceToBar);
       expect(oldReference).toBe(null);
     });
   });
@@ -391,7 +391,7 @@ describe('WorldState.js', function() {
       bar: 'test2'
     });
     imo.afterChange(function() {
-      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      var oldReference = ReferenceRegistry.findObjectReference(referenceToBar);
       expect(oldReference).toBe(null);
     });
   });
@@ -407,7 +407,7 @@ describe('WorldState.js', function() {
     var referenceToBar = imo.read().foo.ref;
     imo.wrapped().foo.remove();
     imo.afterChange(function() {
-      var oldReference = ReferenceRegistry.findReference(referenceToBar);
+      var oldReference = ReferenceRegistry.findObjectReference(referenceToBar);
       expect(oldReference).toBe(null);
     });
   });
@@ -426,7 +426,7 @@ describe('WorldState.js', function() {
     var referenceToItem = imo.read().foo.ref[0].ref;
     imo.wrapped().foo.insert({id: 1, title: 'test2'});
     imo.afterChange(function() {
-      var oldReference = ReferenceRegistry.findReference(referenceToItem);
+      var oldReference = ReferenceRegistry.findArrayReference(referenceToItem);
       expect(oldReference).toBe(null);
     });
   });

@@ -6,7 +6,7 @@
     "name": "Sander Spies",
     "email": "sandermail@gmail.com"
   },
-  "version": "0.1.0",
+  "version": "0.1.1-alpha",
   "bin": {
     "worldstate": "src/Generator/Generator.js"
   },
@@ -18,7 +18,6 @@
   "dependencies": {
     "setimmediate": "~1.0.2"
   },
-
 
   "devDependencies": {
     "gulp-util": "~2.2.14",

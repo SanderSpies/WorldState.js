@@ -20,11 +20,22 @@ module.exports = function(grunt) {
           }
         ]
       }
+    },
+    closurecompiler: {
+      minify: {
+        files: {
+          'build/bundle.js':'build/bundle.js'
+        },
+        options: {
+          "compilation_LEVEL": "ADVANCED_OPTIMIZATIONS"
+        }
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-react');
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-closurecompiler');
 
   grunt.registerTask('default', ['react', 'browserify']);
 

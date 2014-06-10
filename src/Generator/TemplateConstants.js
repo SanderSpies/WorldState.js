@@ -27,7 +27,8 @@ var TemplateConstants = {
   AFTER_CHANGE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/afterChange.jst', { encoding:'utf8'}),
   REMOVE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/remove.jst', { encoding:'utf8'}),
   LENGTH_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/length.jst', { encoding:'utf8'}),
-  GENERATED_ID_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/generatedId.jst', { encoding:'utf8'})
+  GENERATED_ID_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/generatedId.jst', { encoding:'utf8'}),
+  CHANGE_PROPERTIES_TO:  fs.readFileSync(__dirname + '/Templates/Functions/changePropertiesTo.jst', { encoding:'utf8'}),
 };
 
 module.exports = TemplateConstants;

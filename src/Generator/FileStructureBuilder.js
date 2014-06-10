@@ -15,6 +15,7 @@ var ObjectFunctionTemplates = [
   TemplateConstants.AFTER_CHANGE_FUNCTION,
   TemplateConstants.REMOVE_FUNCTION,
   TemplateConstants.GENERATED_ID_FUNCTION,
+  TemplateConstants.CHANGE_PROPERTIES_TO
 ];
 
 var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([

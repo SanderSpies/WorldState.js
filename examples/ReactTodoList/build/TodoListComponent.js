@@ -20,25 +20,27 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
     var filter = props.filter;
 
     var todoComponents = [];
-    var l = items.read().length;
-    for (var i = 0; i < l; i++) {
-      var item = items.at(i);
-      var isComplete = item.read().isComplete;
-      if (filter === 1 && isComplete) {
-        continue;
-      } else if (filter === 2 && !isComplete) {
-        continue;
+    var itemsRead = items.read();
+    if (itemsRead) {
+      var l = itemsRead.length;
+      for (var i = 0; i < l; i++) {
+        var item = items.at(i);
+        var isComplete = item.read().isComplete;
+        if (filter === 1 && isComplete) {
+          continue;
+        } else if (filter === 2 && !isComplete) {
+          continue;
+        }
+        todoComponents[todoComponents.length] = TodoListItem( {key:item.generatedId(), item:item} );
       }
-      todoComponents.push(TodoListItem( {key:item.generatedId(), item:item} ));
-    }
 
-    var todoCount = items.where({isComplete:false}).length;
-    var completed = items.length() - todoCount;
-    var completeBtn;
-    if (completed > 0) {
-      completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");
+      var todoCount = items.where({isComplete:false}).length;
+      var completed = items.length() - todoCount;
+      var completeBtn;
+      if (completed > 0) {
+        completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");
+      }
     }
-
     var list = React.DOM.div(null, 
 
       React.DOM.header( {id:"header"}, 

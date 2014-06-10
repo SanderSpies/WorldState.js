@@ -150,7 +150,8 @@ Changing a reference:
 var somewhereElseInTheGraph = todoGraph.items.at(0);
 todoGraph.items().at(1).changeReferenceTo(somewhereElseInTheGraph.read());
 ```
-Now both items will be changed at the same the time when using changeValueTo :-).
+Now both items will be changed at the same the time when using changeValueTo.
+
 
 Saving and restoring a version:
 ```
@@ -187,6 +188,56 @@ var Foo = React.createClass({
 Now if you pass an item from WorldState.js it will be checked using strict equals.
 
 [More examples](EXAMPLES.md)
+
+Coming for 0.2
+===
+
+Implemented
+---
+Changing one or more properties:
+```
+item.changePropertiesTo({
+  title: 'a new title'
+});
+```
+can also be used upon an array to change all the properties of the children.
+
+Todo for 0.1.1
+---
+
+Chaining
+```
+items
+  .changePropertiesTo({
+    yolo: 'yolo'
+  })
+  .saveVersionAs('new name')
+  .afterChange(function() {
+    // do stuff
+  });
+```
+
+Change .where to give back an immutable array, so chaining also works here:
+```
+items
+  .where({foo: 'bar')
+  .remove()
+  .saveVersionAs('other name')
+  .afterChange(function() {
+    // do a thing
+  });
+```
+
+Insert at:
+```
+items.insertAt(1, Item.newInstance({}));
+```
+- items.getPositionFor({})
+- Support for non object arrays
+- Modify afterChange to fire only once
+- Add addChangeListener to add multiple event listeners to objects and arrays (should work nicely with afterChange)
+-
+
 
 LICENSE
 ---

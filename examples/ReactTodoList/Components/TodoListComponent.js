@@ -20,25 +20,27 @@ var TodoListComponent = React.createClass({
     var filter = props.filter;
 
     var todoComponents = [];
-    var l = items.read().length;
-    for (var i = 0; i < l; i++) {
-      var item = items.at(i);
-      var isComplete = item.read().isComplete;
-      if (filter === 1 && isComplete) {
-        continue;
-      } else if (filter === 2 && !isComplete) {
-        continue;
+    var itemsRead = items.read();
+    if (itemsRead) {
+      var l = itemsRead.length;
+      for (var i = 0; i < l; i++) {
+        var item = items.at(i);
+        var isComplete = item.read().isComplete;
+        if (filter === 1 && isComplete) {
+          continue;
+        } else if (filter === 2 && !isComplete) {
+          continue;
+        }
+        todoComponents[todoComponents.length] = <TodoListItem key={item.generatedId()} item={item} />;
       }
-      todoComponents.push(<TodoListItem key={item.generatedId()} item={item} />);
-    }
 
-    var todoCount = items.where({isComplete:false}).length;
-    var completed = items.length() - todoCount;
-    var completeBtn;
-    if (completed > 0) {
-      completeBtn = <button onClick={this.onClearCompletedClick} id="clear-completed">Clear completed ({completed})</button>;
+      var todoCount = items.where({isComplete:false}).length;
+      var completed = items.length() - todoCount;
+      var completeBtn;
+      if (completed > 0) {
+        completeBtn = <button onClick={this.onClearCompletedClick} id="clear-completed">Clear completed ({completed})</button>;
+      }
     }
-
     var list = <div>
 
       <header id="header">

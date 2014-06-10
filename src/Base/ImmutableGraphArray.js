@@ -84,7 +84,7 @@ ImmutableGraphArray.prototype = {
       var i;
       var l;
       for (i = 0, l = refToArrayRef.length; i < l; i++) {
-        if (refToArrayRef[i].ref.id === newItemId) {
+        if (refToArrayRef[i] && refToArrayRef[i].ref.id === newItemId) {
           positions[positions.length] = i;
         }
       }
@@ -169,7 +169,34 @@ ImmutableGraphArray.prototype = {
           getImmutableObject(obj, this, i);
       }
     }
+
+    // todo move function outside
+    containers.changePropertiesTo = function() {
+
+    };
+
     return containers;
+  },
+
+  /**
+   * Change the properties for all the children of this array
+   *
+   * @param {{}} newProperties
+   */
+  changePropertiesTo: function(newProperties) {
+    var __private = this.__private;
+    var newArray = clone(__private.refToObj.ref);
+    for (var i = 0, l = newArray.length; i < l; i++) {
+      var item = clone(newArray[i].ref);
+      for (var key in newProperties) {
+        if (newProperties.hasOwnProperty(key)) {
+          item[key] = newProperties[key];
+        }
+      }
+
+      newArray[i].ref = item;
+    }
+    this.changeValueTo(newArray);
   }
 
 };
