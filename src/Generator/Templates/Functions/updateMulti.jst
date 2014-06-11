@@ -1,0 +1,11 @@
+  /**
+   * Update multi items at once
+   * (this is just a pointer to insertMulti which does the same)
+   *
+   * @param {[{GraphInsertDoc}]} items
+   * @this {{GraphName}Prototype}
+   * @return {{GraphName}Prototype}
+   */
+  updateMulti: function(items) {
+    this.insertMulti(items);
+  }

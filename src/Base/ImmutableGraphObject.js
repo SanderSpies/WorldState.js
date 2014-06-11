@@ -2,6 +2,8 @@
 
 require('setimmediate');
 
+// var Promise = require('bluebird');
+
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
 
@@ -13,7 +15,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 var isBusy = false;
-
+var counterAggregate = 0;
 /**
  * Bundle all child changes into one
  *
@@ -21,6 +23,24 @@ var isBusy = false;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
+function aggregateChangedChildrenExperimental(self, fn) {
+  var __private = self.__private;
+  var localCounterAggregate = counterAggregate;
+  __private.currentChildAggregation = (new Promise(function(resolve) {
+    localCounterAggregate = counterAggregate++;
+    isBusy = true;
+    resolve();
+  })).then(function() {
+      if (localCounterAggregate === 0) {
+        fn();
+      }
+      else if (localCounterAggregate + 1 === counterAggregate) {
+        counterAggregate = 0;
+        __private.currentChildAggregation = null;
+      }
+  });
+}
+
 function aggregateChangedChildren(self, fn) {
   var __private = self.__private;
   if (__private.currentChildAggregation) {
@@ -79,12 +99,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     parents: [],
     saveHistory: false,
     historyRefs: [],
-    changeListener: null,
+    changeListeners: [],
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null,
-    changeListenerOnce: false
+    currentChildEvent: null
   };
 
   this.changeReferenceTo(obj);
@@ -104,8 +123,7 @@ ImmutableGraphObject.prototype = {
     parents: [],
     saveHistory: false,
     historyRefs: [],
-    changeListener: null,
-    changeListenerOnce: false,
+    changeListeners: [],
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
@@ -113,16 +131,29 @@ ImmutableGraphObject.prototype = {
   },
 
   /**
-   * Executes after the current actions, like insert and
+   * Executes once after the current actions, like insert and
    * changeValueTo, have completed
    *
    * @param {function} fn
-   * @param {boolean} once
    */
-  afterChange: function(fn, once) {
+  afterChange: function(fn) {
     var __private = this.__private;
-    __private.changeListener = fn;
-    __private.changeListenerOnce = once;
+    var changeListeners = __private.changeListeners;
+    changeListeners[changeListeners.length] = {
+      fn: fn,
+      once: true
+    };
+  },
+
+
+  addChangeListener: function(fn, context) {
+    var __private = this.__private;
+    var changeListeners = __private.changeListeners;
+    changeListeners[changeListeners.length] = {
+      fn: fn,
+      context: context,
+      once: false
+    };
   },
 
   /**
@@ -141,10 +172,12 @@ ImmutableGraphObject.prototype = {
   saveVersion: function(name) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
-    historyRefs[historyRefs.length] = {
-      name: name,
-      ref: clone(__private.refToObj.ref)
-    };
+    setImmediate(function() {
+      historyRefs[historyRefs.length] = {
+        name: name,
+        ref: clone(__private.refToObj.ref)
+      };
+    });
   },
 
   /**
@@ -303,13 +336,13 @@ ImmutableGraphObject.prototype = {
       updateChildrenParentKeys(this);
     }
 
-    this.__informChangeListener();
+    this.__informChangeListeners();
   },
 
-  __informChangeListener: function() {
+  __informChangeListeners: function() {
     var __private = this.__private;
-    var changeListener = __private.changeListener;
-    if (changeListener) {
+    var changeListeners = __private.changeListeners;
+    if (changeListeners.length) {
       if (__private.currentChildEvent) {
         clearImmediate(__private.currentChildEvent);
       }
@@ -317,9 +350,12 @@ ImmutableGraphObject.prototype = {
       isBusy = false;
       __private.currentChildEvent = setImmediate(function() {
         if (!isBusy) {
-          changeListener.apply(__private.changeListener);
-          if (__private.changeListenerOnce) {
-            __private.changeListener = null;
+          for (var i = 0, l = changeListeners.length; i < l; i++) {
+            var changeListener = changeListeners[i];
+            changeListener.fn.call(changeListener.context);
+            if (changeListener.once) {
+              changeListeners.splice(i, 0);
+            }
           }
         }
       });

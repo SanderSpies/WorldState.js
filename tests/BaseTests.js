@@ -297,41 +297,43 @@ describe('WorldState.js', function() {
               item0.changeValueTo(newData5);
               imo.afterChange(function() {
                 imo.saveVersion('5');
-
-                imo.restoreVersion(imo.getVersions()[0]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test');
-                imo.restoreVersion(imo.getVersions()[1]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test1');
-                imo.restoreVersion(imo.getVersions()[2]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test2');
-                imo.restoreVersion(imo.getVersions()[3]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test3');
-                imo.restoreVersion(imo.getVersions()[4]);
-                expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test4');
-                expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
-                imo.restoreVersion(imo.getVersions()[5]);
-                expect(item0.read().title).toEqual('test5');
-                expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
-                item0.changeValueTo({
-                  id: 1,
-                  title: 'fafafa'
-                });
-                imo.afterChange(function() {
-
-                  expect(item0.read()).toBe(imo.read().parent.ref.items.ref[0].ref);
-                  expect(item0.read()).toBe(imo.wrapped().parent.wrapped
-                    ().items.at(0).read());
-                  expect(item0.read().title).toBe('fafafa');
-                  expect(imo.read().parent.ref.items.ref[0].ref.title).toBe('fafafa');
-
-                  // this should not have changed from when we started
-                  expect(dontChangeMe).toBe(imo.wrapped().dontChangeMe.read());
-
+                //imo.afterChange(function(){
                   imo.restoreVersion(imo.getVersions()[0]);
-                  expect(item0.read().title).toBe('test');
+                  expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test');
+                  imo.restoreVersion(imo.getVersions()[1]);
+                  expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test1');
+                  imo.restoreVersion(imo.getVersions()[2]);
+                  expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test2');
+                  imo.restoreVersion(imo.getVersions()[3]);
+                  expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test3');
+                  imo.restoreVersion(imo.getVersions()[4]);
+                  expect(imo.wrapped().parent.wrapped().items.at(0).read().title).toEqual('test4');
+                  expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
 
-                  done();
-                });
+                  imo.restoreVersion(imo.getVersions()[5]);
+                  expect(item0.read().title).toEqual('test5');
+                  expect(item0.read()).toBe(imo.wrapped().parent.wrapped().items.at(0).read());
+                  item0.changeValueTo({
+                    id: 1,
+                    title: 'fafafa'
+                  });
+                  imo.afterChange(function() {
+
+                    expect(item0.read()).toBe(imo.read().parent.ref.items.ref[0].ref);
+                    expect(item0.read()).toBe(imo.wrapped().parent.wrapped
+                      ().items.at(0).read());
+                    expect(item0.read().title).toBe('fafafa');
+                    expect(imo.read().parent.ref.items.ref[0].ref.title).toBe('fafafa');
+
+                    // this should not have changed from when we started
+                    expect(dontChangeMe).toBe(imo.wrapped().dontChangeMe.read());
+
+                    imo.restoreVersion(imo.getVersions()[0]);
+                    expect(item0.read().title).toBe('test');
+
+                    done();
+                  });
+                //});
               });
             });
           });
@@ -520,8 +522,11 @@ describe('WorldState.js', function() {
       a.push({id: 2, title: 'bla' + i});
     }
     console.timeEnd('Insert plain array test');
-
-
   });
+
+  // add tests for chaining
+  // add tests for addChangeListener + removeChangeListener
+  // add tests for insertAt
+  // add tests for removeMulti, updateMulti
 
 });

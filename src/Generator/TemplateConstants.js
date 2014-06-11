@@ -9,7 +9,7 @@ var fs = require('fs');
  */
 var TemplateConstants = {
   ENABLE_VERSIONING_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/enableVersioning.jst', { encoding:'utf8'}),
-  SAVE_VERSION_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/saveVersion.jst', { encoding:'utf8'}),
+  SAVE_VERSION_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/saveVersionAs.jst', { encoding:'utf8'}),
   RESTORE_VERSION_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/restoreVersion.jst', { encoding:'utf8'}),
   GET_VERSIONS_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/getVersions.jst', { encoding:'utf8'}),
   CHANGE_REFERENCE_TO_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/changeReferenceTo.jst', { encoding:'utf8'}),
@@ -29,6 +29,8 @@ var TemplateConstants = {
   LENGTH_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/length.jst', { encoding:'utf8'}),
   GENERATED_ID_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/generatedId.jst', { encoding:'utf8'}),
   CHANGE_PROPERTIES_TO:  fs.readFileSync(__dirname + '/Templates/Functions/changePropertiesTo.jst', { encoding:'utf8'}),
+  INSERT_AT_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/insertAt.jst', { encoding:'utf8'}),
+  ADD_CHANGE_LISTENER_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/addChangeListener.jst', { encoding:'utf8'})
 };
 
 module.exports = TemplateConstants;

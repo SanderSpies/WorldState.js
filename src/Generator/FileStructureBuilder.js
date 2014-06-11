@@ -15,12 +15,14 @@ var ObjectFunctionTemplates = [
   TemplateConstants.AFTER_CHANGE_FUNCTION,
   TemplateConstants.REMOVE_FUNCTION,
   TemplateConstants.GENERATED_ID_FUNCTION,
-  TemplateConstants.CHANGE_PROPERTIES_TO
+  TemplateConstants.CHANGE_PROPERTIES_TO,
+  TemplateConstants.ADD_CHANGE_LISTENER_FUNCTION
 ];
 
 var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
   TemplateConstants.AT_FUNCTION,
   TemplateConstants.INSERT_FUNCTION,
+  TemplateConstants.INSERT_AT_FUNCTION,
   TemplateConstants.INSERT_MULTI_FUNCTION,
   TemplateConstants.INSERT_MULTI_RAW_FUNCTION,
   TemplateConstants.WHERE_FUNCTION,

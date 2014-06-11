@@ -63,6 +63,7 @@ var ItemPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -74,6 +75,7 @@ var ItemPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -84,6 +86,7 @@ var ItemPrototype = {
    * Enable versioning
    *
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   enableVersioning: function Item$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -118,6 +121,7 @@ var ItemPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   restoreVersion: function Item$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -129,8 +133,9 @@ var ItemPrototype = {
    *
    * @param {string} name name of the version
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
-  saveVersion: function Item$saveVersion(name) {
+  saveVersionAs: function Item$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -151,6 +156,7 @@ var ItemPrototype = {
    * Remove this part of the graph
    *
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
@@ -170,10 +176,21 @@ var ItemPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {ItemPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   }
 
 };

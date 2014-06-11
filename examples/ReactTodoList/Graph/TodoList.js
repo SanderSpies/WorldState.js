@@ -64,6 +64,7 @@ var TodoListPrototype = {
    *
    * @param {[{items:Array,filter:number}]} obj
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -75,6 +76,7 @@ var TodoListPrototype = {
    *
    * @param {[{items:Array,filter:number}]} val
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -85,6 +87,7 @@ var TodoListPrototype = {
    * Enable versioning
    *
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   enableVersioning: function TodoList$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -119,6 +122,7 @@ var TodoListPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   restoreVersion: function TodoList$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -130,8 +134,9 @@ var TodoListPrototype = {
    *
    * @param {string} name name of the version
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
-  saveVersion: function TodoList$saveVersion(name) {
+  saveVersionAs: function TodoList$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -152,6 +157,7 @@ var TodoListPrototype = {
    * Remove this part of the graph
    *
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
@@ -171,10 +177,21 @@ var TodoListPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {TodoListPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   },
 
   /**

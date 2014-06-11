@@ -236,7 +236,6 @@ items.insertAt(1, Item.newInstance({}));
 - Support for non object arrays
 - Modify afterChange to fire only once
 - Add addChangeListener to add multiple event listeners to objects and arrays (should work nicely with afterChange)
--
 
 
 LICENSE

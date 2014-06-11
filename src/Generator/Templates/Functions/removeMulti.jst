@@ -1,16 +1,15 @@
   /**
-   * Insert multiple items. Items with the same id property get replaced
-   * with the new version.
+   * Remove multi items at once
    *
    * @param {[{GraphInsertDoc}]} items
    * @this {{GraphName}Prototype}
    * @return {{GraphName}Prototype}
    */
-  insertMulti: function {GraphName}$insertMulti(items) {
+  removeMulti: function(items) {
     var realItems = [];
     for (var i = 0, l = items.length; i < l; i++) {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
-    this.insertMultiRaw(realItems);
+    this.__private.graph.removeMulti(realItems);
     return this;
   }

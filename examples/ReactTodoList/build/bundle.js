@@ -33,8 +33,9 @@ var TodoActions = {
       text: opt.text,
       isComplete: false
     };
-    items.insert(Item.newInstance(todoListItem));
-    items.saveVersion('Added todo item ' + opt.text);
+    items
+      .insert(Item.newInstance(todoListItem))
+      .saveVersionAs('Added todo item ' + opt.text);
   },
 
   /**
@@ -46,12 +47,14 @@ var TodoActions = {
     console.time('remove todo item');
     var item = opt.item;
     var text = item.read().text;
-    item.remove();
+    item
+      .remove()
+      .afterChange(function() {
+        console.timeEnd('remove todo item');
+      });
 
-    items.afterChange(function() {
-      console.timeEnd('remove todo item');
-      items.saveVersion('Removed todo item ' + text);
-    }, true);
+    items
+      .saveVersionAs('Removed todo item ' + text);
   },
 
   /**
@@ -71,17 +74,19 @@ var TodoActions = {
       return;
     }
 
-    item.changePropertiesTo({
-      isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
-      text: 'text' in opt ? opt.text : oldText
-    });
+    item
+      .changePropertiesTo({
+        isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
+        text: 'text' in opt ? opt.text : oldText
+      })
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+      });
 
-    items.afterChange(function() {
-      console.timeEnd('Update todo item');
-      items.saveVersion('Changed todo item from ' + oldText + ' ' +
-          (oldIsComplete ? 'checked' : 'unchecked') +
-          ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
-    }, true);
+    items
+      .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+        (oldIsComplete ? 'checked' : 'unchecked') +
+        ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
   },
 
   /**
@@ -90,7 +95,6 @@ var TodoActions = {
    */
   removeAllTodoItems: function() {
     items.remove();
-    // items.saveVersion('Removed all todo items');
   },
 
   /**
@@ -112,14 +116,15 @@ var TodoActions = {
    */
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
-    items.changePropertiesTo({
-      isComplete: opt.checked
-    });
-    items.afterChange(function() {
-      console.timeEnd('Update all todo items');
-      items.saveVersion((opt.checked ? 'Checked' : 'Unchecked') +
-          ' all todo list items');
-    }, true);
+    items
+      .changePropertiesTo({
+        isComplete: opt.checked
+      })
+      .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
+        ' all todo list items')
+      .afterChange(function() {
+        console.timeEnd('Update all todo items');
+      });
   },
 
   /**
@@ -131,7 +136,8 @@ var TodoActions = {
       filter: opt.filter
     });
 
-    todoListGraph.__private.graph.__informChangeListener();
+    // TODO: fix me
+    todoListGraph.__private.graph.__informChangeListeners();
   },
 
   /**
@@ -145,8 +151,8 @@ var TodoActions = {
     }
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
-      items.saveVersion('Removed all completed items');
-    }, true);
+      items.saveVersionAs('Removed all completed items');
+    });
   }
 
 };
@@ -168,7 +174,7 @@ var todoList = TodoList.newInstance({
   ]
 });
 todoList.items().enableVersioning();
-todoList.items().saveVersion('initial');
+todoList.items().saveVersionAs('initial');
 
 module.exports = todoList;
 },{"../Graph/TodoList":5}],3:[function(require,module,exports){
@@ -237,6 +243,7 @@ var ItemPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -248,6 +255,7 @@ var ItemPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -258,6 +266,7 @@ var ItemPrototype = {
    * Enable versioning
    *
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   enableVersioning: function Item$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -292,6 +301,7 @@ var ItemPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   restoreVersion: function Item$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -303,8 +313,9 @@ var ItemPrototype = {
    *
    * @param {string} name name of the version
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
-  saveVersion: function Item$saveVersion(name) {
+  saveVersionAs: function Item$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -325,6 +336,7 @@ var ItemPrototype = {
    * Remove this part of the graph
    *
    * @this {ItemPrototype}
+   * @return {ItemPrototype}
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
@@ -344,10 +356,21 @@ var ItemPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {ItemPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   }
 
 };
@@ -419,6 +442,7 @@ var ItemsPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -430,6 +454,7 @@ var ItemsPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -440,6 +465,7 @@ var ItemsPrototype = {
    * Enable versioning
    *
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   enableVersioning: function Items$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -474,6 +500,7 @@ var ItemsPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   restoreVersion: function Items$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -485,8 +512,9 @@ var ItemsPrototype = {
    *
    * @param {string} name name of the version
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
-  saveVersion: function Items$saveVersion(name) {
+  saveVersionAs: function Items$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -507,6 +535,7 @@ var ItemsPrototype = {
    * Remove this part of the graph
    *
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
@@ -526,10 +555,21 @@ var ItemsPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {ItemsPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   },
 
   /**
@@ -549,10 +589,23 @@ var ItemsPrototype = {
    *
    * @param {ItemPrototype} item
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
+    return this;
+  },
+
+  /**
+   * Insert an item at the given position
+   *
+   * @param {number} position
+   * @param {ItemPrototype} item
+   * @return {ItemsPrototype}
+   */
+  insertAt: function(position, item) {
+    this.__private.graph.insertAt(position, item.__private.graph.read());
     return this;
   },
 
@@ -562,6 +615,7 @@ var ItemsPrototype = {
    *
    * @param {[ItemPrototype]} items
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insertMulti: function Items$insertMulti(items) {
     var realItems = [];
@@ -578,6 +632,7 @@ var ItemsPrototype = {
    *
    * @param {[ItemPrototype]} items
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
@@ -680,6 +735,7 @@ var TodoListPrototype = {
    *
    * @param {[{items:Array,filter:number}]} obj
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -691,6 +747,7 @@ var TodoListPrototype = {
    *
    * @param {[{items:Array,filter:number}]} val
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -701,6 +758,7 @@ var TodoListPrototype = {
    * Enable versioning
    *
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   enableVersioning: function TodoList$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -735,6 +793,7 @@ var TodoListPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   restoreVersion: function TodoList$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -746,8 +805,9 @@ var TodoListPrototype = {
    *
    * @param {string} name name of the version
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
-  saveVersion: function TodoList$saveVersion(name) {
+  saveVersionAs: function TodoList$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -768,6 +828,7 @@ var TodoListPrototype = {
    * Remove this part of the graph
    *
    * @this {TodoListPrototype}
+   * @return {TodoListPrototype}
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
@@ -787,10 +848,21 @@ var TodoListPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {TodoListPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   },
 
   /**
@@ -848,9 +920,10 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
       React.DOM.div( {style:{textAlign: 'center', marginTop:20}}, 
         React.DOM.input( {type:"button", onClick:add200, value:"Add 200 items 1 by 1"}),
         React.DOM.input( {type:"button", onClick:add200AtOnce, value:"Add 200 items at once"}),
-        React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items 1 by 1"}),
-        React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"}),
-        React.DOM.input( {type:"button", onClick:removeAll, value:"Remove all items at once"})
+  React.DOM.input( {type:"button", onClick:insertAt5, value:"Insert at 5"}),React.DOM.br(null ),
+  React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items 1 by 1"}),
+  React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"}),
+  React.DOM.input( {type:"button", onClick:removeItems, value:"Remove items"})
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
@@ -874,7 +947,7 @@ window.addEventListener('hashchange', function(e){
 
 React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
 
-todoList.afterChange(function() {
+todoList.addChangeListener(function() {
  // requestAnimationFrame(function() {
     React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
       var end = window.performance.now();
@@ -889,13 +962,15 @@ todoList.afterChange(function() {
 // testing code
 var idCounter = 0;
 function add200() {
-  start = window.performance.now();
-  for (var i = 0, l = 200; i < l; i++) {
-    todoList.items().insert(Item.newInstance({
-      text: 'something' + i,
-      id: idCounter++
-    }));
-  }
+  requestAnimationFrame(function(){
+    start = window.performance.now();
+    for (var i = 0, l = 200; i < l; i++) {
+      todoList.items().insert(Item.newInstance({
+        text: 'something' + i,
+        id: idCounter++
+      }));
+    }
+  });
 }
 
 function add200AtOnce() {
@@ -930,11 +1005,18 @@ function remove200() {
   });
 }
 
-function removeAll() {
+function removeItems() {
   requestAnimationFrame(function(){
     start = window.performance.now();
     TodoActions.removeAllTodoItems();
   });
+}
+
+function insertAt5() {
+  todoList.items().insertAt(5, Item.newInstance({
+    text: 'inserted item',
+    isComplete: false
+  }));
 }
 
 
@@ -18777,8 +18859,9 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
-  __informChangeListener: ImmutableGraphObjectPrototype.__informChangeListener,
+      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+  __informChangeListeners:
+      ImmutableGraphObjectPrototype.__informChangeListeners,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -18791,7 +18874,7 @@ ImmutableGraphArray.prototype = {
     var __private = this.__private;
     var oldRefToObj = __private.refToObj;
     var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem);
+    this._insert(newItem, -1);
     setReferences(oldRefToObj, clone(oldRefToObjRef));
     removeReference(oldRefToObjRef);
     this.__changed();
@@ -18800,9 +18883,10 @@ ImmutableGraphArray.prototype = {
   /**
    *
    * @param {{}} newItem2
+   * @param {number} position
    * @private
    */
-  _insert: function(newItem2) {
+  _insert: function(newItem2, position) {
     var newItem = getReferenceTo(newItem2);
     var __private = this.__private;
     var refToArray = __private.refToObj;
@@ -18829,8 +18913,13 @@ ImmutableGraphArray.prototype = {
     }
 
     if (!alreadyInserted) {
-      var key = refToArrayRef.length;
-      refToArrayRef[key] = newItem;
+      if (position < 0) {
+        var key = refToArrayRef.length;
+        refToArrayRef[key] = newItem;
+      }
+      else {
+        refToArrayRef.splice(position, 0, newItem);
+      }
       this.length++;
     }
   },
@@ -18847,7 +18936,7 @@ ImmutableGraphArray.prototype = {
 
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
-      this._insert(newItem);
+      this._insert(newItem, -1);
     }
 
     setReferences(oldRefToObj, clone(oldRefToObjRef));
@@ -18928,16 +19017,34 @@ ImmutableGraphArray.prototype = {
       newArray[i].ref = item;
     }
     this.changeValueTo(newArray);
+  },
+
+  /**
+   * Insert an item at the given position.
+   *
+   * @param {number} position
+   * @param {ImmutableGraphObject|ImmutableGraphArray} newItem
+   */
+  insertAt: function(position, newItem) {
+    var __private = this.__private;
+    var oldRefToObj = __private.refToObj;
+    var oldRefToObjRef = oldRefToObj.ref;
+    this._insert(newItem, position);
+    setReferences(oldRefToObj, clone(oldRefToObjRef));
+    removeReference(oldRefToObjRef);
+    this.__changed();
   }
 
 };
 
 module.exports = ImmutableGraphArray;
-
+2
 },{"./ImmutableGraphObject":148,"./ImmutableGraphRegistry":149,"./ReferenceRegistry":150,"./clone":151}],148:[function(require,module,exports){
 'use strict';
 
 require('setimmediate');
+
+// var Promise = require('bluebird');
 
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
@@ -18950,7 +19057,7 @@ var resolveObject = ReferenceRegistry.resolveObject;
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 var isBusy = false;
-
+var counterAggregate = 0;
 /**
  * Bundle all child changes into one
  *
@@ -18958,6 +19065,24 @@ var isBusy = false;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
+function aggregateChangedChildrenExperimental(self, fn) {
+  var __private = self.__private;
+  var localCounterAggregate = counterAggregate;
+  __private.currentChildAggregation = (new Promise(function(resolve) {
+    localCounterAggregate = counterAggregate++;
+    isBusy = true;
+    resolve();
+  })).then(function() {
+      if (localCounterAggregate === 0) {
+        fn();
+      }
+      else if (localCounterAggregate + 1 === counterAggregate) {
+        counterAggregate = 0;
+        __private.currentChildAggregation = null;
+      }
+  });
+}
+
 function aggregateChangedChildren(self, fn) {
   var __private = self.__private;
   if (__private.currentChildAggregation) {
@@ -19016,12 +19141,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
     parents: [],
     saveHistory: false,
     historyRefs: [],
-    changeListener: null,
+    changeListeners: [],
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
-    currentChildEvent: null,
-    changeListenerOnce: false
+    currentChildEvent: null
   };
 
   this.changeReferenceTo(obj);
@@ -19041,8 +19165,7 @@ ImmutableGraphObject.prototype = {
     parents: [],
     saveHistory: false,
     historyRefs: [],
-    changeListener: null,
-    changeListenerOnce: false,
+    changeListeners: [],
     changedKeys: {},
     removeKeys: [],
     currentChildAggregation: null,
@@ -19050,16 +19173,29 @@ ImmutableGraphObject.prototype = {
   },
 
   /**
-   * Executes after the current actions, like insert and
+   * Executes once after the current actions, like insert and
    * changeValueTo, have completed
    *
    * @param {function} fn
-   * @param {boolean} once
    */
-  afterChange: function(fn, once) {
+  afterChange: function(fn) {
     var __private = this.__private;
-    __private.changeListener = fn;
-    __private.changeListenerOnce = once;
+    var changeListeners = __private.changeListeners;
+    changeListeners[changeListeners.length] = {
+      fn: fn,
+      once: true
+    };
+  },
+
+
+  addChangeListener: function(fn, context) {
+    var __private = this.__private;
+    var changeListeners = __private.changeListeners;
+    changeListeners[changeListeners.length] = {
+      fn: fn,
+      context: context,
+      once: false
+    };
   },
 
   /**
@@ -19078,10 +19214,12 @@ ImmutableGraphObject.prototype = {
   saveVersion: function(name) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
-    historyRefs[historyRefs.length] = {
-      name: name,
-      ref: clone(__private.refToObj.ref)
-    };
+    setImmediate(function() {
+      historyRefs[historyRefs.length] = {
+        name: name,
+        ref: clone(__private.refToObj.ref)
+      };
+    });
   },
 
   /**
@@ -19240,13 +19378,13 @@ ImmutableGraphObject.prototype = {
       updateChildrenParentKeys(this);
     }
 
-    this.__informChangeListener();
+    this.__informChangeListeners();
   },
 
-  __informChangeListener: function() {
+  __informChangeListeners: function() {
     var __private = this.__private;
-    var changeListener = __private.changeListener;
-    if (changeListener) {
+    var changeListeners = __private.changeListeners;
+    if (changeListeners.length) {
       if (__private.currentChildEvent) {
         clearImmediate(__private.currentChildEvent);
       }
@@ -19254,9 +19392,12 @@ ImmutableGraphObject.prototype = {
       isBusy = false;
       __private.currentChildEvent = setImmediate(function() {
         if (!isBusy) {
-          changeListener.apply(__private.changeListener);
-          if (__private.changeListenerOnce) {
-            __private.changeListener = null;
+          for (var i = 0, l = changeListeners.length; i < l; i++) {
+            var changeListener = changeListeners[i];
+            changeListener.fn.call(changeListener.context);
+            if (changeListener.once) {
+              changeListeners.splice(i, 0);
+            }
           }
         }
       });
@@ -19758,14 +19899,8 @@ var ImmutableGraphRegistry = {
 
     for (var i = 0, l = foundImos.length; i < l; i++) {
       var imo = foundImos[i];
-      var imoPrivate = imo.__private;
+      imo.__private.refToObj = null;
 
-      if (isArray(imoPrivate.refToObj.ref)) {
-        imoPrivate.refToObj.ref = [];
-      }
-      else {
-        imoPrivate.refToObj = null;
-      }
       delete _objects[id];
       delete _arrays[id];
 

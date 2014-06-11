@@ -46,8 +46,9 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
-  __informChangeListener: ImmutableGraphObjectPrototype.__informChangeListener,
+      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+  __informChangeListeners:
+      ImmutableGraphObjectPrototype.__informChangeListeners,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -60,7 +61,7 @@ ImmutableGraphArray.prototype = {
     var __private = this.__private;
     var oldRefToObj = __private.refToObj;
     var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem);
+    this._insert(newItem, -1);
     setReferences(oldRefToObj, clone(oldRefToObjRef));
     removeReference(oldRefToObjRef);
     this.__changed();
@@ -69,9 +70,10 @@ ImmutableGraphArray.prototype = {
   /**
    *
    * @param {{}} newItem2
+   * @param {number} position
    * @private
    */
-  _insert: function(newItem2) {
+  _insert: function(newItem2, position) {
     var newItem = getReferenceTo(newItem2);
     var __private = this.__private;
     var refToArray = __private.refToObj;
@@ -98,8 +100,13 @@ ImmutableGraphArray.prototype = {
     }
 
     if (!alreadyInserted) {
-      var key = refToArrayRef.length;
-      refToArrayRef[key] = newItem;
+      if (position < 0) {
+        var key = refToArrayRef.length;
+        refToArrayRef[key] = newItem;
+      }
+      else {
+        refToArrayRef.splice(position, 0, newItem);
+      }
       this.length++;
     }
   },
@@ -116,7 +123,7 @@ ImmutableGraphArray.prototype = {
 
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
-      this._insert(newItem);
+      this._insert(newItem, -1);
     }
 
     setReferences(oldRefToObj, clone(oldRefToObjRef));
@@ -197,6 +204,36 @@ ImmutableGraphArray.prototype = {
       newArray[i].ref = item;
     }
     this.changeValueTo(newArray);
+  },
+
+  /**
+   * Insert an item at the given position.
+   *
+   * @param {number} position
+   * @param {ImmutableGraphObject|ImmutableGraphArray} newItem
+   */
+  insertAt: function(position, newItem) {
+    var __private = this.__private;
+    var oldRefToObj = __private.refToObj;
+    var oldRefToObjRef = oldRefToObj.ref;
+    this._insert(newItem, position);
+    setReferences(oldRefToObj, clone(oldRefToObjRef));
+    removeReference(oldRefToObjRef);
+    this.__changed();
+  },
+
+  removeMulti: function(items) {
+    // TODO
+    /*var __private = this.__private;
+    var refToObj = __private.refToObj;
+    var refToObjRef = refToObj.ref;
+    removeReference(refToObjRef);
+    var parents = __private.parents;
+    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+    if (isArray(refToObjRef)) {
+      refToObj.ref = [];
+    }
+    this.__changed({parents: parents});*/
   }
 
 };

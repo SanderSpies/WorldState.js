@@ -32,8 +32,9 @@ var TodoActions = {
       text: opt.text,
       isComplete: false
     };
-    items.insert(Item.newInstance(todoListItem));
-    items.saveVersion('Added todo item ' + opt.text);
+    items
+      .insert(Item.newInstance(todoListItem))
+      .saveVersionAs('Added todo item ' + opt.text);
   },
 
   /**
@@ -45,12 +46,14 @@ var TodoActions = {
     console.time('remove todo item');
     var item = opt.item;
     var text = item.read().text;
-    item.remove();
+    item
+      .remove()
+      .afterChange(function() {
+        console.timeEnd('remove todo item');
+      });
 
-    items.afterChange(function() {
-      console.timeEnd('remove todo item');
-      items.saveVersion('Removed todo item ' + text);
-    }, true);
+    items
+      .saveVersionAs('Removed todo item ' + text);
   },
 
   /**
@@ -70,17 +73,19 @@ var TodoActions = {
       return;
     }
 
-    item.changePropertiesTo({
-      isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
-      text: 'text' in opt ? opt.text : oldText
-    });
+    item
+      .changePropertiesTo({
+        isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
+        text: 'text' in opt ? opt.text : oldText
+      })
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+      });
 
-    items.afterChange(function() {
-      console.timeEnd('Update todo item');
-      items.saveVersion('Changed todo item from ' + oldText + ' ' +
-          (oldIsComplete ? 'checked' : 'unchecked') +
-          ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
-    }, true);
+    items
+      .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+        (oldIsComplete ? 'checked' : 'unchecked') +
+        ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
   },
 
   /**
@@ -89,7 +94,6 @@ var TodoActions = {
    */
   removeAllTodoItems: function() {
     items.remove();
-    // items.saveVersion('Removed all todo items');
   },
 
   /**
@@ -111,15 +115,15 @@ var TodoActions = {
    */
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
-    items.changePropertiesTo({
-      isComplete: opt.checked
-    });
-
-    items.afterChange(function() {
-      console.timeEnd('Update all todo items');
-      items.saveVersion((opt.checked ? 'Checked' : 'Unchecked') +
-          ' all todo list items');
-    }, true);
+    items
+      .changePropertiesTo({
+        isComplete: opt.checked
+      })
+      .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
+        ' all todo list items')
+      .afterChange(function() {
+        console.timeEnd('Update all todo items');
+      });
   },
 
   /**
@@ -131,7 +135,8 @@ var TodoActions = {
       filter: opt.filter
     });
 
-    todoListGraph.__private.graph.__informChangeListener();
+    // TODO: fix me
+    todoListGraph.__private.graph.__informChangeListeners();
   },
 
   /**
@@ -145,8 +150,8 @@ var TodoActions = {
     }
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
-      items.saveVersion('Removed all completed items');
-    }, true);
+      items.saveVersionAs('Removed all completed items');
+    });
   }
 
 };

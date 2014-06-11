@@ -1,0 +1,9 @@
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
+  }

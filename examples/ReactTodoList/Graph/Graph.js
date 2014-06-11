@@ -12,6 +12,6 @@ var todoList = TodoList.newInstance({
   ]
 });
 todoList.items().enableVersioning();
-todoList.items().saveVersion('initial');
+todoList.items().saveVersionAs('initial');
 
 module.exports = todoList;

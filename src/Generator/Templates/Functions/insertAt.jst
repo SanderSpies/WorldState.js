@@ -1,0 +1,11 @@
+  /**
+   * Insert an item at the given position
+   *
+   * @param {number} position
+   * @param {{GraphInsertDoc}} item
+   * @return {{GraphName}Prototype}
+   */
+  insertAt: function(position, item) {
+    this.__private.graph.insertAt(position, item.__private.graph.read());
+    return this;
+  }

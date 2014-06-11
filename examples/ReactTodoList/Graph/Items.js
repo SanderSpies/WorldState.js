@@ -62,6 +62,7 @@ var ItemsPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
@@ -73,6 +74,7 @@ var ItemsPrototype = {
    *
    * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
@@ -83,6 +85,7 @@ var ItemsPrototype = {
    * Enable versioning
    *
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   enableVersioning: function Items$enableVersioning() {
     this.__private.graph.enableVersioning();
@@ -117,6 +120,7 @@ var ItemsPrototype = {
    *
    * @param {{name:string, ref:object}} version version to restore
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   restoreVersion: function Items$restoreVersion(version) {
     this.__private.graph.restoreVersion(version);
@@ -128,8 +132,9 @@ var ItemsPrototype = {
    *
    * @param {string} name name of the version
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
-  saveVersion: function Items$saveVersion(name) {
+  saveVersionAs: function Items$saveVersionAs(name) {
     this.__private.graph.saveVersion(name);
     return this;
   },
@@ -150,6 +155,7 @@ var ItemsPrototype = {
    * Remove this part of the graph
    *
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
@@ -169,10 +175,21 @@ var ItemsPrototype = {
    * Change one or more properties at once
    *
    * @param {{}} newProperties
+   * @return {ItemsPrototype}
    */
   changePropertiesTo: function(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   * Add a change listener
+   *
+   * @param {function} fn
+   * @param {{}} context
+   */
+  addChangeListener: function(fn, context) {
+    this.__private.graph.addChangeListener(fn, context);
   },
 
   /**
@@ -192,10 +209,23 @@ var ItemsPrototype = {
    *
    * @param {ItemPrototype} item
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
+    return this;
+  },
+
+  /**
+   * Insert an item at the given position
+   *
+   * @param {number} position
+   * @param {ItemPrototype} item
+   * @return {ItemsPrototype}
+   */
+  insertAt: function(position, item) {
+    this.__private.graph.insertAt(position, item.__private.graph.read());
     return this;
   },
 
@@ -205,6 +235,7 @@ var ItemsPrototype = {
    *
    * @param {[ItemPrototype]} items
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insertMulti: function Items$insertMulti(items) {
     var realItems = [];
@@ -221,6 +252,7 @@ var ItemsPrototype = {
    *
    * @param {[ItemPrototype]} items
    * @this {ItemsPrototype}
+   * @return {ItemsPrototype}
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
