@@ -168,16 +168,23 @@ ImmutableGraphObject.prototype = {
    * Save current version
    *
    * @param {string} name
+   * @param {boolean} delayed
    */
-  saveVersion: function(name) {
+  saveVersion: function(name, delayed) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
-    setImmediate(function() {
+    function setHistory() {
       historyRefs[historyRefs.length] = {
         name: name,
         ref: clone(__private.refToObj.ref)
       };
-    });
+    }
+    if (!delayed) {
+      setHistory();
+    }
+    else {
+      setImmediate(setHistory());
+    }
   },
 
   /**
@@ -354,7 +361,7 @@ ImmutableGraphObject.prototype = {
             var changeListener = changeListeners[i];
             changeListener.fn.call(changeListener.context);
             if (changeListener.once) {
-              changeListeners.splice(i, 0);
+              changeListeners.splice(i, 1);
             }
           }
         }
