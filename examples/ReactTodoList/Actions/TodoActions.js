@@ -116,7 +116,7 @@ var TodoActions = {
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
     items
-      .changePropertiesTo({
+      .changeChildrenPropertiesTo({
         isComplete: opt.checked
       })
       .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +

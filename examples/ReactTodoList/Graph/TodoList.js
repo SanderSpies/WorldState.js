@@ -10,7 +10,6 @@ var ImmutableGraphRegistry =
 /* @type Items */
 var Items = require('./Items');
 
-
 /**
  * A factory for {TodoList}
  *
@@ -40,7 +39,6 @@ var TodoListFactory = {
     };
     TodoListClass.prototype = TodoListPrototype;
     var instance = new TodoListClass(obj, parent, parentKey);
-
     return instance;
   }
 };
@@ -130,14 +128,15 @@ var TodoListPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {TodoListPrototype}
    * @return {TodoListPrototype}
    */
-  saveVersionAs: function TodoList$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function TodoList$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -169,7 +168,7 @@ var TodoListPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function TodoList$generatedId() {
     return this.__private.graph.generatedId();
   },
 
@@ -179,7 +178,7 @@ var TodoListPrototype = {
    * @param {{}} newProperties
    * @return {TodoListPrototype}
    */
-  changePropertiesTo: function(newProperties) {
+  changePropertiesTo: function TodoList$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
   },
@@ -190,7 +189,7 @@ var TodoListPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function TodoList$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   },
 

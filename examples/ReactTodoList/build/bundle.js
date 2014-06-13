@@ -117,7 +117,7 @@ var TodoActions = {
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
     items
-      .changePropertiesTo({
+      .changeChildrenPropertiesTo({
         isComplete: opt.checked
       })
       .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
@@ -189,7 +189,6 @@ var ImmutableGraphRegistry =
 
 
 
-
 /**
  * A factory for {Item}
  *
@@ -219,7 +218,6 @@ var ItemFactory = {
     };
     ItemClass.prototype = ItemPrototype;
     var instance = new ItemClass(obj, parent, parentKey);
-
     return instance;
   }
 };
@@ -309,14 +307,15 @@ var ItemPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
-  saveVersionAs: function Item$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function Item$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -348,7 +347,7 @@ var ItemPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function Item$generatedId() {
     return this.__private.graph.generatedId();
   },
 
@@ -358,7 +357,7 @@ var ItemPrototype = {
    * @param {{}} newProperties
    * @return {ItemPrototype}
    */
-  changePropertiesTo: function(newProperties) {
+  changePropertiesTo: function Item$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
   },
@@ -369,7 +368,7 @@ var ItemPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function Item$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   }
 
@@ -508,14 +507,15 @@ var ItemsPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
-  saveVersionAs: function Items$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function Items$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -547,19 +547,8 @@ var ItemsPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function Items$generatedId() {
     return this.__private.graph.generatedId();
-  },
-
-  /**
-   * Change one or more properties at once
-   *
-   * @param {{}} newProperties
-   * @return {ItemsPrototype}
-   */
-  changePropertiesTo: function(newProperties) {
-    this.__private.graph.changePropertiesTo(newProperties);
-    return this;
   },
 
   /**
@@ -568,7 +557,7 @@ var ItemsPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function Items$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   },
 
@@ -581,7 +570,8 @@ var ItemsPrototype = {
    */
   at: function Items$at(position) {
     var item = this.__private.graph.at(position);
-    return Item.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    var instance = Item.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    return instance;
   },
 
   /**
@@ -604,7 +594,7 @@ var ItemsPrototype = {
    * @param {ItemPrototype} item
    * @return {ItemsPrototype}
    */
-  insertAt: function(position, item) {
+  insertAt: function Items$insertAt(position, item) {
     this.__private.graph.insertAt(position, item.__private.graph.read());
     return this;
   },
@@ -662,6 +652,17 @@ var ItemsPrototype = {
    */
   length: function Items$length() {
     return this.__private.graph.length;
+  },
+
+  /**
+   * Change one or more child properties at once
+   *
+   * @param {{}} newProperties
+   * @return {ItemsPrototype}
+   */
+  changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   }
 
 };
@@ -680,7 +681,6 @@ var ImmutableGraphRegistry =
 
 /* @type Items */
 var Items = require('./Items');
-
 
 /**
  * A factory for {TodoList}
@@ -711,7 +711,6 @@ var TodoListFactory = {
     };
     TodoListClass.prototype = TodoListPrototype;
     var instance = new TodoListClass(obj, parent, parentKey);
-
     return instance;
   }
 };
@@ -801,14 +800,15 @@ var TodoListPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {TodoListPrototype}
    * @return {TodoListPrototype}
    */
-  saveVersionAs: function TodoList$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function TodoList$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -840,7 +840,7 @@ var TodoListPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function TodoList$generatedId() {
     return this.__private.graph.generatedId();
   },
 
@@ -850,7 +850,7 @@ var TodoListPrototype = {
    * @param {{}} newProperties
    * @return {TodoListPrototype}
    */
-  changePropertiesTo: function(newProperties) {
+  changePropertiesTo: function TodoList$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
   },
@@ -861,7 +861,7 @@ var TodoListPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function TodoList$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   },
 
@@ -891,6 +891,7 @@ module.exports = TodoListFactory;
 'use strict';
 
 var React = require('react');
+
 var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
 /**
@@ -927,8 +928,7 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
-      ),
-      UndoRedoListComponent( {items:todoList.items()} )
+      )
     );
   }
 });
@@ -945,31 +945,56 @@ window.addEventListener('hashchange', function(e){
   TodoActions.setFilter({filter: filter});
 });
 
+
 React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
+var renderStack = [];
+var isRenderBusy = false;
+function render(fn) {
+  if (renderStack.length && !isRenderBusy) {
+    isRenderBusy = true;
+    requestAnimationFrame(function(){
+      renderStack.shift().call();
+      isRenderBusy = false;
+      render();
+    });
+  }
+  else if (fn) {
+    renderStack.push(fn);
+    if (!isRenderBusy) {
+      render();
+    }
+  }
+}
 
 todoList.addChangeListener(function() {
- // requestAnimationFrame(function() {
+  render(function(){
     React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
       var end = window.performance.now();
       var duration = end - start;
-
-      console.log('Duration:', duration);
+      isRenderBusy = false;
     });
- // });
+  });
 });
+
+
 
 
 // testing code
 var idCounter = 0;
 function add200() {
-  requestAnimationFrame(function(){
     start = window.performance.now();
     for (var i = 0, l = 200; i < l; i++) {
       todoList.items().insert(Item.newInstance({
-        text: 'something' + i,
+        text: 'foo',
         id: idCounter++
       }));
     }
+    todoList.afterChange(function(){
+      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
+      var end = window.performance.now();
+      var duration = end - start;
+      console.log('Duration:', duration);
+    });
   });
 }
 
@@ -996,13 +1021,11 @@ function change200() {
 }
 
 function remove200() {
-  requestAnimationFrame(function(){
-    start = window.performance.now();
-    for (var i = 0, l = 200; i < l; l--) {
-      var item = todoList.items().at(l - 1);
-      item.remove();
-    }
-  });
+  start = window.performance.now();
+  for (var i = 0, l = 200; i < l; l--) {
+    var item = todoList.items().at(l - 1);
+    item.remove();
+  }
 }
 
 function removeItems() {
@@ -1129,6 +1152,8 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
 
   mixins: [WorldStateMixin],
 
+
+
   render: function() {
     var props = this.props;
     var i = props.item.read();
@@ -1149,10 +1174,6 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
       React.DOM.input( {className:"edit", ref:"input", defaultValue:i.text, onKeyPress:this.onKeyPress, onBlur:this.onBlur})
     );
     return item;
-  },
-
-  componentDidMount: function() {
-
   },
 
   onDeleteClick: function() {
@@ -18855,6 +18876,7 @@ ImmutableGraphArray.prototype = {
   changeReferenceTo: ImmutableGraphObjectPrototype.changeReferenceTo,
   changeValueTo: ImmutableGraphObjectPrototype.changeValueTo,
   wrapped: ImmutableGraphObjectPrototype.wrapped,
+  generatedId: ImmutableGraphObjectPrototype.generatedId,
   read: ImmutableGraphObjectPrototype.read,
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
@@ -19033,18 +19055,34 @@ ImmutableGraphArray.prototype = {
     setReferences(oldRefToObj, clone(oldRefToObjRef));
     removeReference(oldRefToObjRef);
     this.__changed();
+  },
+
+  removeMulti: function(items) {
+    // TODO
+    /*var __private = this.__private;
+    var refToObj = __private.refToObj;
+    var refToObjRef = refToObj.ref;
+    removeReference(refToObjRef);
+    var parents = __private.parents;
+    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+    if (isArray(refToObjRef)) {
+      refToObj.ref = [];
+    }
+    this.__changed({parents: parents});*/
+  },
+
+  getPositionFor: function() {
+    // todo
   }
 
 };
 
 module.exports = ImmutableGraphArray;
-2
+
 },{"./ImmutableGraphObject":148,"./ImmutableGraphRegistry":149,"./ReferenceRegistry":150,"./clone":151}],148:[function(require,module,exports){
 'use strict';
 
 require('setimmediate');
-
-// var Promise = require('bluebird');
 
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
@@ -19058,6 +19096,7 @@ var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 var isBusy = false;
 var counterAggregate = 0;
+
 /**
  * Bundle all child changes into one
  *
@@ -19065,31 +19104,46 @@ var counterAggregate = 0;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
-function aggregateChangedChildrenExperimental(self, fn) {
+function aggregrateChangedChildrenWithPromises(self, fn) {
   var __private = self.__private;
   var localCounterAggregate = counterAggregate;
   __private.currentChildAggregation = (new Promise(function(resolve) {
     localCounterAggregate = counterAggregate++;
     isBusy = true;
     resolve();
-  })).then(function() {
+  }))
+    .then(function() {
       if (localCounterAggregate === 0) {
-        fn();
+        (new Promise(function(resolve){
+          resolve();
+        })).then(function(){
+            counterAggregate = 0;
+            __private.currentChildAggregation = null;
+            isBusy = false;
+            fn.call(self);
+          });
       }
-      else if (localCounterAggregate + 1 === counterAggregate) {
-        counterAggregate = 0;
-        __private.currentChildAggregation = null;
-      }
-  });
+    })
+    .catch(function(e) {
+      console.log('Should not happen (please report to https://github.com/SanderSpies/WorldState.js/issues):', e);
+    });
 }
 
-function aggregateChangedChildren(self, fn) {
+function aggregrateChangedChildrenWithSetImmediate(self, fn) {
   var __private = self.__private;
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
   isBusy = true;
   __private.currentChildAggregation = setImmediate(fn);
+}
+
+var aggregateChangedChildren;
+if (typeof window !== 'undefined' && 'Promise' in window) {
+  aggregateChangedChildren = aggregrateChangedChildrenWithPromises;
+}
+else {
+  aggregateChangedChildren = aggregrateChangedChildrenWithSetImmediate;
 }
 
 
@@ -19210,16 +19264,23 @@ ImmutableGraphObject.prototype = {
    * Save current version
    *
    * @param {string} name
+   * @param {boolean} delayed
    */
-  saveVersion: function(name) {
+  saveVersion: function(name, delayed) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
-    setImmediate(function() {
+    function setHistory() {
       historyRefs[historyRefs.length] = {
         name: name,
         ref: clone(__private.refToObj.ref)
       };
-    });
+    }
+    if (!delayed) {
+      setHistory();
+    }
+    else {
+      setImmediate(setHistory());
+    }
   },
 
   /**
@@ -19279,7 +19340,8 @@ ImmutableGraphObject.prototype = {
    */
   changeValueTo: function(newValue) {
     var __private = this.__private;
-    var oldRef = __private.refToObj.ref;
+    var oldRefToObj = __private.refToObj;
+    var oldRef = oldRefToObj.ref;
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
     removeReference(oldRef);
@@ -19384,6 +19446,7 @@ ImmutableGraphObject.prototype = {
   __informChangeListeners: function() {
     var __private = this.__private;
     var changeListeners = __private.changeListeners;
+
     if (changeListeners.length) {
       if (__private.currentChildEvent) {
         clearImmediate(__private.currentChildEvent);
@@ -19396,7 +19459,7 @@ ImmutableGraphObject.prototype = {
             var changeListener = changeListeners[i];
             changeListener.fn.call(changeListener.context);
             if (changeListener.once) {
-              changeListeners.splice(i, 0);
+              changeListeners.splice(i, 1);
             }
           }
         }
@@ -19447,6 +19510,7 @@ ImmutableGraphObject.prototype = {
     if (isArray(refToObjRef)) {
       refToObj.ref = [];
     }
+
     this.__changed({parents: parents});
   },
 

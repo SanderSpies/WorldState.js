@@ -7,5 +7,6 @@
    */
   at: function {GraphName}$at(position) {
     var item = this.__private.graph.at(position);
-    return {SubGraphName}.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    var instance = {SubGraphName}.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    return instance;
   }

@@ -9,7 +9,6 @@ var ImmutableGraphRegistry =
 
 
 
-
 /**
  * A factory for {Item}
  *
@@ -39,7 +38,6 @@ var ItemFactory = {
     };
     ItemClass.prototype = ItemPrototype;
     var instance = new ItemClass(obj, parent, parentKey);
-
     return instance;
   }
 };
@@ -129,14 +127,15 @@ var ItemPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
-  saveVersionAs: function Item$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function Item$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -168,7 +167,7 @@ var ItemPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function Item$generatedId() {
     return this.__private.graph.generatedId();
   },
 
@@ -178,7 +177,7 @@ var ItemPrototype = {
    * @param {{}} newProperties
    * @return {ItemPrototype}
    */
-  changePropertiesTo: function(newProperties) {
+  changePropertiesTo: function Item$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
   },
@@ -189,7 +188,7 @@ var ItemPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function Item$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   }
 

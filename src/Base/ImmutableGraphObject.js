@@ -2,8 +2,6 @@
 
 require('setimmediate');
 
-// var Promise = require('bluebird');
-
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
 
@@ -16,6 +14,7 @@ var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 var isBusy = false;
 var counterAggregate = 0;
+
 /**
  * Bundle all child changes into one
  *
@@ -23,31 +22,46 @@ var counterAggregate = 0;
  * @param {function} fn
  * @this {ImmutableGraphObject}
  */
-function aggregateChangedChildrenExperimental(self, fn) {
+function aggregrateChangedChildrenWithPromises(self, fn) {
   var __private = self.__private;
   var localCounterAggregate = counterAggregate;
   __private.currentChildAggregation = (new Promise(function(resolve) {
     localCounterAggregate = counterAggregate++;
     isBusy = true;
     resolve();
-  })).then(function() {
+  }))
+    .then(function() {
       if (localCounterAggregate === 0) {
-        fn();
+        (new Promise(function(resolve){
+          resolve();
+        })).then(function(){
+            counterAggregate = 0;
+            __private.currentChildAggregation = null;
+            isBusy = false;
+            fn.call(self);
+          });
       }
-      else if (localCounterAggregate + 1 === counterAggregate) {
-        counterAggregate = 0;
-        __private.currentChildAggregation = null;
-      }
-  });
+    })
+    .catch(function(e) {
+      console.log('Should not happen (please report to https://github.com/SanderSpies/WorldState.js/issues):', e);
+    });
 }
 
-function aggregateChangedChildren(self, fn) {
+function aggregrateChangedChildrenWithSetImmediate(self, fn) {
   var __private = self.__private;
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
   isBusy = true;
   __private.currentChildAggregation = setImmediate(fn);
+}
+
+var aggregateChangedChildren;
+if (typeof window !== 'undefined' && 'Promise' in window) {
+  aggregateChangedChildren = aggregrateChangedChildrenWithPromises;
+}
+else {
+  aggregateChangedChildren = aggregrateChangedChildrenWithSetImmediate;
 }
 
 
@@ -244,7 +258,8 @@ ImmutableGraphObject.prototype = {
    */
   changeValueTo: function(newValue) {
     var __private = this.__private;
-    var oldRef = __private.refToObj.ref;
+    var oldRefToObj = __private.refToObj;
+    var oldRef = oldRefToObj.ref;
     var newRefToObj = clone(resolveObject(newValue));
     setReferences(__private.refToObj, newRefToObj.ref);
     removeReference(oldRef);
@@ -349,6 +364,7 @@ ImmutableGraphObject.prototype = {
   __informChangeListeners: function() {
     var __private = this.__private;
     var changeListeners = __private.changeListeners;
+
     if (changeListeners.length) {
       if (__private.currentChildEvent) {
         clearImmediate(__private.currentChildEvent);
@@ -412,6 +428,7 @@ ImmutableGraphObject.prototype = {
     if (isArray(refToObjRef)) {
       refToObj.ref = [];
     }
+
     this.__changed({parents: parents});
   },
 

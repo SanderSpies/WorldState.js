@@ -12,6 +12,8 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
 
   mixins: [WorldStateMixin],
 
+
+
   render: function() {
     var props = this.props;
     var i = props.item.read();
@@ -32,10 +34,6 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
       React.DOM.input( {className:"edit", ref:"input", defaultValue:i.text, onKeyPress:this.onKeyPress, onBlur:this.onBlur})
     );
     return item;
-  },
-
-  componentDidMount: function() {
-
   },
 
   onDeleteClick: function() {

@@ -8,7 +8,7 @@ ROUGH EDGES
 
 Introduction
 ---
-This generator turns a JSON object model into an immutable graph.
+This generator turns a JSON object model into an easy to use immutable graph.
 
 You can use this immutable graph as input for rendering your interface from the top node, and efficiently decide what
 needs to happen or not through strict equal checks.
@@ -202,9 +202,6 @@ item.changePropertiesTo({
 ```
 can also be used upon an array to change all the properties of the children.
 
-Todo for 0.1.1
----
-
 Chaining
 ```
 items
@@ -217,6 +214,23 @@ items
   });
 ```
 
+
+Insert at:
+```
+items.insertAt(1, Item.newInstance({}));
+```
+
+AfterChange now only fires once
+
+Added addChangeListener to add multiple event listeners to objects and arrays
+
+- items.getPositionFor({})
+
+
+Todo for 0.1.1
+---
+
+
 Change .where to give back an immutable array, so chaining also works here:
 ```
 items
@@ -228,15 +242,8 @@ items
   });
 ```
 
-Insert at:
-```
-items.insertAt(1, Item.newInstance({}));
-```
-- items.getPositionFor({})
-- Support for non object arrays
-- Modify afterChange to fire only once
-- Add addChangeListener to add multiple event listeners to objects and arrays (should work nicely with afterChange)
-
+- Support for non object arrays (in progress)
+- Advanced graph capabilities
 
 LICENSE
 ---

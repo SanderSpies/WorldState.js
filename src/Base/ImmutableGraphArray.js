@@ -42,6 +42,7 @@ ImmutableGraphArray.prototype = {
   changeReferenceTo: ImmutableGraphObjectPrototype.changeReferenceTo,
   changeValueTo: ImmutableGraphObjectPrototype.changeValueTo,
   wrapped: ImmutableGraphObjectPrototype.wrapped,
+  generatedId: ImmutableGraphObjectPrototype.generatedId,
   read: ImmutableGraphObjectPrototype.read,
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
@@ -234,6 +235,10 @@ ImmutableGraphArray.prototype = {
       refToObj.ref = [];
     }
     this.__changed({parents: parents});*/
+  },
+
+  getPositionFor: function() {
+    // todo
   }
 
 };

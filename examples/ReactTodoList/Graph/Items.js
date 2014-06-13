@@ -128,14 +128,15 @@ var ItemsPrototype = {
   },
 
   /**
-   * Save a version (versioning must be enabled)
+   * Save a version (versioning must be enabled).
    *
    * @param {string} name name of the version
+   * @param {boolean} delayedExecution
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
-  saveVersionAs: function Items$saveVersionAs(name) {
-    this.__private.graph.saveVersion(name);
+  saveVersionAs: function Items$saveVersionAs(name, delayedExecution) {
+    this.__private.graph.saveVersion(name, delayedExecution);
     return this;
   },
 
@@ -167,19 +168,8 @@ var ItemsPrototype = {
    *
    * @return {number}
    */
-  generatedId: function() {
+  generatedId: function Items$generatedId() {
     return this.__private.graph.generatedId();
-  },
-
-  /**
-   * Change one or more properties at once
-   *
-   * @param {{}} newProperties
-   * @return {ItemsPrototype}
-   */
-  changePropertiesTo: function(newProperties) {
-    this.__private.graph.changePropertiesTo(newProperties);
-    return this;
   },
 
   /**
@@ -188,7 +178,7 @@ var ItemsPrototype = {
    * @param {function} fn
    * @param {{}} context
    */
-  addChangeListener: function(fn, context) {
+  addChangeListener: function Items$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
   },
 
@@ -201,7 +191,8 @@ var ItemsPrototype = {
    */
   at: function Items$at(position) {
     var item = this.__private.graph.at(position);
-    return Item.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    var instance = Item.newInstance(item.__private.refToObj.ref, this.__private.graph, position);
+    return instance;
   },
 
   /**
@@ -224,7 +215,7 @@ var ItemsPrototype = {
    * @param {ItemPrototype} item
    * @return {ItemsPrototype}
    */
-  insertAt: function(position, item) {
+  insertAt: function Items$insertAt(position, item) {
     this.__private.graph.insertAt(position, item.__private.graph.read());
     return this;
   },
@@ -282,6 +273,17 @@ var ItemsPrototype = {
    */
   length: function Items$length() {
     return this.__private.graph.length;
+  },
+
+  /**
+   * Change one or more child properties at once
+   *
+   * @param {{}} newProperties
+   * @return {ItemsPrototype}
+   */
+  changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
+    this.__private.graph.changePropertiesTo(newProperties);
+    return this;
   }
 
 };

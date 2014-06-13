@@ -26,8 +26,11 @@ var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
   TemplateConstants.INSERT_MULTI_FUNCTION,
   TemplateConstants.INSERT_MULTI_RAW_FUNCTION,
   TemplateConstants.WHERE_FUNCTION,
-  TemplateConstants.LENGTH_FUNCTION
+  TemplateConstants.LENGTH_FUNCTION,
+  TemplateConstants.CHANGE_CHILDREN_PROPERTIES_TO
 ]);
+
+ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.CHANGE_PROPERTIES_TO), 1);
 
 var FileStructureBuilder = {
 

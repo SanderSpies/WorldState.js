@@ -4,6 +4,7 @@
 'use strict';
 
 var React = require('react');
+
 var WorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
 
 /**
@@ -40,8 +41,7 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
-      ),
-      UndoRedoListComponent( {items:todoList.items()} )
+      )
     );
   }
 });
@@ -58,31 +58,56 @@ window.addEventListener('hashchange', function(e){
   TodoActions.setFilter({filter: filter});
 });
 
+
 React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'));
+var renderStack = [];
+var isRenderBusy = false;
+function render(fn) {
+  if (renderStack.length && !isRenderBusy) {
+    isRenderBusy = true;
+    requestAnimationFrame(function(){
+      renderStack.shift().call();
+      isRenderBusy = false;
+      render();
+    });
+  }
+  else if (fn) {
+    renderStack.push(fn);
+    if (!isRenderBusy) {
+      render();
+    }
+  }
+}
 
 todoList.addChangeListener(function() {
- // requestAnimationFrame(function() {
+  render(function(){
     React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
       var end = window.performance.now();
       var duration = end - start;
-
-      console.log('Duration:', duration);
+      isRenderBusy = false;
     });
- // });
+  });
 });
+
+
 
 
 // testing code
 var idCounter = 0;
 function add200() {
-  requestAnimationFrame(function(){
     start = window.performance.now();
     for (var i = 0, l = 200; i < l; i++) {
       todoList.items().insert(Item.newInstance({
-        text: 'something' + i,
+        text: 'foo',
         id: idCounter++
       }));
     }
+    todoList.afterChange(function(){
+      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
+      var end = window.performance.now();
+      var duration = end - start;
+      console.log('Duration:', duration);
+    });
   });
 }
 
@@ -109,13 +134,11 @@ function change200() {
 }
 
 function remove200() {
-  requestAnimationFrame(function(){
-    start = window.performance.now();
-    for (var i = 0, l = 200; i < l; l--) {
-      var item = todoList.items().at(l - 1);
-      item.remove();
-    }
-  });
+  start = window.performance.now();
+  for (var i = 0, l = 200; i < l; l--) {
+    var item = todoList.items().at(l - 1);
+    item.remove();
+  }
 }
 
 function removeItems() {
