@@ -147,7 +147,7 @@ items.orderBy([/*TODO*/]);
 Grouping items in an array:
 ```
 items.groupBy([/*TODO*/]);
-'''
+```
 
 Inserting a value into an array:
 ```
