@@ -5,7 +5,6 @@ var _objectReferences = [];
 var isArray = Array.isArray;
 var uniqueIdCounter = 1;
 
-
 /**
  * Keeps track of references to objects
  *
@@ -87,10 +86,18 @@ var ReferenceRegistry = {
   /**
    * Resolve an object and it's inner objects to use reference objects
    *
-   * @param {{}} obj
+   * @param {{__worldStateUniqueId}} obj
    * @return {{ref: {}}}
    */
-  resolveObject: function(obj) {
+  resolveObject: function(obj, currentChain) {
+    var stop = false;
+    if (!currentChain) {
+      currentChain = {};
+    }
+    if (obj.__worldStateUniqueId) {
+      currentChain[obj.__worldStateUniqueId] = true;
+    }
+
     var val;
     var i;
     var l;
@@ -103,7 +110,7 @@ var ReferenceRegistry = {
           newArray[i] = val;
         }
         else {
-          newArray[i] = ReferenceRegistry.resolveObject(obj[i]);
+          newArray[i] = ReferenceRegistry.resolveObject(obj[i], currentChain);
         }
       }
       return refToArray;
@@ -116,7 +123,12 @@ var ReferenceRegistry = {
         var key = keys[i];
         val = obj[key];
         if (typeof val === 'object' && !val.ref) {
-          newObj[key] = ReferenceRegistry.resolveObject(val);
+          if (currentChain[obj.__worldStateUniqueId]) {
+            newObj[key] = ReferenceRegistry.getReferenceTo(val);
+          }
+          else {
+            newObj[key] = ReferenceRegistry.resolveObject(val, currentChain);
+          }
         }
       }
       return refToObj;

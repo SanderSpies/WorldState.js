@@ -4,6 +4,7 @@ require('setimmediate');
 
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
+var EdgeRegistry = require('./EdgeRegistry');
 
 var clone = require('./clone');
 var removeReference = ReferenceRegistry.removeReference;
@@ -14,6 +15,9 @@ var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
 var isBusy = false;
 var counterAggregate = 0;
+var waitingPromise = null;
+
+var alreadyUpdatedImos = {};
 
 /**
  * Bundle all child changes into one
@@ -25,6 +29,7 @@ var counterAggregate = 0;
 function aggregrateChangedChildrenWithPromises(self, fn) {
   var __private = self.__private;
   var localCounterAggregate = counterAggregate;
+
   __private.currentChildAggregation = (new Promise(function(resolve) {
     localCounterAggregate = counterAggregate++;
     isBusy = true;
@@ -32,14 +37,11 @@ function aggregrateChangedChildrenWithPromises(self, fn) {
   }))
     .then(function() {
       if (localCounterAggregate === 0) {
-        (new Promise(function(resolve){
-          resolve();
-        })).then(function(){
-            counterAggregate = 0;
-            __private.currentChildAggregation = null;
-            isBusy = false;
-            fn.call(self);
-          });
+        fn.call(self);
+      } else if (waitingPromise) {
+        waitingPromise.call(self);
+        waitingPromise = null;
+        alreadyUpdatedImos = {};
       }
     })
     .catch(function(e) {
@@ -309,12 +311,19 @@ ImmutableGraphObject.prototype = {
     var __private = this.__private;
     var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
+    var noUpdate = refToObj && refToObj.ref &&
+        !!alreadyUpdatedImos[refToObj.ref.__worldStateUniqueId];
+
+    if (refToObj && refToObj.ref) {
+      alreadyUpdatedImos[refToObj.ref.__worldStateUniqueId] = true;
+    }
+
     var i;
     var l;
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
-        parent.parent.__childChanged(parent.parentKey, refToObj);
+        parent.parent.__childChanged(parent.parentKey, refToObj, noUpdate);
       }
     }
   },
@@ -371,17 +380,35 @@ ImmutableGraphObject.prototype = {
       }
 
       isBusy = false;
-      __private.currentChildEvent = setImmediate(function() {
-        if (!isBusy) {
-          for (var i = 0, l = changeListeners.length; i < l; i++) {
-            var changeListener = changeListeners[i];
-            changeListener.fn.call(changeListener.context);
-            if (changeListener.once) {
-              changeListeners.splice(i, 1);
+      __private.currentChildEvent =
+          waitingPromise = function() {
+            if (!isBusy) {
+              for (var i = 0, l = changeListeners.length; i < l; i++) {
+                var changeListener = changeListeners[i];
+                changeListener.fn.call(changeListener.context);
+                if (changeListener.once) {
+                  changeListeners.splice(i, 1);
+                }
+              }
             }
+          };
+      if (typeof window !== 'undefined' && 'Promise' in window) {
+        var self = this;
+        (new Promise(function(resolve) {resolve();})).then(function() {
+          if (waitingPromise) {
+            waitingPromise.call(self);
+            waitingPromise = null;
           }
-        }
-      });
+        });
+      }
+      else {
+        setImmediate(function() {
+          if (waitingPromise) {
+            waitingPromise.call(self);
+            waitingPromise = null;
+          }
+        });
+      }
     }
   },
 
@@ -396,11 +423,17 @@ ImmutableGraphObject.prototype = {
    * @param {ImmutableGraphObject|ImmutableGraphArray} newValue
    * @private
    */
-  __childChanged: function(key, newValue) {
+  __childChanged: function(key, newValue, setOnly) {
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var removeKeys = __private.removeKeys;
     var changedKeys = __private.changedKeys;
+
+    if (setOnly) {
+      //console.log('AAAA');
+      //refToObj.ref[key] = newValue;
+      //return;
+    }
 
     if (!newValue && isArray(refToObj.ref)) {
       removeKeys[removeKeys.length] = key;
@@ -411,6 +444,10 @@ ImmutableGraphObject.prototype = {
 
     var self = this;
     aggregateChangedChildren(this, function() {
+      counterAggregate = 0;
+      __private.currentChildAggregation = null;
+      isBusy = false;
+
       self.__aggregateChangedChildren();
     });
   },
@@ -455,6 +492,39 @@ ImmutableGraphObject.prototype = {
       }
     }
     this.changeValueTo(newValue);
+  },
+
+  /**
+   * Add an edge to another object
+   *
+   * @param
+   */
+  addEdgeTo: function(topic, otherObject) {
+    EdgeRegistry.addEdge(topic, this.__private.refToObj, otherObject.__private.refToObj);
+  },
+
+  /**
+   * Remove an edge
+   *
+   * @param
+   */
+  removeEdgeTo: function(topic, otherObject) {
+    EdgeRegistry.removeEdge(topic, this.__private.refToObj, otherObject.__private.refToObj);
+  },
+
+  /**
+   * Get edges that originate from this object
+   *
+   */
+  getOutgoingEdges: function() {
+
+  },
+
+  /**
+   * Get edges that end up at this object
+   */
+  getIncomingEdges: function() {
+
   }
 
 };

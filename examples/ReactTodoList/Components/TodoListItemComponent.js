@@ -12,8 +12,6 @@ var TodoListItemComponent = React.createClass({
 
   mixins: [WorldStateMixin],
 
-
-
   render: function() {
     var props = this.props;
     var i = props.item.read();
@@ -25,6 +23,7 @@ var TodoListItemComponent = React.createClass({
     else if (i.editMode) {
       className = 'editing';
     }
+
     var item = <li className={className}>
       <div className="view">
         <input ref="checkbox" onChange={this.onCheckBoxChange} type="checkbox" checked={i.isComplete} className="toggle" />

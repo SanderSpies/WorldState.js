@@ -13,13 +13,13 @@ var isArray = Array.isArray;
 
 
 /**
- * @type {Array.<ImmutableGraphArray>}
+ * @type {[Array.<ImmutableGraphArray>]}
  */
 var _arrays = [];
 
 
 /**
- * @type {Object.<ImmutableGraphObject>}
+ * @type {[Array.<ImmutableGraphObject>]}
  */
 var _objects = [];
 
@@ -433,5 +433,7 @@ var ImmutableGraphRegistry = {
   }
 
 };
+
+//window.ImmutableGraphRegistry = ImmutableGraphRegistry;
 
 module.exports = ImmutableGraphRegistry;

@@ -524,9 +524,43 @@ describe('WorldState.js', function() {
     console.timeEnd('Insert plain array test');
   });
 
-  // add tests for chaining
+  it ('should support recursive structures', function() {
+    var exampleData = {
+      tree: [
+      ]
+    };
+
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    var child = {};
+    var other = {};
+    child.thing = other;
+    other.something = child;
+    imo.wrapped().tree.insert(child);
+    imo.wrapped().tree.insert(other);
+
+    expect(imo.wrapped().tree.wrapped()[0].wrapped().thing.wrapped().something.wrapped().thing.read()).toBe(other);
+  });
+
+  it ('should insert an item at the right position', function() {
+    var exampleData = {
+      items: [
+        {
+          id: 1
+        },
+        {
+          id: 2,
+        },
+        {
+          id: 3
+        }
+      ]
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    imo.wrapped().items.insertAt(1, {id:4});
+    expect(imo.wrapped().items.at(1).read().id).toBe(4);
+  });
+  // add tests for graph specific stuff
   // add tests for addChangeListener + removeChangeListener
-  // add tests for insertAt
   // add tests for removeMulti, updateMulti
 
 });

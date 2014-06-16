@@ -239,6 +239,27 @@ ImmutableGraphArray.prototype = {
 
   getPositionFor: function() {
     // todo
+  },
+
+  /**
+   * Order the array
+   *
+   * @param {[{}]} orderDirectives
+   */
+  orderBy: function(orderDirectives) {
+    var __private = this.__private;
+    var _orderDirectives = orderDirectives.reverse();
+    var currValues = __private.refToObj.ref;
+    var bla = [];
+    var i, l;
+    for (i = 0, l = currValues.length; i < l; i++) {
+      bla[i] = currValues[i].ref;
+    }
+
+    for (i = 0, l = _orderDirectives.length; i < l; i++) {
+      var directive = _orderDirectives[i];
+
+    }
   }
 
 };

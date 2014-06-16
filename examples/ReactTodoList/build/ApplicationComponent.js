@@ -24,10 +24,15 @@ var start = window.performance.now();
 var ReferenceRegistry = require('worldstate/src/Base/ReferenceRegistry');
 var ImmutableGraphRegistry = require('worldstate/src/Base/ImmutableGraphRegistry');
 
+var setState = null;
+var context = null;
 
 var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent',
-
-  mixins: [WorldStateMixin],
+   getInitialState: function() {
+     return {
+       bla: 0
+     };
+   },
 
   render: function() {
     return React.DOM.div(null, 
@@ -43,6 +48,9 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
       )
     );
+  }, componentDidMount: function() {
+    setState = this.setState;
+    context = this;
   }
 });
 
@@ -67,8 +75,8 @@ function render(fn) {
     isRenderBusy = true;
     requestAnimationFrame(function(){
       renderStack.shift().call();
-      isRenderBusy = false;
       render();
+      isRenderBusy = false;
     });
   }
   else if (fn) {
@@ -78,13 +86,14 @@ function render(fn) {
     }
   }
 }
-
 todoList.addChangeListener(function() {
+
   render(function(){
+    var start = window.performance.now();
     React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
       var end = window.performance.now();
       var duration = end - start;
-      isRenderBusy = false;
+      console.log('Render time:', duration);
     });
   });
 });
@@ -93,22 +102,15 @@ todoList.addChangeListener(function() {
 
 
 // testing code
-var idCounter = 0;
+var idCounter = 1;
 function add200() {
-    start = window.performance.now();
-    for (var i = 0, l = 200; i < l; i++) {
-      todoList.items().insert(Item.newInstance({
-        text: 'foo',
-        id: idCounter++
-      }));
-    }
-    todoList.afterChange(function(){
-      React.renderComponent(ApplicationComponent( {todoList:todoList} ), document.getElementById('container'), function(){
-      var end = window.performance.now();
-      var duration = end - start;
-      console.log('Duration:', duration);
-    });
-  });
+  start = window.performance.now();
+  for (var i = 0, l = 200; i < l; i++) {
+    todoList.items().insert(Item.newInstance({
+      text: 'foo',
+      id: idCounter++
+    }));
+  }
 }
 
 function add200AtOnce() {
@@ -118,7 +120,6 @@ function add200AtOnce() {
     for (var i = 0, l = 200; i < l; i++) {
       items[i] = {text: 'another' + i, id: 900000 + i}
     }
-
     todoList.items().insertMultiRaw(items);
   });
 }

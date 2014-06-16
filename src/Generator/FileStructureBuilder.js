@@ -27,7 +27,8 @@ var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
   TemplateConstants.INSERT_MULTI_RAW_FUNCTION,
   TemplateConstants.WHERE_FUNCTION,
   TemplateConstants.LENGTH_FUNCTION,
-  TemplateConstants.CHANGE_CHILDREN_PROPERTIES_TO
+  TemplateConstants.CHANGE_CHILDREN_PROPERTIES_TO,
+  TemplateConstants.ORDER_BY_FUNCTION
 ]);
 
 ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.CHANGE_PROPERTIES_TO), 1);

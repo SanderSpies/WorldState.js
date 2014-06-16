@@ -27,7 +27,10 @@ module.exports = function(grunt) {
           'build/bundle.js':'build/bundle.js'
         },
         options: {
-          "compilation_LEVEL": "ADVANCED_OPTIMIZATIONS"
+          "compilation_level": "ADVANCED_OPTIMIZATIONS",
+          "externs": [
+            'externs/react.js'
+          ]
         }
       }
     }

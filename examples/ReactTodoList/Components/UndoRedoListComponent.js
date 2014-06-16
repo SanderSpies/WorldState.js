@@ -8,6 +8,8 @@ var React = require('react');
 
 var UndoRedoListComponent = React.createClass({
 
+
+
   restore: function(e) {
     var position = e.target.dataset.position;
     var version = this.props.items.getVersions()[position];

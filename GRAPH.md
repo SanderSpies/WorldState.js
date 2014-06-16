@@ -40,3 +40,14 @@ History / Undo / Redo
 In the previous sections we spoke about replacing objects with new objects, whereby the old object chains are
 cleaned up by the garbage collector. If we want to support history we need to save this chain of old objects,
 and be able to restore them. This should make jumping to different versions of the chains of objects very fast.
+
+Describing relationships
+---
+A graph (database) distinguish itself by describing more elaborate relationships between objects, and giving the
+capability to search for these relationships. I believe these relationships should exist besides the "normal" object
+model, which is just objects referring to other objects - basically a "has" relationship. It should be possible to
+search for object properties and relationships between objects.
+
+These elaborate relationships should be described by relationship objects that have pointers to the two objects
+involved in the relationship, and a pointer to the "topic" object, also a separate object. The relationship object
+should also be able contain details regarding the relationship.
