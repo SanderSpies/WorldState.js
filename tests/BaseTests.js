@@ -4,6 +4,7 @@
 
 var ImmutableGraphRegistry = require('../src/Base/ImmutableGraphRegistry');
 var ReferenceRegistry = require('../src/Base/ReferenceRegistry');
+var EdgeTypeRegistry = require('../src/Base/EdgeTypeRegistry');
 
 describe('WorldState.js', function() {
 
@@ -47,6 +48,25 @@ describe('WorldState.js', function() {
         x: '33'
       }
     });
+  });
+
+  it ('should be possible to listen to the change of the same object', function(done) {
+    var blaData = {
+      o: [
+        {
+          a: {
+            b: 123
+          },
+          b: true
+        }
+      ]
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(blaData);
+    var x = imo.wrapped().o.at(0).wrapped().a;
+    x.afterChange(function() {
+      done();
+    });
+    x.remove();
   });
 
   it('should properly recreate all parent objects', function(done) {
@@ -524,7 +544,7 @@ describe('WorldState.js', function() {
     console.timeEnd('Insert plain array test');
   });
 
-  it ('should support recursive structures', function() {
+  it ('should support recursive structures', function(done) {
     var exampleData = {
       tree: [
       ]
@@ -537,18 +557,20 @@ describe('WorldState.js', function() {
     other.something = child;
     imo.wrapped().tree.insert(child);
     imo.wrapped().tree.insert(other);
-
-    expect(imo.wrapped().tree.wrapped()[0].wrapped().thing.wrapped().something.wrapped().thing.read()).toBe(other);
+    imo.afterChange(function(){
+      expect(imo.wrapped().tree.wrapped()[0].wrapped().thing.wrapped().something.wrapped().thing.read()).toBe(other);
+      done();
+    });
   });
 
-  it ('should insert an item at the right position', function() {
+  it ('should insert an item at the right position', function(done) {
     var exampleData = {
       items: [
         {
           id: 1
         },
         {
-          id: 2,
+          id: 2
         },
         {
           id: 3
@@ -557,9 +579,136 @@ describe('WorldState.js', function() {
     };
     var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
     imo.wrapped().items.insertAt(1, {id:4});
-    expect(imo.wrapped().items.at(1).read().id).toBe(4);
+    imo.afterChange(function(){
+      expect(imo.wrapped().items.at(1).read().id).toBe(4);
+      done();
+    });
   });
-  // add tests for graph specific stuff
+
+  it ('should allow to listen to changes on the changing object', function(done) {
+    var exampleData = {
+      bla: {
+        x: 1,
+        y: 2
+      }
+    };
+
+    var imo = ImmutableGraphRegistry.getImmutableObject(exampleData);
+    imo.wrapped().bla.afterChange(function(){
+      done();
+    });
+    imo.wrapped().bla.changeValueTo({
+      x: 2,
+      y: 4
+    });
+
+  });
+
+  it ('should allow creating edges to other objects', function() {
+    var data1 = {};
+    var data2 = {};
+    var imo1 = ImmutableGraphRegistry.getImmutableObject(data1);
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(data2);
+    var topic = EdgeTypeRegistry.registerEdgeType({like: null});
+    imo1.addEdgeTo(topic, imo2);
+    expect(imo1.getOutgoingEdges()[0].type).toBe(topic);
+    expect(imo1.getOutgoingEdges()[0].origin).toBe(imo1);
+    expect(imo1.getOutgoingEdges()[0].destination).toBe(imo2);
+    expect(imo2.getIncomingEdges()[0].origin).toBe(imo1);
+    expect(imo2.getIncomingEdges()[0].destination).toBe(imo2);
+  });
+
+  it('should update the incoming edges when a change happens', function(done) {
+    var data1 = {
+      bla: {
+        test: {
+
+        }
+      }
+    };
+    var data2 = {
+      test: {
+        bla: {
+
+        }
+      }
+    };
+    var imo1 = ImmutableGraphRegistry.getImmutableObject(data1);
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(data2);
+    var topic = EdgeTypeRegistry.registerEdgeType({like: null});
+    imo1.wrapped().bla.addEdgeTo(topic, imo2.wrapped().test.wrapped().bla);
+    imo1.afterChange(function() {
+      done();
+    });
+    imo2.wrapped().test.wrapped().bla.changeValueTo({
+      a: 'hoooi'
+    });
+
+  });
+
+  it('should properly restore edges when choosing a different version', function(done) {
+    var data1 = {
+      bla: {
+        test: {
+
+        }
+      }
+    };
+    var data2 = {
+      test: {
+        bla: {
+          a: 'bbb'
+        }
+      }
+    };
+    var imo1 = ImmutableGraphRegistry.getImmutableObject(data1);
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(data2);
+
+    var topic = EdgeTypeRegistry.registerEdgeType({like: null});
+    imo1.wrapped().bla.addEdgeTo(topic, imo2.wrapped().test.wrapped().bla);
+    imo2.saveVersion('bla');
+    imo1.afterChange(function() {
+      imo2.restoreVersion(imo2.getVersions()[0]);
+
+      // TODO: add some realistic tests here
+      done();
+    });
+    imo2.wrapped().test.wrapped().bla.changeValueTo({
+      a: 'hoooi'
+    });
+  });
+
+  xit('should remove edges when an object gets removed', function() {
+    // TODO
+  });
+
+  xit('should properly change the reference of the edge when changing the reference', function() {
+    // TODO
+  });
+
+  it('should behave correctly when using changePropertiesTo', function(done){
+    var data = {
+      x: {
+        y: [
+          {
+            a: 'bla',
+            b: true
+          }
+        ]
+      }
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(data);
+    var oldImo = imo.read();
+    imo.afterChange(function(){
+      expect(imo.wrapped().x.wrapped().y.at(0).read().x).toBe(2);
+      expect(oldImo).not.toBe(imo.read());
+      done();
+    });
+    imo.wrapped().x.wrapped().y.changePropertiesTo({x:2});
+
+  });
+
+  // xit('should ')
   // add tests for addChangeListener + removeChangeListener
   // add tests for removeMulti, updateMulti
 

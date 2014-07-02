@@ -6,6 +6,7 @@
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 var ImmutableGraphRegistry =
     require('worldstate/src/Base/ImmutableGraphRegistry');
+var GeneratorInstanceRegistry = require('worldstate/src/Base/GeneratorInstanceRegistry');
 
 
 
@@ -16,7 +17,7 @@ var ImmutableGraphRegistry =
  */
 var ItemFactory = {
   /**
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
    * @param {{}} parent
    * @param {string} parentKey
    * @return {ItemPrototype}
@@ -27,7 +28,7 @@ var ItemFactory = {
      * Item
      *
      * @constructor
-     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
      */
     var ItemClass = function ItemClass(obj, parent, parentKey) {
       this.__private = {
@@ -38,6 +39,7 @@ var ItemFactory = {
     };
     ItemClass.prototype = ItemPrototype;
     var instance = new ItemClass(obj, parent, parentKey);
+    GeneratorInstanceRegistry.registerInstance(obj, this);
     return instance;
   }
 };
@@ -59,7 +61,7 @@ var ItemPrototype = {
     /**
    * Change reference
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
@@ -71,7 +73,7 @@ var ItemPrototype = {
   /**
    * Change value
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} val
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
@@ -104,7 +106,7 @@ var ItemPrototype = {
   /**
    * Get the actual immutable object
    *
-   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean}}
+   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}}
    * @this {ItemPrototype}
    */
   read: function Item$read() {
@@ -149,6 +151,7 @@ var ItemPrototype = {
    */
   afterChange: function Item$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -187,9 +190,72 @@ var ItemPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {ItemPrototype}
    */
   addChangeListener: function Item$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
+  },
+
+  /**
+   * Add an edge to another object
+   *
+   * @return {ItemPrototype}
+   */
+  addEdgeTo: function(topic, imo) {
+    this.__private.graph.addEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Remove edge to another object
+   *
+   * @return {ItemPrototype}
+   */
+  removeEdgeTo: function(topic, imo) {
+    this.__private.graph.removeEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Get edges coming from other objects
+   *
+   * @return {ItemPrototype}
+   */
+  getIncomingEdges: function() {
+    var realEdges = this.__private.graph.getIncomingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        origin: GeneratorInstanceRegistry.getInstance(realEdge.origin),
+        destination: Item.newInstance(realEdge.destination.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+
+    return edges;
+  },
+
+  /**
+   * Get edges going to other objects
+   *
+   * @return {ItemPrototype}
+   */
+  getOutgoingEdges: function() {
+    var realEdges = this.__private.graph.getOutgoingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        destination: GeneratorInstanceRegistry.getInstance(realEdge.destination),
+        origin: Item.newInstance(realEdge.origin.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+    return edges;
   }
 
 };

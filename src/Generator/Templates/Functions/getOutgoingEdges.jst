@@ -1,0 +1,19 @@
+  /**
+   * Get edges going to other objects
+   *
+   * @return {{GraphName}Prototype}
+   */
+  getOutgoingEdges: function() {
+    var realEdges = this.__private.graph.getOutgoingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        destination: GeneratorInstanceRegistry.getInstance(realEdge.destination),
+        origin: {GraphName}.newInstance(realEdge.origin.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+    return edges;
+  }

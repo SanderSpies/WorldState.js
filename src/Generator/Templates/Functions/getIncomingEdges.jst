@@ -1,0 +1,20 @@
+  /**
+   * Get edges coming from other objects
+   *
+   * @return {{GraphName}Prototype}
+   */
+  getIncomingEdges: function() {
+    var realEdges = this.__private.graph.getIncomingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        origin: GeneratorInstanceRegistry.getInstance(realEdge.origin),
+        destination: {GraphName}.newInstance(realEdge.destination.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+
+    return edges;
+  }

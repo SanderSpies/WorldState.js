@@ -6,6 +6,7 @@ var ImmutableGraphObject = require('./ImmutableGraphObject');
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
+var createMicroTask = require('./createMicroTask');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var removeReference = ReferenceRegistry.removeReference;
 
@@ -59,13 +60,16 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newItem
    */
   insert: function(newItem) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem, -1);
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function(){
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
+      self._insert(newItem, -1);
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    //});
   },
 
   /**
@@ -118,18 +122,21 @@ ImmutableGraphArray.prototype = {
    * @param {[]} newItems
    */
   insertMulti: function(newItems) {
-    var __private = this.__private;
+    var self = this;
+
+    var __private = self.__private;
     var oldRefToObj = __private.refToObj;
     var oldRefToObjRef = oldRefToObj.ref;
 
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
-      this._insert(newItem, -1);
+      self._insert(newItem, -1);
     }
 
     setReferences(oldRefToObj, clone(oldRefToObjRef));
     removeReference(oldRefToObjRef);
-    this.__changed();
+    self.__changed();
+
   },
 
   /**
@@ -201,10 +208,10 @@ ImmutableGraphArray.prototype = {
           item[key] = newProperties[key];
         }
       }
-
       newArray[i].ref = item;
     }
     this.changeValueTo(newArray);
+
   },
 
   /**
@@ -214,13 +221,16 @@ ImmutableGraphArray.prototype = {
    * @param {ImmutableGraphObject|ImmutableGraphArray} newItem
    */
   insertAt: function(position, newItem) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem, position);
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function(){
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
+      self._insert(newItem, position);
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    //})
   },
 
   removeMulti: function(items) {

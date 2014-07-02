@@ -8,7 +8,7 @@ var ObjectPool = function ObjectPool(opt) {
     availableObjects: [],
     usedObjects: [],
     template: opt.template
-  }
+  };
 };
 
 ObjectPool.prototype = {

@@ -4,7 +4,9 @@
       "id": 1,
       "text": "",
       "isComplete": false,
-      "editMode": false
+      "editMode": false,
+      "test1": [1,2,3,4],
+      "test2": ["a","b","c"]
     }
   ],
 

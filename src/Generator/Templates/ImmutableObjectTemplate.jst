@@ -6,6 +6,7 @@
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 var ImmutableGraphRegistry =
     require('worldstate/src/Base/ImmutableGraphRegistry');
+var GeneratorInstanceRegistry = require('worldstate/src/Base/GeneratorInstanceRegistry');
 
 {RequireBlock}
 
@@ -38,6 +39,7 @@ var {GraphName}Factory = {
     };
     {GraphName}Class.prototype = {GraphName}Prototype;
     var instance = new {GraphName}Class(obj, parent, parentKey);
+    GeneratorInstanceRegistry.registerInstance(obj, this);
     return instance;
   }
 };

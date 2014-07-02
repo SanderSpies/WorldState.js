@@ -3,7 +3,9 @@
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {{GraphName}Prototype}
    */
   addChangeListener: function {GraphName}$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
   }

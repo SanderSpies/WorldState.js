@@ -4,8 +4,8 @@ WorldState.js - 0.1 - a generator for immutable graphs
 
 Current version: 0.1 - ROUGH EDGES
 
-Working on: 0.2, which will contain: recursive structures, edges support, syntax improvements, ordering,
-and improved graph generation capabilities.
+Working on: 0.2, which will support: recursive structures, edges support, syntax improvements, ordering, improved graph
+generation capabilities and more.
 
 Introduction
 ---
@@ -121,6 +121,9 @@ todoGraph.afterChange(function() {
     // happens only once
 });
 ```
+
+Note that when you listen to events of children, you can set the change listener after the child changes. However when
+you are listening to changes of the object you are directly modifying, you must set the listener before the change.
 
 Finding one or more item:
 ```

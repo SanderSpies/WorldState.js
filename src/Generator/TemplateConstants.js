@@ -32,7 +32,11 @@ var TemplateConstants = {
   CHANGE_CHILDREN_PROPERTIES_TO:  fs.readFileSync(__dirname + '/Templates/Functions/changeChildrenPropertiesTo.jst', { encoding:'utf8'}),
   INSERT_AT_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/insertAt.jst', { encoding:'utf8'}),
   ADD_CHANGE_LISTENER_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/addChangeListener.jst', { encoding:'utf8'}),
-  ORDER_BY_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/orderBy.jst', { encoding:'utf8'})
+  ORDER_BY_FUNCTION:  fs.readFileSync(__dirname + '/Templates/Functions/orderBy.jst', { encoding:'utf8'}),
+  REMOVE_EDGE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/removeEdgeTo.jst', { encoding:'utf8'}),
+  GET_OUTGOING_EDGES_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/getOutgoingEdges.jst', { encoding:'utf8'}),
+  GET_INCOMING_EDGES_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/getIncomingEdges.jst', { encoding:'utf8'}),
+  ADD_EDGE_FUNCTION: fs.readFileSync(__dirname + '/Templates/Functions/addEdgeTo.jst', { encoding:'utf8'})
 };
 
 module.exports = TemplateConstants;

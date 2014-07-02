@@ -18,7 +18,7 @@ var Item = require('./Item');
  */
 var ItemsFactory = {
   /**
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
    * @return {ItemsPrototype}
    */
   newInstance: function Items$newInstance(obj, parent, parentKey) {
@@ -27,7 +27,7 @@ var ItemsFactory = {
      * Items
      *
      * @constructor
-     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
      */
     var ItemsClass = function ItemsClass(obj, parent, parentKey) {
       this.__private = {
@@ -60,7 +60,7 @@ var ItemsPrototype = {
     /**
    * Change reference
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
@@ -72,7 +72,7 @@ var ItemsPrototype = {
   /**
    * Change value
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} val
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
@@ -105,7 +105,7 @@ var ItemsPrototype = {
   /**
    * Get the actual immutable object
    *
-   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean}}
+   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}}
    * @this {ItemsPrototype}
    */
   read: function Items$read() {
@@ -150,6 +150,7 @@ var ItemsPrototype = {
    */
   afterChange: function Items$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -177,9 +178,11 @@ var ItemsPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {ItemsPrototype}
    */
   addChangeListener: function Items$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
   },
 
   /**
@@ -283,6 +286,14 @@ var ItemsPrototype = {
    */
   changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
+    return this;
+  },
+
+  /**
+   *
+   */
+  orderBy: function Items$orderBy(sortingInstructions) {
+    this.__private.graph.orderBy(sortingInstructions);
     return this;
   }
 

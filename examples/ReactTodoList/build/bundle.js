@@ -47,14 +47,14 @@ var TodoActions = {
     console.time('remove todo item');
     var item = opt.item;
     var text = item.read().text;
+
     item
       .remove()
       .afterChange(function() {
         console.timeEnd('remove todo item');
+        items
+          .saveVersionAs('Removed todo item ' + text);
       });
-
-    items
-      .saveVersionAs('Removed todo item ' + text);
   },
 
   /**
@@ -75,18 +75,19 @@ var TodoActions = {
     }
 
     item
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+
+        items
+          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+            (oldIsComplete ? 'checked' : 'unchecked') +
+            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
+      })
       .changePropertiesTo({
         isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
         text: 'text' in opt ? opt.text : oldText
-      })
-      .afterChange(function() {
-        console.timeEnd('Update todo item');
       });
 
-    items
-      .saveVersionAs('Changed todo item from ' + oldText + ' ' +
-        (oldIsComplete ? 'checked' : 'unchecked') +
-        ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
   },
 
   /**
@@ -117,14 +118,18 @@ var TodoActions = {
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
     items
-      .changeChildrenPropertiesTo({
-        isComplete: opt.checked
-      })
-      .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
-        ' all todo list items')
       .afterChange(function() {
         console.timeEnd('Update all todo items');
+        items.saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
+          ' all todo list items');
+        console.log(items.read());
+        console.log(items.at(0).read().isComplete);
+        console.log(items.getVersions()[items.getVersions().length - 1].ref[0].ref.isComplete);
+      })
+      .changeChildrenPropertiesTo({
+        isComplete: opt.checked
       });
+
   },
 
   /**
@@ -159,7 +164,7 @@ var TodoActions = {
 
 module.exports = TodoActions;
 
-},{"../Graph/Graph":2,"../Graph/Item":3,"worldstate/src/Base/clone":147}],2:[function(require,module,exports){
+},{"../Graph/Graph":2,"../Graph/Item":3,"worldstate/src/Base/clone":148}],2:[function(require,module,exports){
 'use strict';
 
 
@@ -186,6 +191,7 @@ module.exports = todoList;
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 var ImmutableGraphRegistry =
     require('worldstate/src/Base/ImmutableGraphRegistry');
+var GeneratorInstanceRegistry = require('worldstate/src/Base/GeneratorInstanceRegistry');
 
 
 
@@ -196,7 +202,7 @@ var ImmutableGraphRegistry =
  */
 var ItemFactory = {
   /**
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
    * @param {{}} parent
    * @param {string} parentKey
    * @return {ItemPrototype}
@@ -207,7 +213,7 @@ var ItemFactory = {
      * Item
      *
      * @constructor
-     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
      */
     var ItemClass = function ItemClass(obj, parent, parentKey) {
       this.__private = {
@@ -218,6 +224,7 @@ var ItemFactory = {
     };
     ItemClass.prototype = ItemPrototype;
     var instance = new ItemClass(obj, parent, parentKey);
+    GeneratorInstanceRegistry.registerInstance(obj, this);
     return instance;
   }
 };
@@ -239,7 +246,7 @@ var ItemPrototype = {
     /**
    * Change reference
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
@@ -251,7 +258,7 @@ var ItemPrototype = {
   /**
    * Change value
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} val
    * @this {ItemPrototype}
    * @return {ItemPrototype}
    */
@@ -284,7 +291,7 @@ var ItemPrototype = {
   /**
    * Get the actual immutable object
    *
-   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean}}
+   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}}
    * @this {ItemPrototype}
    */
   read: function Item$read() {
@@ -329,6 +336,7 @@ var ItemPrototype = {
    */
   afterChange: function Item$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -367,16 +375,79 @@ var ItemPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {ItemPrototype}
    */
   addChangeListener: function Item$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
+  },
+
+  /**
+   * Add an edge to another object
+   *
+   * @return {ItemPrototype}
+   */
+  addEdgeTo: function(topic, imo) {
+    this.__private.graph.addEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Remove edge to another object
+   *
+   * @return {ItemPrototype}
+   */
+  removeEdgeTo: function(topic, imo) {
+    this.__private.graph.removeEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Get edges coming from other objects
+   *
+   * @return {ItemPrototype}
+   */
+  getIncomingEdges: function() {
+    var realEdges = this.__private.graph.getIncomingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        origin: GeneratorInstanceRegistry.getInstance(realEdge.origin),
+        destination: Item.newInstance(realEdge.destination.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+
+    return edges;
+  },
+
+  /**
+   * Get edges going to other objects
+   *
+   * @return {ItemPrototype}
+   */
+  getOutgoingEdges: function() {
+    var realEdges = this.__private.graph.getOutgoingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        destination: GeneratorInstanceRegistry.getInstance(realEdge.destination),
+        origin: Item.newInstance(realEdge.origin.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+    return edges;
   }
 
 };
 
 module.exports = ItemFactory;
 
-},{"worldstate/src/Base/ImmutableGraphObject":144,"worldstate/src/Base/ImmutableGraphRegistry":145}],4:[function(require,module,exports){
+},{"worldstate/src/Base/GeneratorInstanceRegistry":143,"worldstate/src/Base/ImmutableGraphObject":145,"worldstate/src/Base/ImmutableGraphRegistry":146}],4:[function(require,module,exports){
 /**
  * Generated by worldstate.js.
  */
@@ -397,7 +468,7 @@ var Item = require('./Item');
  */
 var ItemsFactory = {
   /**
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
    * @return {ItemsPrototype}
    */
   newInstance: function Items$newInstance(obj, parent, parentKey) {
@@ -406,7 +477,7 @@ var ItemsFactory = {
      * Items
      *
      * @constructor
-     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj JSON input data
+     * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj JSON input data
      */
     var ItemsClass = function ItemsClass(obj, parent, parentKey) {
       this.__private = {
@@ -439,7 +510,7 @@ var ItemsPrototype = {
     /**
    * Change reference
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} obj
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} obj
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
@@ -451,7 +522,7 @@ var ItemsPrototype = {
   /**
    * Change value
    *
-   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean}]} val
+   * @param {[{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}]} val
    * @this {ItemsPrototype}
    * @return {ItemsPrototype}
    */
@@ -484,7 +555,7 @@ var ItemsPrototype = {
   /**
    * Get the actual immutable object
    *
-   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean}}
+   * @return {{id:number,text:string,isComplete:boolean,editMode:boolean,test1:object,test2:object}}
    * @this {ItemsPrototype}
    */
   read: function Items$read() {
@@ -529,6 +600,7 @@ var ItemsPrototype = {
    */
   afterChange: function Items$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -556,9 +628,11 @@ var ItemsPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {ItemsPrototype}
    */
   addChangeListener: function Items$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
   },
 
   /**
@@ -663,13 +737,21 @@ var ItemsPrototype = {
   changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
     return this;
+  },
+
+  /**
+   *
+   */
+  orderBy: function Items$orderBy(sortingInstructions) {
+    this.__private.graph.orderBy(sortingInstructions);
+    return this;
   }
 
 };
 
 module.exports = ItemsFactory;
 
-},{"./Item":3,"worldstate/src/Base/ImmutableGraphObject":144,"worldstate/src/Base/ImmutableGraphRegistry":145}],5:[function(require,module,exports){
+},{"./Item":3,"worldstate/src/Base/ImmutableGraphObject":145,"worldstate/src/Base/ImmutableGraphRegistry":146}],5:[function(require,module,exports){
 /**
  * Generated by worldstate.js
  */
@@ -678,6 +760,7 @@ module.exports = ItemsFactory;
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 var ImmutableGraphRegistry =
     require('worldstate/src/Base/ImmutableGraphRegistry');
+var GeneratorInstanceRegistry = require('worldstate/src/Base/GeneratorInstanceRegistry');
 
 /* @type Items */
 var Items = require('./Items');
@@ -711,6 +794,7 @@ var TodoListFactory = {
     };
     TodoListClass.prototype = TodoListPrototype;
     var instance = new TodoListClass(obj, parent, parentKey);
+    GeneratorInstanceRegistry.registerInstance(obj, this);
     return instance;
   }
 };
@@ -822,6 +906,7 @@ var TodoListPrototype = {
    */
   afterChange: function TodoList$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -860,9 +945,72 @@ var TodoListPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {TodoListPrototype}
    */
   addChangeListener: function TodoList$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
+  },
+
+  /**
+   * Add an edge to another object
+   *
+   * @return {TodoListPrototype}
+   */
+  addEdgeTo: function(topic, imo) {
+    this.__private.graph.addEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Remove edge to another object
+   *
+   * @return {TodoListPrototype}
+   */
+  removeEdgeTo: function(topic, imo) {
+    this.__private.graph.removeEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Get edges coming from other objects
+   *
+   * @return {TodoListPrototype}
+   */
+  getIncomingEdges: function() {
+    var realEdges = this.__private.graph.getIncomingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        origin: GeneratorInstanceRegistry.getInstance(realEdge.origin),
+        destination: TodoList.newInstance(realEdge.destination.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+
+    return edges;
+  },
+
+  /**
+   * Get edges going to other objects
+   *
+   * @return {TodoListPrototype}
+   */
+  getOutgoingEdges: function() {
+    var realEdges = this.__private.graph.getOutgoingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        destination: GeneratorInstanceRegistry.getInstance(realEdge.destination),
+        origin: TodoList.newInstance(realEdge.origin.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+    return edges;
   },
 
   /**
@@ -884,7 +1032,7 @@ var TodoListPrototype = {
 
 module.exports = TodoListFactory;
 
-},{"./Items":4,"worldstate/src/Base/ImmutableGraphObject":144,"worldstate/src/Base/ImmutableGraphRegistry":145}],6:[function(require,module,exports){
+},{"./Items":4,"worldstate/src/Base/GeneratorInstanceRegistry":143,"worldstate/src/Base/ImmutableGraphObject":145,"worldstate/src/Base/ImmutableGraphRegistry":146}],6:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -933,7 +1081,8 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
-      )
+      ),
+      UndoRedoListComponent( {items:todoList.items()} )
     );
   }, componentDidMount: function() {
     setState = this.setState;
@@ -1046,7 +1195,7 @@ function insertAt5() {
 
 module.exports = ApplicationComponent;
 
-},{"../Actions/TodoActions":1,"../Graph/Graph":2,"../Graph/Item":3,"./TodoListComponent":7,"./UndoRedoListComponent":9,"react":140,"worldstate/src/Base/ImmutableGraphRegistry":145,"worldstate/src/Base/ReferenceRegistry":146,"worldstate/src/Helpers/ReactWorldStateMixin":148}],7:[function(require,module,exports){
+},{"../Actions/TodoActions":1,"../Graph/Graph":2,"../Graph/Item":3,"./TodoListComponent":7,"./UndoRedoListComponent":9,"react":140,"worldstate/src/Base/ImmutableGraphRegistry":146,"worldstate/src/Base/ReferenceRegistry":147,"worldstate/src/Helpers/ReactWorldStateMixin":151}],7:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -1138,7 +1287,7 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
 
 module.exports = TodoListComponent;
 
-},{"../Actions/TodoActions":1,"./TodoListItemComponent":8,"react":140,"worldstate/src/Helpers/ReactWorldStateMixin":148}],8:[function(require,module,exports){
+},{"../Actions/TodoActions":1,"./TodoListItemComponent":8,"react":140,"worldstate/src/Helpers/ReactWorldStateMixin":151}],8:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -1216,7 +1365,7 @@ var TodoListItemComponent = React.createClass({displayName: 'TodoListItemCompone
 
 module.exports = TodoListItemComponent;
 
-},{"../Actions/TodoActions":1,"react":140,"worldstate/src/Helpers/ReactWorldStateMixin":148}],9:[function(require,module,exports){
+},{"../Actions/TodoActions":1,"react":140,"worldstate/src/Helpers/ReactWorldStateMixin":151}],9:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -1258,7 +1407,7 @@ var UndoRedoListComponent = React.createClass({displayName: 'UndoRedoListCompone
 
 module.exports = UndoRedoListComponent;
 
-},{"react":140,"worldstate/src/Base/clone":147}],10:[function(require,module,exports){
+},{"react":140,"worldstate/src/Base/clone":148}],10:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -18244,32 +18393,99 @@ module.exports = require('./lib/React');
 },{"FWaASH":10}],142:[function(require,module,exports){
 'use strict';
 
-
+var outgoingEdges = {};
+var incomingEdges = {};
 
 var EdgeRegistry = {
 
-  addEdge: function(topic, fromObject, toObject) {
+  addEdge: function(type, origin, destination, details) {
+    var edge = {
+      type: type,
+      origin: origin,
+      destination: destination,
+      opts: details
+    };
+    var originId = origin.__private.refToObj.ref.__worldStateUniqueId;
+    var destinationId = destination.__private.refToObj.ref.__worldStateUniqueId;
+
+    if (!outgoingEdges[originId]) {
+      outgoingEdges[originId] = [];
+    }
+    if (!incomingEdges[destinationId]) {
+      incomingEdges[destinationId] = [];
+    }
+
+    // duplication is purely done for performance
+    outgoingEdges[originId].push(edge);
+    incomingEdges[destinationId].push(edge);
+  },
+
+  removeEdge: function(topic, origin, destination) {
 
   },
 
-  removeEdge: function(topic, fromObject, toObject) {
+  getOutgoingEdges: function(obj) {
+    if (!obj.__private.refToObj) {
+      return null;
+    }
 
+    return outgoingEdges[obj.__private.refToObj.ref.__worldStateUniqueId];
   },
 
-  getOutgoingEdges: function() {
+  getIncomingEdges: function(obj) {
+    var refToObj = obj.__private.refToObj;
+    if (!refToObj) {
+      return null;
+    }
 
+   return incomingEdges[refToObj.ref.__worldStateUniqueId];
   },
 
-  getIncomingEdges: function() {
+  changeEdgeId: function(oldId, newId) {
+    outgoingEdges[newId] = outgoingEdges[oldId];
+    incomingEdges[newId] = incomingEdges[oldId];
+    delete outgoingEdges[oldId];
+    delete incomingEdges[oldId];
+  },
 
+  changeEdgeReference: function(oldId) {
+    // TODO
+    var outgoingEdges = outgoingEdges[oldId];
+    var incomingEdges2 = [];
+    for (var i = 0, l = outgoingEdges.length; i < l; i++) {
+      incomingEdges2[i] = incomingEdges[outgoingEdges[i].destination];
+    }
   }
 
 };
 
 module.exports = EdgeRegistry;
 
-
 },{}],143:[function(require,module,exports){
+'use strict';
+
+// recipe for disaster (AKA memory leaks)
+var instances = {};
+
+var GeneratorInstanceRegistry = {
+
+  registerInstance: function(obj, instance) {
+    instances[obj.__worldStateUniqueId] = instance;
+  },
+
+  removeInstance: function(obj) {
+    instances[obj.__worldStateUniqueId] = null;
+  },
+
+  getInstance: function(obj) {
+    return instances[obj.__worldStateUniqueId] || null;
+  }
+
+};
+
+module.exports = GeneratorInstanceRegistry;
+
+},{}],144:[function(require,module,exports){
 'use strict';
 
 /* @type {ImmutableGraphObject} */
@@ -18278,6 +18494,7 @@ var ImmutableGraphObject = require('./ImmutableGraphObject');
 var ReferenceRegistry = require('./ReferenceRegistry');
 
 var clone = require('./clone');
+var createMicroTask = require('./createMicroTask');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var removeReference = ReferenceRegistry.removeReference;
 
@@ -18331,13 +18548,16 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newItem
    */
   insert: function(newItem) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem, -1);
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function(){
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
+      self._insert(newItem, -1);
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    //});
   },
 
   /**
@@ -18390,18 +18610,21 @@ ImmutableGraphArray.prototype = {
    * @param {[]} newItems
    */
   insertMulti: function(newItems) {
-    var __private = this.__private;
+    var self = this;
+
+    var __private = self.__private;
     var oldRefToObj = __private.refToObj;
     var oldRefToObjRef = oldRefToObj.ref;
 
     for (var i = 0, l = newItems.length; i < l; i++) {
       var newItem = newItems[i];
-      this._insert(newItem, -1);
+      self._insert(newItem, -1);
     }
 
     setReferences(oldRefToObj, clone(oldRefToObjRef));
     removeReference(oldRefToObjRef);
-    this.__changed();
+    self.__changed();
+
   },
 
   /**
@@ -18464,19 +18687,22 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newProperties
    */
   changePropertiesTo: function(newProperties) {
-    var __private = this.__private;
-    var newArray = clone(__private.refToObj.ref);
-    for (var i = 0, l = newArray.length; i < l; i++) {
-      var item = clone(newArray[i].ref);
-      for (var key in newProperties) {
-        if (newProperties.hasOwnProperty(key)) {
-          item[key] = newProperties[key];
+    var self = this;
+    // createMicroTask(function(){
+      var __private = self.__private;
+      var newArray = clone(__private.refToObj.ref);
+      for (var i = 0, l = newArray.length; i < l; i++) {
+        var item = clone(newArray[i].ref);
+        for (var key in newProperties) {
+          if (newProperties.hasOwnProperty(key)) {
+            item[key] = newProperties[key];
+          }
         }
-      }
 
-      newArray[i].ref = item;
-    }
-    this.changeValueTo(newArray);
+        newArray[i].ref = item;
+      }
+      self.changeValueTo(newArray);
+    // });
   },
 
   /**
@@ -18486,13 +18712,16 @@ ImmutableGraphArray.prototype = {
    * @param {ImmutableGraphObject|ImmutableGraphArray} newItem
    */
   insertAt: function(position, newItem) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
-    this._insert(newItem, position);
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function(){
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
+      self._insert(newItem, position);
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    //})
   },
 
   removeMulti: function(items) {
@@ -18538,7 +18767,7 @@ ImmutableGraphArray.prototype = {
 
 module.exports = ImmutableGraphArray;
 
-},{"./ImmutableGraphObject":144,"./ImmutableGraphRegistry":145,"./ReferenceRegistry":146,"./clone":147}],144:[function(require,module,exports){
+},{"./ImmutableGraphObject":145,"./ImmutableGraphRegistry":146,"./ReferenceRegistry":147,"./clone":148,"./createMicroTask":149}],145:[function(require,module,exports){
 'use strict';
 
 require('setimmediate');
@@ -18548,17 +18777,14 @@ var ReferenceRegistry = require('./ReferenceRegistry');
 var EdgeRegistry = require('./EdgeRegistry');
 
 var clone = require('./clone');
+var createMicroTask = require('./createMicroTask');
 var removeReference = ReferenceRegistry.removeReference;
 var resolveObject = ReferenceRegistry.resolveObject;
 
-
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
-var isBusy = false;
 var counterAggregate = 0;
 var waitingPromise = null;
-
-var alreadyUpdatedImos = {};
 
 /**
  * Bundle all child changes into one
@@ -18573,7 +18799,7 @@ function aggregrateChangedChildrenWithPromises(self, fn) {
 
   __private.currentChildAggregation = (new Promise(function(resolve) {
     localCounterAggregate = counterAggregate++;
-    isBusy = true;
+    __private.isBusy = true;
     resolve();
   }))
     .then(function() {
@@ -18582,7 +18808,6 @@ function aggregrateChangedChildrenWithPromises(self, fn) {
       } else if (waitingPromise) {
         waitingPromise.call(self);
         waitingPromise = null;
-        alreadyUpdatedImos = {};
       }
     })
     .catch(function(e) {
@@ -18595,7 +18820,7 @@ function aggregrateChangedChildrenWithSetImmediate(self, fn) {
   if (__private.currentChildAggregation) {
     clearImmediate(__private.currentChildAggregation);
   }
-  isBusy = true;
+  __private.isBusy = true;
   __private.currentChildAggregation = setImmediate(fn);
 }
 
@@ -18676,6 +18901,7 @@ var restoreReferences;
 ImmutableGraphObject.prototype = {
 
   __private: {
+    isBusy: false,
     refToObj: null,
     parents: [],
     saveHistory: false,
@@ -18694,6 +18920,7 @@ ImmutableGraphObject.prototype = {
    * @param {function} fn
    */
   afterChange: function(fn) {
+    // TODO: should also work when updating own object instead of children - works in tests, but not in browser WTF!
     var __private = this.__private;
     var changeListeners = __private.changeListeners;
     changeListeners[changeListeners.length] = {
@@ -18740,7 +18967,7 @@ ImmutableGraphObject.prototype = {
       setHistory();
     }
     else {
-      setImmediate(setHistory());
+      setImmediate(setHistory);
     }
   },
 
@@ -18780,12 +19007,12 @@ ImmutableGraphObject.prototype = {
       oldRef = oldRefToObj.ref;
     }
 
-    var x = resolveObject(newObj);
-    __private.refToObj = x;
+    var resolvedObject = resolveObject(newObj);
+    __private.refToObj = resolvedObject;
     mergeWithExistingImmutableObject(this);
     if (oldRef) {
-      changeReferenceId(this, x.ref.__worldStateUniqueId,
-        oldRef.__worldStateUniqueId);
+      changeReferenceId(this, resolvedObject.ref.__worldStateUniqueId,
+          oldRef.__worldStateUniqueId);
     }
 
     if (oldRef) {
@@ -18800,13 +19027,16 @@ ImmutableGraphObject.prototype = {
    * @param {{}} newValue
    */
   changeValueTo: function(newValue) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRef = oldRefToObj.ref;
-    var newRefToObj = clone(resolveObject(newValue));
-    setReferences(__private.refToObj, newRefToObj.ref);
-    removeReference(oldRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function() {
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRef = oldRefToObj.ref;
+      var newRefToObj = clone(resolveObject(newValue));
+      setReferences(__private.refToObj, newRefToObj.ref);
+      removeReference(oldRef);
+      self.__changed();
+    //});
   },
 
   /**
@@ -18852,19 +19082,24 @@ ImmutableGraphObject.prototype = {
     var __private = this.__private;
     var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
-    var noUpdate = refToObj && refToObj.ref &&
-        !!alreadyUpdatedImos[refToObj.ref.__worldStateUniqueId];
-
-    if (refToObj && refToObj.ref) {
-      alreadyUpdatedImos[refToObj.ref.__worldStateUniqueId] = true;
-    }
-
     var i;
     var l;
+    this.__informChangeListeners();
+
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
         var parent = parents[i];
-        parent.parent.__childChanged(parent.parentKey, refToObj, noUpdate);
+        parent.parent.__childChanged(parent.parentKey, refToObj);
+      }
+    }
+
+    // inform incoming edges of changes
+    if (this.getIncomingEdges) {
+      var incomingEdges = this.getIncomingEdges();
+      if (incomingEdges) {
+        for (i = 0, l = incomingEdges.length; i < l; i++) {
+          incomingEdges[i].origin.__changed();
+        }
       }
     }
   },
@@ -18907,8 +19142,6 @@ ImmutableGraphObject.prototype = {
       this.length = newRefToObjRef.length;
       updateChildrenParentKeys(this);
     }
-
-    this.__informChangeListeners();
   },
 
   __informChangeListeners: function() {
@@ -18920,36 +19153,28 @@ ImmutableGraphObject.prototype = {
         clearImmediate(__private.currentChildEvent);
       }
 
-      isBusy = false;
+      __private.isBusy = false;
       __private.currentChildEvent =
           waitingPromise = function() {
-            if (!isBusy) {
-              for (var i = 0, l = changeListeners.length; i < l; i++) {
-                var changeListener = changeListeners[i];
-                changeListener.fn.call(changeListener.context);
-                if (changeListener.once) {
-                  changeListeners.splice(i, 1);
+            createMicroTask(function(){
+              if (!__private.isBusy) {
+                for (var i = 0, l = changeListeners.length; i < l; i++) {
+                  var changeListener = changeListeners[i];
+                  changeListener.fn.call(changeListener.context);
+                  if (changeListener.once) {
+                    changeListeners.splice(i, 1);
+                  }
                 }
               }
-            }
+            });
           };
-      if (typeof window !== 'undefined' && 'Promise' in window) {
-        var self = this;
-        (new Promise(function(resolve) {resolve();})).then(function() {
-          if (waitingPromise) {
-            waitingPromise.call(self);
-            waitingPromise = null;
-          }
-        });
-      }
-      else {
-        setImmediate(function() {
-          if (waitingPromise) {
-            waitingPromise.call(self);
-            waitingPromise = null;
-          }
-        });
-      }
+      var self = this;
+      createMicroTask(function() {
+        if (waitingPromise) {
+          waitingPromise.call(self);
+          waitingPromise = null;
+        }
+      });
     }
   },
 
@@ -18964,17 +19189,11 @@ ImmutableGraphObject.prototype = {
    * @param {ImmutableGraphObject|ImmutableGraphArray} newValue
    * @private
    */
-  __childChanged: function(key, newValue, setOnly) {
+  __childChanged: function(key, newValue) {
     var __private = this.__private;
     var refToObj = __private.refToObj;
     var removeKeys = __private.removeKeys;
     var changedKeys = __private.changedKeys;
-
-    if (setOnly) {
-      //console.log('AAAA');
-      //refToObj.ref[key] = newValue;
-      //return;
-    }
 
     if (!newValue && isArray(refToObj.ref)) {
       removeKeys[removeKeys.length] = key;
@@ -18987,8 +19206,8 @@ ImmutableGraphObject.prototype = {
     aggregateChangedChildren(this, function() {
       counterAggregate = 0;
       __private.currentChildAggregation = null;
-      isBusy = false;
-
+      __private.isBusy = false;
+      
       self.__aggregateChangedChildren();
     });
   },
@@ -18997,17 +19216,19 @@ ImmutableGraphObject.prototype = {
    * Remove this graph object
    */
   remove: function() {
-    var __private = this.__private;
-    var refToObj = __private.refToObj;
-    var refToObjRef = refToObj.ref;
-    removeReference(refToObjRef);
-    var parents = __private.parents;
-    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
-    if (isArray(refToObjRef)) {
-      refToObj.ref = [];
-    }
-
-    this.__changed({parents: parents});
+    var self = this;
+    createMicroTask(function(){
+      var __private = self.__private;
+      var refToObj = __private.refToObj;
+      var refToObjRef = refToObj.ref;
+      removeReference(refToObjRef);
+      var parents = __private.parents;
+      require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+      if (isArray(refToObjRef)) {
+        refToObj.ref = [];
+      }
+      self.__changed({parents: parents});
+    });
   },
 
   /**
@@ -19032,6 +19253,7 @@ ImmutableGraphObject.prototype = {
         newValue[key] = newProperties[key];
       }
     }
+    newValue = clone(newValue);
     this.changeValueTo(newValue);
   },
 
@@ -19041,7 +19263,7 @@ ImmutableGraphObject.prototype = {
    * @param
    */
   addEdgeTo: function(topic, otherObject) {
-    EdgeRegistry.addEdge(topic, this.__private.refToObj, otherObject.__private.refToObj);
+    EdgeRegistry.addEdge(topic, this, otherObject);
   },
 
   /**
@@ -19050,7 +19272,7 @@ ImmutableGraphObject.prototype = {
    * @param
    */
   removeEdgeTo: function(topic, otherObject) {
-    EdgeRegistry.removeEdge(topic, this.__private.refToObj, otherObject.__private.refToObj);
+    EdgeRegistry.removeEdge(topic, this, otherObject);
   },
 
   /**
@@ -19058,21 +19280,21 @@ ImmutableGraphObject.prototype = {
    *
    */
   getOutgoingEdges: function() {
-
+    return EdgeRegistry.getOutgoingEdges(this);
   },
 
   /**
    * Get edges that end up at this object
    */
   getIncomingEdges: function() {
-
+    return EdgeRegistry.getIncomingEdges(this);
   }
 
 };
 
 module.exports = ImmutableGraphObject;
 
-},{"./EdgeRegistry":142,"./ImmutableGraphRegistry":145,"./ReferenceRegistry":146,"./clone":147,"setimmediate":141}],145:[function(require,module,exports){
+},{"./EdgeRegistry":142,"./ImmutableGraphRegistry":146,"./ReferenceRegistry":147,"./clone":148,"./createMicroTask":149,"setimmediate":141}],146:[function(require,module,exports){
 'use strict';
 
 /* @type {ImmutableGraphArray} */
@@ -19081,11 +19303,13 @@ var ImmutableGraphArray = require('./ImmutableGraphArray');
 var ImmutableGraphObject = require('./ImmutableGraphObject');
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
+/* @type {EdgeRegistry} */
+var EdgeRegistry = require('./EdgeRegistry');
 
 var clone = require('./clone');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
-
+var isObjectArray = require('./isObjectArray');
 
 /**
  * @type {[Array.<ImmutableGraphArray>]}
@@ -19304,10 +19528,12 @@ var ImmutableGraphRegistry = {
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.
-            setReferences(imo.__private.refToObj, newRef.ref, true);
+              setReferences(imo.__private.refToObj, newRef.ref, true);
           ImmutableGraphRegistry.
-            changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
+              changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
               oldRef.ref.__worldStateUniqueId);
+          EdgeRegistry.changeEdgeId(oldRef.ref.__worldStateUniqueId,
+              newRef.ref.__worldStateUniqueId);
         }
 
         var newRefRef = newRef.ref;
@@ -19315,9 +19541,10 @@ var ImmutableGraphRegistry = {
         for (var key in newRefRef) {
           var value = newRefRef[key];
           if (typeof value === 'object') {
-            if (oldRefRef[key] !== newRefRef[key] || oldRefRef[key].ref !== newRefRef[key].ref) {
+            if (oldRefRef[key] !== newRefRef[key] ||
+                oldRefRef[key].ref !== newRefRef[key].ref) {
               ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
-                newRefRef[key]);
+                  newRefRef[key]);
             }
           }
         }
@@ -19333,6 +19560,10 @@ var ImmutableGraphRegistry = {
   mergeWithExistingImmutableObject: function(imo) {
     var imoPrivate = imo.__private;
     var imoRefToObj = imoPrivate.refToObj;
+    if (!imoPrivate.parents.length) {
+      return;
+    }
+
     if (!imoPrivate.realParent && imoPrivate.parents.length) {
       imoPrivate.realParent = imoPrivate.parents[0];
     }
@@ -19408,7 +19639,6 @@ var ImmutableGraphRegistry = {
    */
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
-
       var array = _getImmutableArray(obj, parent, parentKey);
       return array;
     }
@@ -19438,6 +19668,8 @@ var ImmutableGraphRegistry = {
 
     delete _objects[oldId];
     delete _arrays[oldId];
+
+    EdgeRegistry.changeEdgeId(oldId, newRef.ref.__worldStateUniqueId);
 
     for (var i = 0, l = res.length; i < l; i++) {
       var res2 = res[i];
@@ -19480,46 +19712,44 @@ var ImmutableGraphRegistry = {
    */
   removeImmutableGraphObject: function(reference) {
     var foundImos;
-    var id = reference.ref.__worldStateUniqueId;
-    if (isArray(reference.ref)) {
-      foundImos = _findAll(_arrays, reference.ref);
+    var referenceRef = reference.ref;
+    var id = referenceRef.__worldStateUniqueId;
+    if (isArray(referenceRef)) {
+      foundImos = _findAll(_arrays, referenceRef);
     }
     else {
-      foundImos = _findAll(_objects, reference.ref);
+      foundImos = _findAll(_objects, referenceRef);
     }
 
     this.removeImmutableGraphObjectChildren(foundImos);
 
     for (var i = 0, l = foundImos.length; i < l; i++) {
       var imo = foundImos[i];
-      imo.__private.refToObj = null;
+      var imoPrivate = imo.__private;
+      imoPrivate.refToObj = null;
 
       delete _objects[id];
       delete _arrays[id];
 
-      imo.__private.historyRefs = null;
-      var parents = imo.__private.parents;
-      for (var j = 0, l2 = parents.length; j < l2; j++) {
-        var parent = parents[j];
-        var parentRef = parent.parent.__private.refToObj.ref;
-      }
-      imo.__private.parents = [];
+      imoPrivate.historyRefs = null;
+      imoPrivate.parents = [];
     }
+
+
   }
-
 };
-
-//window.ImmutableGraphRegistry = ImmutableGraphRegistry;
 
 module.exports = ImmutableGraphRegistry;
 
-},{"./ImmutableGraphArray":143,"./ImmutableGraphObject":144,"./ReferenceRegistry":146,"./clone":147}],146:[function(require,module,exports){
+},{"./EdgeRegistry":142,"./ImmutableGraphArray":144,"./ImmutableGraphObject":145,"./ReferenceRegistry":147,"./clone":148,"./isObjectArray":150}],147:[function(require,module,exports){
 'use strict';
 
 var _arrayReferences = [];
 var _objectReferences = [];
 var isArray = Array.isArray;
+var isObjectArray = require('./isObjectArray');
 var uniqueIdCounter = 1;
+
 
 /**
  * Keeps track of references to objects
@@ -19617,7 +19847,7 @@ var ReferenceRegistry = {
     var val;
     var i;
     var l;
-    if (isArray(obj)) {
+    if (isObjectArray(obj)) {
       var refToArray = ReferenceRegistry.getReferenceTo(obj);
       var newArray = refToArray.ref;
       for (i = 0, l = obj.length; i < l; i++) {
@@ -19655,7 +19885,7 @@ var ReferenceRegistry = {
 
 module.exports = ReferenceRegistry;
 
-},{}],147:[function(require,module,exports){
+},{"./isObjectArray":150}],148:[function(require,module,exports){
 'use strict';
 
 var isArray = Array.isArray;
@@ -19696,7 +19926,46 @@ function clone(obj) {
 
 module.exports = clone;
 
-},{}],148:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
+require('setimmediate');
+
+function createMicroTask(fn, context, beforeFn) {
+  if (typeof window !== 'undefined' && 'Promise' in window) {
+    var self = this;
+    (new Promise(function(resolve) {
+      if (beforeFn) {
+        beforeFn.call(context);
+      }
+
+      resolve();})).then(function(){
+        fn.call(context);
+      });
+  }
+  else {
+    if (beforeFn) {
+      beforeFn.call(context);
+    }
+
+    setImmediate(function(){
+      fn.call(context);
+    });
+  }
+}
+
+module.exports = createMicroTask;
+
+},{"setimmediate":141}],150:[function(require,module,exports){
+'use strict';
+
+var isArray = Array.isArray;
+
+function isObjectArray(arr) {
+  return isArray(arr) && arr.length && typeof arr[0] === 'object';
+}
+
+module.exports = isObjectArray;
+
+},{}],151:[function(require,module,exports){
 'use strict';
 
 

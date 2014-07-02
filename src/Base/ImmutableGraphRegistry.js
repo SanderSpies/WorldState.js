@@ -6,11 +6,13 @@ var ImmutableGraphArray = require('./ImmutableGraphArray');
 var ImmutableGraphObject = require('./ImmutableGraphObject');
 /* @type {ReferenceRegistry} */
 var ReferenceRegistry = require('./ReferenceRegistry');
+/* @type {EdgeRegistry} */
+var EdgeRegistry = require('./EdgeRegistry');
 
 var clone = require('./clone');
 var getReferenceTo = ReferenceRegistry.getReferenceTo;
 var isArray = Array.isArray;
-
+var isObjectArray = require('./isObjectArray');
 
 /**
  * @type {[Array.<ImmutableGraphArray>]}
@@ -229,10 +231,12 @@ var ImmutableGraphRegistry = {
         for (var i = 0, l = imos.length; i < l; i++) {
           var imo = imos[i];
           ImmutableGraphRegistry.
-            setReferences(imo.__private.refToObj, newRef.ref, true);
+              setReferences(imo.__private.refToObj, newRef.ref, true);
           ImmutableGraphRegistry.
-            changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
+              changeReferenceId(imo, newRef.ref.__worldStateUniqueId,
               oldRef.ref.__worldStateUniqueId);
+          EdgeRegistry.changeEdgeId(oldRef.ref.__worldStateUniqueId,
+              newRef.ref.__worldStateUniqueId);
         }
 
         var newRefRef = newRef.ref;
@@ -240,9 +244,10 @@ var ImmutableGraphRegistry = {
         for (var key in newRefRef) {
           var value = newRefRef[key];
           if (typeof value === 'object') {
-            if (oldRefRef[key] !== newRefRef[key] || oldRefRef[key].ref !== newRefRef[key].ref) {
+            if (oldRefRef[key] !== newRefRef[key] ||
+                oldRefRef[key].ref !== newRefRef[key].ref) {
               ImmutableGraphRegistry.restoreReferences(oldRefRef[key],
-                newRefRef[key]);
+                  newRefRef[key]);
             }
           }
         }
@@ -258,6 +263,10 @@ var ImmutableGraphRegistry = {
   mergeWithExistingImmutableObject: function(imo) {
     var imoPrivate = imo.__private;
     var imoRefToObj = imoPrivate.refToObj;
+    if (!imoPrivate.parents.length) {
+      return;
+    }
+
     if (!imoPrivate.realParent && imoPrivate.parents.length) {
       imoPrivate.realParent = imoPrivate.parents[0];
     }
@@ -333,7 +342,6 @@ var ImmutableGraphRegistry = {
    */
   getImmutableObject: function(obj, parent, parentKey) {
     if (isArray(obj)) {
-
       var array = _getImmutableArray(obj, parent, parentKey);
       return array;
     }
@@ -363,6 +371,8 @@ var ImmutableGraphRegistry = {
 
     delete _objects[oldId];
     delete _arrays[oldId];
+
+    EdgeRegistry.changeEdgeId(oldId, newRef.ref.__worldStateUniqueId);
 
     for (var i = 0, l = res.length; i < l; i++) {
       var res2 = res[i];
@@ -405,35 +415,31 @@ var ImmutableGraphRegistry = {
    */
   removeImmutableGraphObject: function(reference) {
     var foundImos;
-    var id = reference.ref.__worldStateUniqueId;
-    if (isArray(reference.ref)) {
-      foundImos = _findAll(_arrays, reference.ref);
+    var referenceRef = reference.ref;
+    var id = referenceRef.__worldStateUniqueId;
+    if (isArray(referenceRef)) {
+      foundImos = _findAll(_arrays, referenceRef);
     }
     else {
-      foundImos = _findAll(_objects, reference.ref);
+      foundImos = _findAll(_objects, referenceRef);
     }
 
     this.removeImmutableGraphObjectChildren(foundImos);
 
     for (var i = 0, l = foundImos.length; i < l; i++) {
       var imo = foundImos[i];
-      imo.__private.refToObj = null;
+      var imoPrivate = imo.__private;
+      imoPrivate.refToObj = null;
 
       delete _objects[id];
       delete _arrays[id];
 
-      imo.__private.historyRefs = null;
-      var parents = imo.__private.parents;
-      for (var j = 0, l2 = parents.length; j < l2; j++) {
-        var parent = parents[j];
-        var parentRef = parent.parent.__private.refToObj.ref;
-      }
-      imo.__private.parents = [];
+      imoPrivate.historyRefs = null;
+      imoPrivate.parents = [];
     }
+
+
   }
-
 };
-
-//window.ImmutableGraphRegistry = ImmutableGraphRegistry;
 
 module.exports = ImmutableGraphRegistry;

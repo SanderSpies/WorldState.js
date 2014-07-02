@@ -6,6 +6,7 @@
 var ImmutableGraphObject = require('worldstate/src/Base/ImmutableGraphObject');
 var ImmutableGraphRegistry =
     require('worldstate/src/Base/ImmutableGraphRegistry');
+var GeneratorInstanceRegistry = require('worldstate/src/Base/GeneratorInstanceRegistry');
 
 /* @type Items */
 var Items = require('./Items');
@@ -39,6 +40,7 @@ var TodoListFactory = {
     };
     TodoListClass.prototype = TodoListPrototype;
     var instance = new TodoListClass(obj, parent, parentKey);
+    GeneratorInstanceRegistry.registerInstance(obj, this);
     return instance;
   }
 };
@@ -150,6 +152,7 @@ var TodoListPrototype = {
    */
   afterChange: function TodoList$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
+    return this;
   },
 
   /**
@@ -188,9 +191,72 @@ var TodoListPrototype = {
    *
    * @param {function} fn
    * @param {{}} context
+   * @return {TodoListPrototype}
    */
   addChangeListener: function TodoList$addChangeListener(fn, context) {
     this.__private.graph.addChangeListener(fn, context);
+    return this;
+  },
+
+  /**
+   * Add an edge to another object
+   *
+   * @return {TodoListPrototype}
+   */
+  addEdgeTo: function(topic, imo) {
+    this.__private.graph.addEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Remove edge to another object
+   *
+   * @return {TodoListPrototype}
+   */
+  removeEdgeTo: function(topic, imo) {
+    this.__private.graph.removeEdgeTo(topic, imo.__private.graph);
+    return this;
+  },
+
+  /**
+   * Get edges coming from other objects
+   *
+   * @return {TodoListPrototype}
+   */
+  getIncomingEdges: function() {
+    var realEdges = this.__private.graph.getIncomingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        origin: GeneratorInstanceRegistry.getInstance(realEdge.origin),
+        destination: TodoList.newInstance(realEdge.destination.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+
+    return edges;
+  },
+
+  /**
+   * Get edges going to other objects
+   *
+   * @return {TodoListPrototype}
+   */
+  getOutgoingEdges: function() {
+    var realEdges = this.__private.graph.getOutgoingEdges();
+    var edges = [];
+    for (var i = 0, l = realEdges.length; i < l; i++){
+      var realEdge = realEdges[i];
+      edges[i] = {
+        destination: GeneratorInstanceRegistry.getInstance(realEdge.destination),
+        origin: TodoList.newInstance(realEdge.origin.__private.refToObj.ref),
+        type: realEdge.type,
+        details: realEdge.details
+      };
+    }
+    return edges;
   },
 
   /**

@@ -46,7 +46,8 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
-      )
+      ),
+      UndoRedoListComponent( {items:todoList.items()} )
     );
   }, componentDidMount: function() {
     setState = this.setState;

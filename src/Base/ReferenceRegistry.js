@@ -3,7 +3,9 @@
 var _arrayReferences = [];
 var _objectReferences = [];
 var isArray = Array.isArray;
+var isObjectArray = require('./isObjectArray');
 var uniqueIdCounter = 1;
+
 
 /**
  * Keeps track of references to objects
@@ -101,7 +103,7 @@ var ReferenceRegistry = {
     var val;
     var i;
     var l;
-    if (isArray(obj)) {
+    if (isObjectArray(obj)) {
       var refToArray = ReferenceRegistry.getReferenceTo(obj);
       var newArray = refToArray.ref;
       for (i = 0, l = obj.length; i < l; i++) {

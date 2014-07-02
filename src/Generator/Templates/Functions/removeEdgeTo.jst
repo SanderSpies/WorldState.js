@@ -1,0 +1,9 @@
+  /**
+   * Remove edge to another object
+   *
+   * @return {{GraphName}Prototype}
+   */
+  removeEdgeTo: function(topic, imo) {
+    this.__private.graph.removeEdgeTo(topic, imo.__private.graph);
+    return this;
+  }

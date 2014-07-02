@@ -3,6 +3,7 @@
 var TemplateConstants = require('./TemplateConstants');
 
 var isArray = Array.isArray;
+var isObjectArray = require('../Base/isObjectArray');
 
 var ObjectFunctionTemplates = [
   TemplateConstants.CHANGE_REFERENCE_TO_FUNCTION,
@@ -16,7 +17,11 @@ var ObjectFunctionTemplates = [
   TemplateConstants.REMOVE_FUNCTION,
   TemplateConstants.GENERATED_ID_FUNCTION,
   TemplateConstants.CHANGE_PROPERTIES_TO,
-  TemplateConstants.ADD_CHANGE_LISTENER_FUNCTION
+  TemplateConstants.ADD_CHANGE_LISTENER_FUNCTION,
+  TemplateConstants.ADD_EDGE_FUNCTION,
+  TemplateConstants.REMOVE_EDGE_FUNCTION,
+  TemplateConstants.GET_INCOMING_EDGES_FUNCTION,
+  TemplateConstants.GET_OUTGOING_EDGES_FUNCTION
 ];
 
 var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
@@ -32,8 +37,13 @@ var ArrayFunctionTemplates = ObjectFunctionTemplates.concat([
 ]);
 
 ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.CHANGE_PROPERTIES_TO), 1);
+ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.ADD_EDGE_FUNCTION), 1);
+ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.REMOVE_EDGE_FUNCTION), 1);
+ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.GET_INCOMING_EDGES_FUNCTION), 1);
+ArrayFunctionTemplates.splice(ArrayFunctionTemplates.indexOf(TemplateConstants.GET_OUTGOING_EDGES_FUNCTION), 1);
 
-var FileStructureBuilder = {
+
+ var FileStructureBuilder = {
 
   createFunction: function(template, info) {
     for (var key in info) {
@@ -46,7 +56,7 @@ var FileStructureBuilder = {
   },
 
   getType: function(val) {
-    if (Array.isArray(val)) {
+    if (isObjectArray(val)) {
       return 'Array';
     }
     else {
@@ -58,7 +68,7 @@ var FileStructureBuilder = {
     var GraphReadDoc = '';
     var GraphChangeValueDoc = '';
     var child = obj;
-    if (isArray(obj)) {
+    if (isObjectArray(obj)) {
       child = obj[0];
     }
 
@@ -67,7 +77,7 @@ var FileStructureBuilder = {
         var val = child[key];
         GraphChangeValueDoc += key + ':' +
             FileStructureBuilder.getType(val) + ',';
-        if (typeof val !== 'object') {
+        if (!isObjectArray(val) && (typeof val !== 'object' || isArray(val))) {
           GraphReadDoc += key + ':' +
               FileStructureBuilder.getType(val) + ',';
         }
@@ -103,7 +113,7 @@ var FileStructureBuilder = {
     var functions = [];
     for (var key in obj) {
       var val = obj[key];
-      if (typeof val === 'object') {
+      if ((typeof val === 'object' && !isArray(val)) || isObjectArray(val)) {
         if (isNaN(key)) {
           info.subGraphName = key;
           info.SubGraphName = key[0].toUpperCase() + key.substr(1);
@@ -120,7 +130,7 @@ var FileStructureBuilder = {
     var requires = [];
     for (var key in obj) {
       var val = obj[key];
-      if (typeof val === 'object') {
+      if ((typeof val === 'object' && !isArray(val)) || isObjectArray(val)) {
         if (isNaN(key)) {
           var SubGraphName = key[0].toUpperCase() + key.substr(1);
           requires[requires.length] = FileStructureBuilder
@@ -137,7 +147,7 @@ var FileStructureBuilder = {
       fileName: objName + '.js',
       functions: [],
       require: [],
-      type: isArray(obj) ? 'Array' : 'object',
+      type: isObjectArray(obj) ? 'Array' : 'object',
       graphChangeValueDoc: ''
     };
 
@@ -159,7 +169,7 @@ var FileStructureBuilder = {
     var requireStatements = FileStructureBuilder.
         getRequireStatements(obj);
 
-    if (isArray(obj)) {
+    if (isObjectArray(obj)) {
       requireStatements = requireStatements.concat(
           [FileStructureBuilder.createFunction(TemplateConstants.__SUB_GRAPH_REQUIRE__, {SubGraphName: info.SubGraphName})]
         );
@@ -180,7 +190,8 @@ var FileStructureBuilder = {
     var sub = [];
     for (var key in obj) {
       var val = obj[key];
-      if (typeof val === 'object') {
+      if ((typeof val === 'object' && !isArray(val)) || isObjectArray(val)) {
+
         if (isNaN(key)) {
           var SubGraphName = key[0].toUpperCase() + key.substr(1);
 
@@ -190,6 +201,7 @@ var FileStructureBuilder = {
           };
         }
         else {
+
           var SubGraphName = objName.substr(0, objName.length - 1);
           sub[sub.length] = {
             fileName: SubGraphName,

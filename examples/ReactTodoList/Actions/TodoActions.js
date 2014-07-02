@@ -46,14 +46,14 @@ var TodoActions = {
     console.time('remove todo item');
     var item = opt.item;
     var text = item.read().text;
+
     item
       .remove()
       .afterChange(function() {
         console.timeEnd('remove todo item');
+        items
+          .saveVersionAs('Removed todo item ' + text);
       });
-
-    items
-      .saveVersionAs('Removed todo item ' + text);
   },
 
   /**
@@ -74,18 +74,19 @@ var TodoActions = {
     }
 
     item
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+
+        items
+          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+            (oldIsComplete ? 'checked' : 'unchecked') +
+            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
+      })
       .changePropertiesTo({
         isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
         text: 'text' in opt ? opt.text : oldText
-      })
-      .afterChange(function() {
-        console.timeEnd('Update todo item');
       });
 
-    items
-      .saveVersionAs('Changed todo item from ' + oldText + ' ' +
-        (oldIsComplete ? 'checked' : 'unchecked') +
-        ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
   },
 
   /**
@@ -116,14 +117,18 @@ var TodoActions = {
   updateAllTodoItems: function(opt) {
     console.time('Update all todo items');
     items
-      .changeChildrenPropertiesTo({
-        isComplete: opt.checked
-      })
-      .saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
-        ' all todo list items')
       .afterChange(function() {
         console.timeEnd('Update all todo items');
+        items.saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
+          ' all todo list items');
+        console.log(items.read());
+        console.log(items.at(0).read().isComplete);
+        console.log(items.getVersions()[items.getVersions().length - 1].ref[0].ref.isComplete);
+      })
+      .changeChildrenPropertiesTo({
+        isComplete: opt.checked
       });
+
   },
 
   /**
