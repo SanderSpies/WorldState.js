@@ -42,7 +42,8 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
   React.DOM.input( {type:"button", onClick:insertAt5, value:"Insert at 5"}),React.DOM.br(null ),
   React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items 1 by 1"}),
   React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"}),
-  React.DOM.input( {type:"button", onClick:removeItems, value:"Remove items"})
+  React.DOM.input( {type:"button", onClick:removeItems, value:"Remove items"}),
+  React.DOM.input( {type:"button", onClick:order, value:"Order items"})
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
@@ -86,6 +87,7 @@ function render(fn) {
       render();
     }
   }
+
 }
 todoList.addChangeListener(function() {
 
@@ -157,5 +159,8 @@ function insertAt5() {
   }));
 }
 
+function order() {
+  TodoActions.orderByTextAndCompleted();
+}
 
 module.exports = ApplicationComponent;

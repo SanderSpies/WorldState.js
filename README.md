@@ -133,18 +133,26 @@ console.log('Found items:', todoGraph.items().where({isComplete:true}));
 It's also possible to chain actions on the same object:
 ```
 items
-  .changePropertiesTo({
+  .changeChildPropertiesTo({
     yolo: 'yolo'
   })
-  .saveVersionAs('new name')
+  .saveVersionAs('Added yolo to all items', true)
   .afterChange(function() {
     // do stuff
   });
 ```
 
+Note that this still pretty much a work in progress, so expect this to not work.
+
 Ordering an array:
 ```
-items.orderBy([/*TODO*/]);
+items.orderBy({
+    name: 0, //ascending
+    id: 1, //descending
+    another: function(a, b) {
+        // perform custom sorting magic;
+    }
+});
 ```
 
 Grouping items in an array:

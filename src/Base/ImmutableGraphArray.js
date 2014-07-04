@@ -48,9 +48,9 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
   __informChangeListeners:
-      ImmutableGraphObjectPrototype.__informChangeListeners,
+    ImmutableGraphObjectPrototype.__informChangeListeners,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -61,7 +61,7 @@ ImmutableGraphArray.prototype = {
    */
   insert: function(newItem) {
     var self = this;
-    //createMicroTask(function(){
+    createMicroTask(function(){
       var __private = self.__private;
       var oldRefToObj = __private.refToObj;
       var oldRefToObjRef = oldRefToObj.ref;
@@ -69,7 +69,7 @@ ImmutableGraphArray.prototype = {
       setReferences(oldRefToObj, clone(oldRefToObjRef));
       removeReference(oldRefToObjRef);
       self.__changed();
-    //});
+    });
   },
 
   /**
@@ -123,20 +123,20 @@ ImmutableGraphArray.prototype = {
    */
   insertMulti: function(newItems) {
     var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
 
-    var __private = self.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
+      for (var i = 0, l = newItems.length; i < l; i++) {
+        var newItem = newItems[i];
+        self._insert(newItem, -1);
+      }
 
-    for (var i = 0, l = newItems.length; i < l; i++) {
-      var newItem = newItems[i];
-      self._insert(newItem, -1);
-    }
-
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    self.__changed();
-
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    });
   },
 
   /**
@@ -181,7 +181,7 @@ ImmutableGraphArray.prototype = {
         parentKeys[j] = i;
         j++;
         containers[containers.length] =
-          getImmutableObject(obj, this, i);
+            getImmutableObject(obj, this, i);
       }
     }
 
@@ -199,19 +199,21 @@ ImmutableGraphArray.prototype = {
    * @param {{}} newProperties
    */
   changePropertiesTo: function(newProperties) {
-    var __private = this.__private;
-    var newArray = clone(__private.refToObj.ref);
-    for (var i = 0, l = newArray.length; i < l; i++) {
-      var item = clone(newArray[i].ref);
-      for (var key in newProperties) {
-        if (newProperties.hasOwnProperty(key)) {
-          item[key] = newProperties[key];
+    var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var newArray = clone(__private.refToObj.ref);
+      for (var i = 0, l = newArray.length; i < l; i++) {
+        var item = clone(newArray[i].ref);
+        for (var key in newProperties) {
+          if (newProperties.hasOwnProperty(key)) {
+            item[key] = newProperties[key];
+          }
         }
+        newArray[i].ref = item;
       }
-      newArray[i].ref = item;
-    }
-    this.changeValueTo(newArray);
-
+      self.changeValueTo(newArray);
+    });
   },
 
   /**
@@ -222,7 +224,7 @@ ImmutableGraphArray.prototype = {
    */
   insertAt: function(position, newItem) {
     var self = this;
-    //createMicroTask(function(){
+    createMicroTask(function() {
       var __private = self.__private;
       var oldRefToObj = __private.refToObj;
       var oldRefToObjRef = oldRefToObj.ref;
@@ -230,21 +232,21 @@ ImmutableGraphArray.prototype = {
       setReferences(oldRefToObj, clone(oldRefToObjRef));
       removeReference(oldRefToObjRef);
       self.__changed();
-    //})
+    });
   },
 
   removeMulti: function(items) {
     // TODO
     /*var __private = this.__private;
-    var refToObj = __private.refToObj;
-    var refToObjRef = refToObj.ref;
-    removeReference(refToObjRef);
-    var parents = __private.parents;
-    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
-    if (isArray(refToObjRef)) {
-      refToObj.ref = [];
-    }
-    this.__changed({parents: parents});*/
+     var refToObj = __private.refToObj;
+     var refToObjRef = refToObj.ref;
+     removeReference(refToObjRef);
+     var parents = __private.parents;
+     require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+     if (isArray(refToObjRef)) {
+     refToObj.ref = [];
+     }
+     this.__changed({parents: parents});*/
   },
 
   getPositionFor: function() {
@@ -257,19 +259,87 @@ ImmutableGraphArray.prototype = {
    * @param {[{}]} orderDirectives
    */
   orderBy: function(orderDirectives) {
-    var __private = this.__private;
-    var _orderDirectives = orderDirectives.reverse();
-    var currValues = __private.refToObj.ref;
-    var bla = [];
-    var i, l;
-    for (i = 0, l = currValues.length; i < l; i++) {
-      bla[i] = currValues[i].ref;
-    }
+    var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var directiveKeys = Object.keys(orderDirectives);
+      var _orderDirectives = directiveKeys.reverse();
+      var oldRefToObj = __private.refToObj;
+      var newArray = clone(oldRefToObj.ref);
+      for (var i = 0, l = directiveKeys.length; i < l; i++) {
+        var key = directiveKeys[i];
+        var value = _orderDirectives[key];
+        var sortFn;
+        var isDescending = _orderDirectives[directiveKeys[i]];
 
-    for (i = 0, l = _orderDirectives.length; i < l; i++) {
-      var directive = _orderDirectives[i];
+        var type = typeof newArray[0].ref[key];
+        if (type === 'function') {
+          newArray = newArray.sort(value);
+          continue;
+        }
+        else if (type === 'number') {
+          if (!isDescending) {
+            sortFn = function(a, b) {
+              return a.ref[key] - b.ref[key];
+            };
+          }
+          else {
+            sortFn = function(a, b) {
+              return -(a.ref[key] - b.ref[key]);
+            };
+          }
+        }
+        else if (type === 'string') {
+          sortFn = function(a, b) {
+            // needs a polyfill for < IE11 and other old browsers
+            return isDescending ? b.ref[key].localeCompare(a.ref[key]) :
+                a.ref[key].localeCompare(b.ref[key]);
+          };
+        }
+        else if (type === 'boolean') {
+          sortFn = function(a, b) {
+            if (isDescending) {
+              if (b.ref[key] < a.ref[key]) {
+                return -1;
+              }
+              if (b.ref[key] > a.ref[key]) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (b.ref[key] > a.ref[key]) {
+                return -1;
+              }
+              if (b.ref[key] < a.ref[key]) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+          };
+        }
+        newArray = newArray.sort(sortFn);
+      }
+      for (i = 0, l = newArray.length; i < l; i++) {
+        var parents = getImmutableObject(newArray[i].ref).__private.parents;
+        for (var j = 0, l2 = parents.length; j < l2; j++) {
+          var parent = parents[j];
+          if (parent.parent === self) {
+            parent.parentKey = i;
+            break;
+          }
+        }
+      }
+      self.changeValueTo(newArray);
+    });
+  },
 
-    }
+  groupBy: function() {
+
   }
 
 };

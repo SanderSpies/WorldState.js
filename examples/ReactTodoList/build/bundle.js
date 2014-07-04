@@ -35,7 +35,7 @@ var TodoActions = {
     };
     items
       .insert(Item.newInstance(todoListItem))
-      .saveVersionAs('Added todo item ' + opt.text);
+      .saveVersionAs('Added todo item ' + opt.text, true);
   },
 
   /**
@@ -53,7 +53,7 @@ var TodoActions = {
       .afterChange(function() {
         console.timeEnd('remove todo item');
         items
-          .saveVersionAs('Removed todo item ' + text);
+          .saveVersionAs('Removed todo item ' + text, true);
       });
   },
 
@@ -75,19 +75,17 @@ var TodoActions = {
     }
 
     item
-      .afterChange(function() {
-        console.timeEnd('Update todo item');
-
-        items
-          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
-            (oldIsComplete ? 'checked' : 'unchecked') +
-            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
-      })
       .changePropertiesTo({
         isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
         text: 'text' in opt ? opt.text : oldText
+      })
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+        items
+          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+            (oldIsComplete ? 'checked' : 'unchecked') +
+            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'), true);
       });
-
   },
 
   /**
@@ -121,7 +119,7 @@ var TodoActions = {
       .afterChange(function() {
         console.timeEnd('Update all todo items');
         items.saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
-          ' all todo list items');
+          ' all todo list items', true);
         console.log(items.read());
         console.log(items.at(0).read().isComplete);
         console.log(items.getVersions()[items.getVersions().length - 1].ref[0].ref.isComplete);
@@ -129,7 +127,17 @@ var TodoActions = {
       .changeChildrenPropertiesTo({
         isComplete: opt.checked
       });
+  },
 
+  orderByTextAndCompleted: function() {
+    var ASCENDING = 0;
+    var DESCENDING = 1;
+    items
+      .orderBy({
+        text: ASCENDING,
+        isComplete: DESCENDING
+      })
+      .saveVersionAs('Sorted everything out', true);
   },
 
   /**
@@ -142,7 +150,7 @@ var TodoActions = {
     });
 
     // TODO: fix me
-    todoListGraph.__private.graph.__informChangeListeners();
+    //todoListGraph.__private.graph.__informChangeListeners();
   },
 
   /**
@@ -156,7 +164,7 @@ var TodoActions = {
     }
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
-      items.saveVersionAs('Removed all completed items');
+      items.saveVersionAs('Removed all completed items', true);
     });
   }
 
@@ -1077,7 +1085,8 @@ var ApplicationComponent = React.createClass({displayName: 'ApplicationComponent
   React.DOM.input( {type:"button", onClick:insertAt5, value:"Insert at 5"}),React.DOM.br(null ),
   React.DOM.input( {type:"button", onClick:change200, value:"Change 200 items 1 by 1"}),
   React.DOM.input( {type:"button", onClick:remove200, value:"Remove 200 items 1 by 1"}),
-  React.DOM.input( {type:"button", onClick:removeItems, value:"Remove items"})
+  React.DOM.input( {type:"button", onClick:removeItems, value:"Remove items"}),
+  React.DOM.input( {type:"button", onClick:order, value:"Order items"})
       ),
       React.DOM.section( {id:"todoapp"}, 
         TodoListComponent( {items:todoList.items(), filter:todoList.read().filter} )
@@ -1121,6 +1130,7 @@ function render(fn) {
       render();
     }
   }
+
 }
 todoList.addChangeListener(function() {
 
@@ -1192,6 +1202,9 @@ function insertAt5() {
   }));
 }
 
+function order() {
+  TodoActions.orderByTextAndCompleted();
+}
 
 module.exports = ApplicationComponent;
 
@@ -18536,9 +18549,9 @@ ImmutableGraphArray.prototype = {
   __changed: ImmutableGraphObjectPrototype.__changed,
   __childChanged: ImmutableGraphObjectPrototype.__childChanged,
   __aggregateChangedChildren:
-      ImmutableGraphObjectPrototype.__aggregateChangedChildren,
+    ImmutableGraphObjectPrototype.__aggregateChangedChildren,
   __informChangeListeners:
-      ImmutableGraphObjectPrototype.__informChangeListeners,
+    ImmutableGraphObjectPrototype.__informChangeListeners,
   remove: ImmutableGraphObjectPrototype.remove,
   afterChange: ImmutableGraphObjectPrototype.afterChange,
 
@@ -18549,7 +18562,7 @@ ImmutableGraphArray.prototype = {
    */
   insert: function(newItem) {
     var self = this;
-    //createMicroTask(function(){
+    createMicroTask(function(){
       var __private = self.__private;
       var oldRefToObj = __private.refToObj;
       var oldRefToObjRef = oldRefToObj.ref;
@@ -18557,7 +18570,7 @@ ImmutableGraphArray.prototype = {
       setReferences(oldRefToObj, clone(oldRefToObjRef));
       removeReference(oldRefToObjRef);
       self.__changed();
-    //});
+    });
   },
 
   /**
@@ -18611,20 +18624,20 @@ ImmutableGraphArray.prototype = {
    */
   insertMulti: function(newItems) {
     var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRefToObjRef = oldRefToObj.ref;
 
-    var __private = self.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRefToObjRef = oldRefToObj.ref;
+      for (var i = 0, l = newItems.length; i < l; i++) {
+        var newItem = newItems[i];
+        self._insert(newItem, -1);
+      }
 
-    for (var i = 0, l = newItems.length; i < l; i++) {
-      var newItem = newItems[i];
-      self._insert(newItem, -1);
-    }
-
-    setReferences(oldRefToObj, clone(oldRefToObjRef));
-    removeReference(oldRefToObjRef);
-    self.__changed();
-
+      setReferences(oldRefToObj, clone(oldRefToObjRef));
+      removeReference(oldRefToObjRef);
+      self.__changed();
+    });
   },
 
   /**
@@ -18669,7 +18682,7 @@ ImmutableGraphArray.prototype = {
         parentKeys[j] = i;
         j++;
         containers[containers.length] =
-          getImmutableObject(obj, this, i);
+            getImmutableObject(obj, this, i);
       }
     }
 
@@ -18688,7 +18701,7 @@ ImmutableGraphArray.prototype = {
    */
   changePropertiesTo: function(newProperties) {
     var self = this;
-    // createMicroTask(function(){
+    createMicroTask(function() {
       var __private = self.__private;
       var newArray = clone(__private.refToObj.ref);
       for (var i = 0, l = newArray.length; i < l; i++) {
@@ -18698,11 +18711,10 @@ ImmutableGraphArray.prototype = {
             item[key] = newProperties[key];
           }
         }
-
         newArray[i].ref = item;
       }
       self.changeValueTo(newArray);
-    // });
+    });
   },
 
   /**
@@ -18713,7 +18725,7 @@ ImmutableGraphArray.prototype = {
    */
   insertAt: function(position, newItem) {
     var self = this;
-    //createMicroTask(function(){
+    createMicroTask(function() {
       var __private = self.__private;
       var oldRefToObj = __private.refToObj;
       var oldRefToObjRef = oldRefToObj.ref;
@@ -18721,21 +18733,21 @@ ImmutableGraphArray.prototype = {
       setReferences(oldRefToObj, clone(oldRefToObjRef));
       removeReference(oldRefToObjRef);
       self.__changed();
-    //})
+    });
   },
 
   removeMulti: function(items) {
     // TODO
     /*var __private = this.__private;
-    var refToObj = __private.refToObj;
-    var refToObjRef = refToObj.ref;
-    removeReference(refToObjRef);
-    var parents = __private.parents;
-    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
-    if (isArray(refToObjRef)) {
-      refToObj.ref = [];
-    }
-    this.__changed({parents: parents});*/
+     var refToObj = __private.refToObj;
+     var refToObjRef = refToObj.ref;
+     removeReference(refToObjRef);
+     var parents = __private.parents;
+     require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+     if (isArray(refToObjRef)) {
+     refToObj.ref = [];
+     }
+     this.__changed({parents: parents});*/
   },
 
   getPositionFor: function() {
@@ -18748,19 +18760,87 @@ ImmutableGraphArray.prototype = {
    * @param {[{}]} orderDirectives
    */
   orderBy: function(orderDirectives) {
-    var __private = this.__private;
-    var _orderDirectives = orderDirectives.reverse();
-    var currValues = __private.refToObj.ref;
-    var bla = [];
-    var i, l;
-    for (i = 0, l = currValues.length; i < l; i++) {
-      bla[i] = currValues[i].ref;
-    }
+    var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var directiveKeys = Object.keys(orderDirectives);
+      var _orderDirectives = directiveKeys.reverse();
+      var oldRefToObj = __private.refToObj;
+      var newArray = clone(oldRefToObj.ref);
+      for (var i = 0, l = directiveKeys.length; i < l; i++) {
+        var key = directiveKeys[i];
+        var value = _orderDirectives[key];
+        var sortFn;
+        var isDescending = _orderDirectives[directiveKeys[i]];
 
-    for (i = 0, l = _orderDirectives.length; i < l; i++) {
-      var directive = _orderDirectives[i];
+        var type = typeof newArray[0].ref[key];
+        if (type === 'function') {
+          newArray = newArray.sort(value);
+          continue;
+        }
+        else if (type === 'number') {
+          if (!isDescending) {
+            sortFn = function(a, b) {
+              return a.ref[key] - b.ref[key];
+            };
+          }
+          else {
+            sortFn = function(a, b) {
+              return -(a.ref[key] - b.ref[key]);
+            };
+          }
+        }
+        else if (type === 'string') {
+          sortFn = function(a, b) {
+            // needs a polyfill for < IE11 and other old browsers
+            return isDescending ? b.ref[key].localeCompare(a.ref[key]) :
+                a.ref[key].localeCompare(b.ref[key]);
+          };
+        }
+        else if (type === 'boolean') {
+          sortFn = function(a, b) {
+            if (isDescending) {
+              if (b.ref[key] < a.ref[key]) {
+                return -1;
+              }
+              if (b.ref[key] > a.ref[key]) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+            else {
+              if (b.ref[key] > a.ref[key]) {
+                return -1;
+              }
+              if (b.ref[key] < a.ref[key]) {
+                return 1;
+              }
+              else {
+                return 0;
+              }
+            }
+          };
+        }
+        newArray = newArray.sort(sortFn);
+      }
+      for (i = 0, l = newArray.length; i < l; i++) {
+        var parents = getImmutableObject(newArray[i].ref).__private.parents;
+        for (var j = 0, l2 = parents.length; j < l2; j++) {
+          var parent = parents[j];
+          if (parent.parent === self) {
+            parent.parentKey = i;
+            break;
+          }
+        }
+      }
+      self.changeValueTo(newArray);
+    });
+  },
 
-    }
+  groupBy: function() {
+
   }
 
 };
@@ -18786,6 +18866,7 @@ var isArray = Array.isArray;
 var counterAggregate = 0;
 var waitingPromise = null;
 
+
 /**
  * Bundle all child changes into one
  *
@@ -18805,7 +18886,8 @@ function aggregrateChangedChildrenWithPromises(self, fn) {
     .then(function() {
       if (localCounterAggregate === 0) {
         fn.call(self);
-      } else if (waitingPromise) {
+      }
+      else if (waitingPromise) {
         waitingPromise.call(self);
         waitingPromise = null;
       }
@@ -18854,8 +18936,6 @@ function updateChildrenParentKeys(self) {
   }
 }
 
-
-
 /**
  * ImmutableGraphObject
  *
@@ -18867,11 +18947,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   if (!mergeWithExistingImmutableObject) {
     var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     mergeWithExistingImmutableObject =
-      ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
-      ImmutableGraphRegistry.removeImmutableGraphObject;
+        ImmutableGraphRegistry.removeImmutableGraphObject;
     changeReferenceId = ImmutableGraphRegistry.changeReferenceId;
     restoreReferences = ImmutableGraphRegistry.restoreReferences;
   }
@@ -18920,7 +19000,6 @@ ImmutableGraphObject.prototype = {
    * @param {function} fn
    */
   afterChange: function(fn) {
-    // TODO: should also work when updating own object instead of children - works in tests, but not in browser WTF!
     var __private = this.__private;
     var changeListeners = __private.changeListeners;
     changeListeners[changeListeners.length] = {
@@ -18928,7 +19007,6 @@ ImmutableGraphObject.prototype = {
       once: true
     };
   },
-
 
   addChangeListener: function(fn, context) {
     var __private = this.__private;
@@ -18957,12 +19035,14 @@ ImmutableGraphObject.prototype = {
   saveVersion: function(name, delayed) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
+
     function setHistory() {
       historyRefs[historyRefs.length] = {
         name: name,
         ref: clone(__private.refToObj.ref)
       };
     }
+
     if (!delayed) {
       setHistory();
     }
@@ -19012,7 +19092,7 @@ ImmutableGraphObject.prototype = {
     mergeWithExistingImmutableObject(this);
     if (oldRef) {
       changeReferenceId(this, resolvedObject.ref.__worldStateUniqueId,
-          oldRef.__worldStateUniqueId);
+        oldRef.__worldStateUniqueId);
     }
 
     if (oldRef) {
@@ -19028,7 +19108,7 @@ ImmutableGraphObject.prototype = {
    */
   changeValueTo: function(newValue) {
     var self = this;
-    //createMicroTask(function() {
+    //createMicroTask(function(){
       var __private = self.__private;
       var oldRefToObj = __private.refToObj;
       var oldRef = oldRefToObj.ref;
@@ -19079,12 +19159,12 @@ ImmutableGraphObject.prototype = {
    * @private
    */
   __changed: function(opt) {
-    var __private = this.__private;
+    var self = this;
+    var __private = self.__private;
     var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
     var i;
     var l;
-    this.__informChangeListeners();
 
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
@@ -19094,14 +19174,16 @@ ImmutableGraphObject.prototype = {
     }
 
     // inform incoming edges of changes
-    if (this.getIncomingEdges) {
-      var incomingEdges = this.getIncomingEdges();
+    if (self.getIncomingEdges) {
+      var incomingEdges = self.getIncomingEdges();
       if (incomingEdges) {
         for (i = 0, l = incomingEdges.length; i < l; i++) {
           incomingEdges[i].origin.__changed();
         }
       }
     }
+
+    self.__informChangeListeners();
   },
 
   /**
@@ -19111,6 +19193,7 @@ ImmutableGraphObject.prototype = {
    */
   __aggregateChangedChildren: function() {
     var __private = this.__private;
+    var self = this;
     var refToObj = __private.refToObj;
 
     ReferenceRegistry.removeReference(refToObj.ref);
@@ -19137,10 +19220,10 @@ ImmutableGraphObject.prototype = {
     }
     __private.changedKeys = {};
     setReferences(__private.refToObj, newRefToObjRef);
-    this.__changed();
+    self.__changed();
     if (isArray(newRefToObjRef)) {
-      this.length = newRefToObjRef.length;
-      updateChildrenParentKeys(this);
+      self.length = newRefToObjRef.length;
+      updateChildrenParentKeys(self);
     }
   },
 
@@ -19149,25 +19232,21 @@ ImmutableGraphObject.prototype = {
     var changeListeners = __private.changeListeners;
 
     if (changeListeners.length) {
-      if (__private.currentChildEvent) {
-        clearImmediate(__private.currentChildEvent);
-      }
-
       __private.isBusy = false;
       __private.currentChildEvent =
-          waitingPromise = function() {
-            createMicroTask(function(){
-              if (!__private.isBusy) {
-                for (var i = 0, l = changeListeners.length; i < l; i++) {
-                  var changeListener = changeListeners[i];
-                  changeListener.fn.call(changeListener.context);
-                  if (changeListener.once) {
-                    changeListeners.splice(i, 1);
-                  }
+        waitingPromise = function() {
+          createMicroTask(function() {
+            if (!__private.isBusy) {
+              for (var i = 0, l = changeListeners.length; i < l; i++) {
+                var changeListener = changeListeners[i];
+                changeListener.fn.call(changeListener.context);
+                if (changeListener.once) {
+                  changeListeners.splice(i, 1);
                 }
               }
-            });
-          };
+            }
+          });
+        };
       var self = this;
       createMicroTask(function() {
         if (waitingPromise) {
@@ -19180,10 +19259,6 @@ ImmutableGraphObject.prototype = {
 
   /**
    * Performed when a child has changed.
-   *
-   * What's interesting here is that we combine all child changes using
-   * setImmediate, and wait using setTimeout(0). This is slower for simple
-   * operations, but faster when doing many operations at once.
    *
    * @param {string} key
    * @param {ImmutableGraphObject|ImmutableGraphArray} newValue
@@ -19207,7 +19282,7 @@ ImmutableGraphObject.prototype = {
       counterAggregate = 0;
       __private.currentChildAggregation = null;
       __private.isBusy = false;
-      
+
       self.__aggregateChangedChildren();
     });
   },
@@ -19217,7 +19292,7 @@ ImmutableGraphObject.prototype = {
    */
   remove: function() {
     var self = this;
-    createMicroTask(function(){
+    createMicroTask(function() {
       var __private = self.__private;
       var refToObj = __private.refToObj;
       var refToObjRef = refToObj.ref;
@@ -19227,6 +19302,7 @@ ImmutableGraphObject.prototype = {
       if (isArray(refToObjRef)) {
         refToObj.ref = [];
       }
+
       self.__changed({parents: parents});
     });
   },
@@ -19246,15 +19322,17 @@ ImmutableGraphObject.prototype = {
    * @param {{}} newProperties
    */
   changePropertiesTo: function(newProperties) {
-    var __private = this.__private;
-    var newValue = clone(__private.refToObj.ref);
-    for (var key in newProperties) {
-      if (newProperties.hasOwnProperty(key)) {
-        newValue[key] = newProperties[key];
+    var self = this;
+    createMicroTask(function(){
+      var __private = self.__private;
+      var newValue = clone(__private.refToObj.ref);
+      for (var key in newProperties) {
+        if (newProperties.hasOwnProperty(key)) {
+          newValue[key] = newProperties[key];
+        }
       }
-    }
-    newValue = clone(newValue);
-    this.changeValueTo(newValue);
+      self.changeValueTo(newValue);
+    });
   },
 
   /**

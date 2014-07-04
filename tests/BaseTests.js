@@ -108,17 +108,26 @@ describe('WorldState.js', function() {
       var old4 = imo.wrapped().otherArea.read();
       var old5 = imo.wrapped().andAnother.read();
 
+      imo.addChangeListener(function(){
+        console.log('I was called!');
+      });
+      console.log('start');
+
       deepItem.changeValueTo({
         hello: 'there'
       });
 
+      var oldImo = imo.read();
       imo.afterChange(function() {
         // test to see if both values are the same
         expect(oldObj1).toBe(imo.read().items.ref[0].ref.sibling);
 
+        expect(imo.read()).not.toBe(oldImo);
+
         // test to see if the changed item has really changed
         expect(imo.read().items.ref[0].ref.bla.ref.items.ref[0].ref).
           not.toBe(old3);
+        console.log('end');
         expect(deepItem.read()).not.toBe(old3);
 
         expect(oldObj3).not.toBe(imo.read().items.ref[0]);
@@ -337,8 +346,9 @@ describe('WorldState.js', function() {
                     id: 1,
                     title: 'fafafa'
                   });
+                  var oldImo = imo.read();
                   imo.afterChange(function() {
-
+                    expect(oldImo).not.toBe(imo.read());
                     expect(item0.read()).toBe(imo.read().parent.ref.items.ref[0].ref);
                     expect(item0.read()).toBe(imo.wrapped().parent.wrapped
                       ().items.at(0).read());

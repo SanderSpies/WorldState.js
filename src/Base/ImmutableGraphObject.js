@@ -16,6 +16,7 @@ var isArray = Array.isArray;
 var counterAggregate = 0;
 var waitingPromise = null;
 
+
 /**
  * Bundle all child changes into one
  *
@@ -35,7 +36,8 @@ function aggregrateChangedChildrenWithPromises(self, fn) {
     .then(function() {
       if (localCounterAggregate === 0) {
         fn.call(self);
-      } else if (waitingPromise) {
+      }
+      else if (waitingPromise) {
         waitingPromise.call(self);
         waitingPromise = null;
       }
@@ -84,8 +86,6 @@ function updateChildrenParentKeys(self) {
   }
 }
 
-
-
 /**
  * ImmutableGraphObject
  *
@@ -97,11 +97,11 @@ var ImmutableGraphObject = function ImmutableGraphObject(obj) {
   if (!mergeWithExistingImmutableObject) {
     var ImmutableGraphRegistry = require('./ImmutableGraphRegistry');
     mergeWithExistingImmutableObject =
-      ImmutableGraphRegistry.mergeWithExistingImmutableObject;
+        ImmutableGraphRegistry.mergeWithExistingImmutableObject;
     setReferences = ImmutableGraphRegistry.setReferences;
     getImmutableObject = ImmutableGraphRegistry.getImmutableObject;
     removeImmutableGraphObject =
-      ImmutableGraphRegistry.removeImmutableGraphObject;
+        ImmutableGraphRegistry.removeImmutableGraphObject;
     changeReferenceId = ImmutableGraphRegistry.changeReferenceId;
     restoreReferences = ImmutableGraphRegistry.restoreReferences;
   }
@@ -150,7 +150,6 @@ ImmutableGraphObject.prototype = {
    * @param {function} fn
    */
   afterChange: function(fn) {
-    // TODO: should also work when updating own object instead of children - works in tests, but not in browser WTF!
     var __private = this.__private;
     var changeListeners = __private.changeListeners;
     changeListeners[changeListeners.length] = {
@@ -158,7 +157,6 @@ ImmutableGraphObject.prototype = {
       once: true
     };
   },
-
 
   addChangeListener: function(fn, context) {
     var __private = this.__private;
@@ -187,12 +185,14 @@ ImmutableGraphObject.prototype = {
   saveVersion: function(name, delayed) {
     var __private = this.__private;
     var historyRefs = __private.historyRefs;
+
     function setHistory() {
       historyRefs[historyRefs.length] = {
         name: name,
         ref: clone(__private.refToObj.ref)
       };
     }
+
     if (!delayed) {
       setHistory();
     }
@@ -242,7 +242,7 @@ ImmutableGraphObject.prototype = {
     mergeWithExistingImmutableObject(this);
     if (oldRef) {
       changeReferenceId(this, resolvedObject.ref.__worldStateUniqueId,
-          oldRef.__worldStateUniqueId);
+        oldRef.__worldStateUniqueId);
     }
 
     if (oldRef) {
@@ -257,13 +257,16 @@ ImmutableGraphObject.prototype = {
    * @param {{}} newValue
    */
   changeValueTo: function(newValue) {
-    var __private = this.__private;
-    var oldRefToObj = __private.refToObj;
-    var oldRef = oldRefToObj.ref;
-    var newRefToObj = clone(resolveObject(newValue));
-    setReferences(__private.refToObj, newRefToObj.ref);
-    removeReference(oldRef);
-    this.__changed();
+    var self = this;
+    //createMicroTask(function(){
+      var __private = self.__private;
+      var oldRefToObj = __private.refToObj;
+      var oldRef = oldRefToObj.ref;
+      var newRefToObj = clone(resolveObject(newValue));
+      setReferences(__private.refToObj, newRefToObj.ref);
+      removeReference(oldRef);
+      self.__changed();
+    //});
   },
 
   /**
@@ -306,12 +309,12 @@ ImmutableGraphObject.prototype = {
    * @private
    */
   __changed: function(opt) {
-    var __private = this.__private;
+    var self = this;
+    var __private = self.__private;
     var parents = opt && opt.parents ? opt.parents : __private.parents;
     var refToObj = __private.refToObj;
     var i;
     var l;
-    this.__informChangeListeners();
 
     if (parents) {
       for (i = 0, l = parents.length; i < l; i++) {
@@ -321,14 +324,16 @@ ImmutableGraphObject.prototype = {
     }
 
     // inform incoming edges of changes
-    if (this.getIncomingEdges) {
-      var incomingEdges = this.getIncomingEdges();
+    if (self.getIncomingEdges) {
+      var incomingEdges = self.getIncomingEdges();
       if (incomingEdges) {
         for (i = 0, l = incomingEdges.length; i < l; i++) {
           incomingEdges[i].origin.__changed();
         }
       }
     }
+
+    self.__informChangeListeners();
   },
 
   /**
@@ -338,6 +343,7 @@ ImmutableGraphObject.prototype = {
    */
   __aggregateChangedChildren: function() {
     var __private = this.__private;
+    var self = this;
     var refToObj = __private.refToObj;
 
     ReferenceRegistry.removeReference(refToObj.ref);
@@ -364,10 +370,10 @@ ImmutableGraphObject.prototype = {
     }
     __private.changedKeys = {};
     setReferences(__private.refToObj, newRefToObjRef);
-    this.__changed();
+    self.__changed();
     if (isArray(newRefToObjRef)) {
-      this.length = newRefToObjRef.length;
-      updateChildrenParentKeys(this);
+      self.length = newRefToObjRef.length;
+      updateChildrenParentKeys(self);
     }
   },
 
@@ -376,25 +382,21 @@ ImmutableGraphObject.prototype = {
     var changeListeners = __private.changeListeners;
 
     if (changeListeners.length) {
-      if (__private.currentChildEvent) {
-        clearImmediate(__private.currentChildEvent);
-      }
-
       __private.isBusy = false;
       __private.currentChildEvent =
-          waitingPromise = function() {
-            createMicroTask(function(){
-              if (!__private.isBusy) {
-                for (var i = 0, l = changeListeners.length; i < l; i++) {
-                  var changeListener = changeListeners[i];
-                  changeListener.fn.call(changeListener.context);
-                  if (changeListener.once) {
-                    changeListeners.splice(i, 1);
-                  }
+        waitingPromise = function() {
+          createMicroTask(function() {
+            if (!__private.isBusy) {
+              for (var i = 0, l = changeListeners.length; i < l; i++) {
+                var changeListener = changeListeners[i];
+                changeListener.fn.call(changeListener.context);
+                if (changeListener.once) {
+                  changeListeners.splice(i, 1);
                 }
               }
-            });
-          };
+            }
+          });
+        };
       var self = this;
       createMicroTask(function() {
         if (waitingPromise) {
@@ -407,10 +409,6 @@ ImmutableGraphObject.prototype = {
 
   /**
    * Performed when a child has changed.
-   *
-   * What's interesting here is that we combine all child changes using
-   * setImmediate, and wait using setTimeout(0). This is slower for simple
-   * operations, but faster when doing many operations at once.
    *
    * @param {string} key
    * @param {ImmutableGraphObject|ImmutableGraphArray} newValue
@@ -434,7 +432,7 @@ ImmutableGraphObject.prototype = {
       counterAggregate = 0;
       __private.currentChildAggregation = null;
       __private.isBusy = false;
-      
+
       self.__aggregateChangedChildren();
     });
   },
@@ -443,16 +441,20 @@ ImmutableGraphObject.prototype = {
    * Remove this graph object
    */
   remove: function() {
-    var __private = this.__private;
-    var refToObj = __private.refToObj;
-    var refToObjRef = refToObj.ref;
-    removeReference(refToObjRef);
-    var parents = __private.parents;
-    require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
-    if (isArray(refToObjRef)) {
-      refToObj.ref = [];
-    }
-    this.__changed({parents: parents});
+    var self = this;
+    createMicroTask(function() {
+      var __private = self.__private;
+      var refToObj = __private.refToObj;
+      var refToObjRef = refToObj.ref;
+      removeReference(refToObjRef);
+      var parents = __private.parents;
+      require('./ImmutableGraphRegistry').removeImmutableGraphObject(refToObj);
+      if (isArray(refToObjRef)) {
+        refToObj.ref = [];
+      }
+
+      self.__changed({parents: parents});
+    });
   },
 
   /**
@@ -470,14 +472,17 @@ ImmutableGraphObject.prototype = {
    * @param {{}} newProperties
    */
   changePropertiesTo: function(newProperties) {
-    var __private = this.__private;
-    var newValue = clone(__private.refToObj.ref);
-    for (var key in newProperties) {
-      if (newProperties.hasOwnProperty(key)) {
-        newValue[key] = newProperties[key];
+    var self = this;
+    createMicroTask(function(){
+      var __private = self.__private;
+      var newValue = clone(__private.refToObj.ref);
+      for (var key in newProperties) {
+        if (newProperties.hasOwnProperty(key)) {
+          newValue[key] = newProperties[key];
+        }
       }
-    }
-    this.changeValueTo(newValue);
+      self.changeValueTo(newValue);
+    });
   },
 
   /**

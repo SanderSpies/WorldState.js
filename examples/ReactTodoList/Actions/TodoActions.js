@@ -34,7 +34,7 @@ var TodoActions = {
     };
     items
       .insert(Item.newInstance(todoListItem))
-      .saveVersionAs('Added todo item ' + opt.text);
+      .saveVersionAs('Added todo item ' + opt.text, true);
   },
 
   /**
@@ -52,7 +52,7 @@ var TodoActions = {
       .afterChange(function() {
         console.timeEnd('remove todo item');
         items
-          .saveVersionAs('Removed todo item ' + text);
+          .saveVersionAs('Removed todo item ' + text, true);
       });
   },
 
@@ -74,19 +74,17 @@ var TodoActions = {
     }
 
     item
-      .afterChange(function() {
-        console.timeEnd('Update todo item');
-
-        items
-          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
-            (oldIsComplete ? 'checked' : 'unchecked') +
-            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'));
-      })
       .changePropertiesTo({
         isComplete:  'isComplete' in opt ? opt.isComplete : oldIsComplete,
         text: 'text' in opt ? opt.text : oldText
+      })
+      .afterChange(function() {
+        console.timeEnd('Update todo item');
+        items
+          .saveVersionAs('Changed todo item from ' + oldText + ' ' +
+            (oldIsComplete ? 'checked' : 'unchecked') +
+            ' to ' + opt.text + ' ' + (opt.isComplete ? 'checked' : 'unchecked'), true);
       });
-
   },
 
   /**
@@ -120,7 +118,7 @@ var TodoActions = {
       .afterChange(function() {
         console.timeEnd('Update all todo items');
         items.saveVersionAs((opt.checked ? 'Checked' : 'Unchecked') +
-          ' all todo list items');
+          ' all todo list items', true);
         console.log(items.read());
         console.log(items.at(0).read().isComplete);
         console.log(items.getVersions()[items.getVersions().length - 1].ref[0].ref.isComplete);
@@ -128,7 +126,17 @@ var TodoActions = {
       .changeChildrenPropertiesTo({
         isComplete: opt.checked
       });
+  },
 
+  orderByTextAndCompleted: function() {
+    var ASCENDING = 0;
+    var DESCENDING = 1;
+    items
+      .orderBy({
+        text: ASCENDING,
+        isComplete: DESCENDING
+      })
+      .saveVersionAs('Sorted everything out', true);
   },
 
   /**
@@ -141,7 +149,7 @@ var TodoActions = {
     });
 
     // TODO: fix me
-    todoListGraph.__private.graph.__informChangeListeners();
+    //todoListGraph.__private.graph.__informChangeListeners();
   },
 
   /**
@@ -155,7 +163,7 @@ var TodoActions = {
     }
     items.afterChange(function() {
       console.timeEnd('Remove completed todo');
-      items.saveVersionAs('Removed all completed items');
+      items.saveVersionAs('Removed all completed items', true);
     });
   }
 

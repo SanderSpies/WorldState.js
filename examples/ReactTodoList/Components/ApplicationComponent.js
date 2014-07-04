@@ -43,6 +43,7 @@ var ApplicationComponent = React.createClass({
   <input type="button" onClick={change200} value="Change 200 items 1 by 1"/>
   <input type="button" onClick={remove200} value="Remove 200 items 1 by 1"/>
   <input type="button" onClick={removeItems} value="Remove items"/>
+  <input type="button" onClick={order} value="Order items"/>
       </div>
       <section id="todoapp">
         <TodoListComponent items={todoList.items()} filter={todoList.read().filter} />
@@ -86,6 +87,7 @@ function render(fn) {
       render();
     }
   }
+
 }
 todoList.addChangeListener(function() {
 
@@ -157,5 +159,8 @@ function insertAt5() {
   }));
 }
 
+function order() {
+  TodoActions.orderByTextAndCompleted();
+}
 
 module.exports = ApplicationComponent;
