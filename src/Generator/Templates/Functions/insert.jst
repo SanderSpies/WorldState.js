@@ -8,5 +8,15 @@
   insert: function {GraphName}$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   }

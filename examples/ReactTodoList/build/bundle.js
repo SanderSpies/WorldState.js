@@ -260,7 +260,17 @@ var ItemPrototype = {
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -272,7 +282,17 @@ var ItemPrototype = {
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -331,7 +351,13 @@ var ItemPrototype = {
    */
   saveVersionAs: function Item$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -344,7 +370,6 @@ var ItemPrototype = {
    */
   afterChange: function Item$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -355,7 +380,17 @@ var ItemPrototype = {
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -375,7 +410,17 @@ var ItemPrototype = {
    */
   changePropertiesTo: function Item$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -524,7 +569,17 @@ var ItemsPrototype = {
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -536,7 +591,17 @@ var ItemsPrototype = {
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -595,7 +660,13 @@ var ItemsPrototype = {
    */
   saveVersionAs: function Items$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -608,7 +679,6 @@ var ItemsPrototype = {
    */
   afterChange: function Items$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -619,7 +689,17 @@ var ItemsPrototype = {
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -666,7 +746,17 @@ var ItemsPrototype = {
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -678,7 +768,17 @@ var ItemsPrototype = {
    */
   insertAt: function Items$insertAt(position, item) {
     this.__private.graph.insertAt(position, item.__private.graph.read());
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -695,7 +795,17 @@ var ItemsPrototype = {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
     this.insertMultiRaw(realItems);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -708,7 +818,17 @@ var ItemsPrototype = {
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -733,7 +853,7 @@ var ItemsPrototype = {
    * @return {number} length
    */
   length: function Items$length() {
-    return this.__private.graph.length;
+    return this.__private.graph.length();
   },
 
   /**
@@ -744,11 +864,23 @@ var ItemsPrototype = {
    */
   changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
+   * Order the graph with the given instructions
    *
+   * @param {{}} sortingInstructions
    */
   orderBy: function Items$orderBy(sortingInstructions) {
     this.__private.graph.orderBy(sortingInstructions);
@@ -830,7 +962,17 @@ var TodoListPrototype = {
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -842,7 +984,17 @@ var TodoListPrototype = {
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -901,7 +1053,13 @@ var TodoListPrototype = {
    */
   saveVersionAs: function TodoList$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -914,7 +1072,6 @@ var TodoListPrototype = {
    */
   afterChange: function TodoList$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -925,7 +1082,17 @@ var TodoListPrototype = {
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -945,7 +1112,17 @@ var TodoListPrototype = {
    */
   changePropertiesTo: function TodoList$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -1166,9 +1343,6 @@ function add200AtOnce() {
   todoList
     .items()
     .insertMultiRaw(items);
-  setTimeout(function(){
-    debugger;
-  }, 0);
 }
 
 function change200() {
@@ -1250,6 +1424,7 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
 
       var todoCount = items.where({isComplete:false}).length;
       var completed = items.length() - todoCount;
+      console.log('items:', items.length());
       var completeBtn;
       if (completed > 0) {
         completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");
@@ -18530,7 +18705,6 @@ var ImmutableGraphArray = function ImmutableGraphArray(array) {
     setReferences = ImmutableGraphRegistry.setReferences;
   }
   ImmutableGraphObject.call(this, array);
-  this.length = array.length;
 };
 var ImmutableGraphObjectPrototype = ImmutableGraphObject.prototype;
 var getImmutableObject;
@@ -18538,7 +18712,6 @@ var setReferences;
 
 // public API
 ImmutableGraphArray.prototype = {
-  length: 0,
   __private: ImmutableGraphObjectPrototype.__private,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
   saveVersion: ImmutableGraphObjectPrototype.saveVersion,
@@ -18616,7 +18789,6 @@ ImmutableGraphArray.prototype = {
       else {
         refToArrayRef.splice(position, 0, newItem);
       }
-      this.length++;
     }
   },
 
@@ -18844,6 +19016,10 @@ ImmutableGraphArray.prototype = {
 
   groupBy: function() {
 
+  },
+
+  length: function() {
+    return this.__private.refToObj.ref.length;
   }
 
 };
@@ -19225,7 +19401,6 @@ ImmutableGraphObject.prototype = {
     setReferences(__private.refToObj, newRefToObjRef);
     self.__changed();
     if (isArray(newRefToObjRef)) {
-      self.length = newRefToObjRef.length;
       updateChildrenParentKeys(self);
     }
   },
@@ -19592,11 +19767,13 @@ var ImmutableGraphRegistry = {
    *
    * @param {{ref:{}}} oldRef
    * @param {{ref:{}}} newRef
+   * @param {boolean} isTop
    */
   restoreReferences: function(oldRef, newRef, isTop) {
     if (oldRef) {
       var imoId = oldRef.ref.__worldStateUniqueId;
       var imos = _objects[imoId] || _arrays[imoId];
+
 
       if (!imos) {
         return;

@@ -67,7 +67,17 @@ var ItemPrototype = {
    */
   changeReferenceTo: function Item$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -79,7 +89,17 @@ var ItemPrototype = {
    */
   changeValueTo: function Item$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -138,7 +158,13 @@ var ItemPrototype = {
    */
   saveVersionAs: function Item$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -151,7 +177,6 @@ var ItemPrototype = {
    */
   afterChange: function Item$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -162,7 +187,17 @@ var ItemPrototype = {
    */
   remove: function Item$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -182,7 +217,17 @@ var ItemPrototype = {
    */
   changePropertiesTo: function Item$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**

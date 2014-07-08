@@ -66,7 +66,17 @@ var ItemsPrototype = {
    */
   changeReferenceTo: function Items$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -78,7 +88,17 @@ var ItemsPrototype = {
    */
   changeValueTo: function Items$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -137,7 +157,13 @@ var ItemsPrototype = {
    */
   saveVersionAs: function Items$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -150,7 +176,6 @@ var ItemsPrototype = {
    */
   afterChange: function Items$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -161,7 +186,17 @@ var ItemsPrototype = {
    */
   remove: function Items$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -208,7 +243,17 @@ var ItemsPrototype = {
   insert: function Items$insert(item) {
     var realItem = item.__private.graph.__private.refToObj.ref;
     this.__private.graph.insert(realItem);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -220,7 +265,17 @@ var ItemsPrototype = {
    */
   insertAt: function Items$insertAt(position, item) {
     this.__private.graph.insertAt(position, item.__private.graph.read());
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -237,7 +292,17 @@ var ItemsPrototype = {
       realItems[i] = items[i].__private.graph.__private.refToObj.ref;
     }
     this.insertMultiRaw(realItems);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -250,7 +315,17 @@ var ItemsPrototype = {
    */
   insertMultiRaw: function Items$insertMultiRaw(items) {
     this.__private.graph.insertMulti(items);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -275,7 +350,7 @@ var ItemsPrototype = {
    * @return {number} length
    */
   length: function Items$length() {
-    return this.__private.graph.length;
+    return this.__private.graph.length();
   },
 
   /**
@@ -286,11 +361,23 @@ var ItemsPrototype = {
    */
   changeChildrenPropertiesTo: function Items$changeChildrenPropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
+   * Order the graph with the given instructions
    *
+   * @param {{}} sortingInstructions
    */
   orderBy: function Items$orderBy(sortingInstructions) {
     this.__private.graph.orderBy(sortingInstructions);

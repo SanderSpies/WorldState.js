@@ -8,5 +8,11 @@
    */
   saveVersionAs: function {GraphName}$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   }

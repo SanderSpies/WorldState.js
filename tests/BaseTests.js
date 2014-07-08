@@ -419,7 +419,7 @@ describe('WorldState.js', function() {
     child.remove();
     imo.afterChange(function() {
       expect(imo.wrapped().items.read().length).toEqual(0);
-      expect(imo.wrapped().items.length).toBe(0);
+      expect(imo.wrapped().items.length()).toBe(0);
       expect(imo.wrapped().items.read()).not.toBe(old1);
     });
   });

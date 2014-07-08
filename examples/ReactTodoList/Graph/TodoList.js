@@ -68,7 +68,17 @@ var TodoListPrototype = {
    */
   changeReferenceTo: function TodoList$changeReferenceTo(obj) {
     this.__private.graph.changeReferenceTo(obj);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -80,7 +90,17 @@ var TodoListPrototype = {
    */
   changeValueTo: function TodoList$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -139,7 +159,13 @@ var TodoListPrototype = {
    */
   saveVersionAs: function TodoList$saveVersionAs(name, delayedExecution) {
     this.__private.graph.saveVersion(name, delayedExecution);
-    return this;
+    var self = this;
+    return {
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -152,7 +178,6 @@ var TodoListPrototype = {
    */
   afterChange: function TodoList$afterChange(fn, once) {
     this.__private.graph.afterChange(fn, once);
-    return this;
   },
 
   /**
@@ -163,7 +188,17 @@ var TodoListPrototype = {
    */
   remove: function TodoList$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**
@@ -183,7 +218,17 @@ var TodoListPrototype = {
    */
   changePropertiesTo: function TodoList$changePropertiesTo(newProperties) {
     this.__private.graph.changePropertiesTo(newProperties);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   },
 
   /**

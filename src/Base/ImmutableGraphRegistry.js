@@ -214,11 +214,13 @@ var ImmutableGraphRegistry = {
    *
    * @param {{ref:{}}} oldRef
    * @param {{ref:{}}} newRef
+   * @param {boolean} isTop
    */
   restoreReferences: function(oldRef, newRef, isTop) {
     if (oldRef) {
       var imoId = oldRef.ref.__worldStateUniqueId;
       var imos = _objects[imoId] || _arrays[imoId];
+
 
       if (!imos) {
         return;

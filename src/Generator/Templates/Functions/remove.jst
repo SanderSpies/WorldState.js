@@ -6,5 +6,15 @@
    */
   remove: function {GraphName}$remove() {
     this.__private.graph.remove();
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   }

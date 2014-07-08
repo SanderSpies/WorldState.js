@@ -7,5 +7,15 @@
    */
   changeValueTo: function {GraphName}$changeValueTo(val) {
     this.__private.graph.changeValueTo(val);
-    return this;
+    var self = this;
+    return {
+      saveVersionAs: function() {
+        var args = arguments;
+        self.saveVersionAs.apply(self, args);
+      },
+      afterChange: function() {
+        var args = arguments;
+        self.afterChange.apply(self, args);
+      }
+    };
   }

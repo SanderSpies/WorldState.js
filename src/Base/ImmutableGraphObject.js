@@ -372,7 +372,6 @@ ImmutableGraphObject.prototype = {
     setReferences(__private.refToObj, newRefToObjRef);
     self.__changed();
     if (isArray(newRefToObjRef)) {
-      self.length = newRefToObjRef.length;
       updateChildrenParentKeys(self);
     }
   },

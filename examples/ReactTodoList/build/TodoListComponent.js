@@ -36,6 +36,7 @@ var TodoListComponent = React.createClass({displayName: 'TodoListComponent',
 
       var todoCount = items.where({isComplete:false}).length;
       var completed = items.length() - todoCount;
+      console.log('items:', items.length());
       var completeBtn;
       if (completed > 0) {
         completeBtn = React.DOM.button( {onClick:this.onClearCompletedClick, id:"clear-completed"}, "Clear completed (",completed,")");

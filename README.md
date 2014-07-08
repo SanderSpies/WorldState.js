@@ -1,6 +1,7 @@
 WorldState.js - 0.1 - a generator for immutable graphs
 ===
 [![Build Status](https://travis-ci.org/SanderSpies/WorldState.js.svg?branch=master)](https://travis-ci.org/SanderSpies/WorldState.js)
+[![Code Climate](https://codeclimate.com/github/SanderSpies/WorldState.js.png)](https://codeclimate.com/github/SanderSpies/WorldState.js)
 
 Current version: 0.1 - ROUGH EDGES
 

@@ -26,7 +26,6 @@ var ImmutableGraphArray = function ImmutableGraphArray(array) {
     setReferences = ImmutableGraphRegistry.setReferences;
   }
   ImmutableGraphObject.call(this, array);
-  this.length = array.length;
 };
 var ImmutableGraphObjectPrototype = ImmutableGraphObject.prototype;
 var getImmutableObject;
@@ -34,7 +33,6 @@ var setReferences;
 
 // public API
 ImmutableGraphArray.prototype = {
-  length: 0,
   __private: ImmutableGraphObjectPrototype.__private,
   enableVersioning: ImmutableGraphObjectPrototype.enableVersioning,
   saveVersion: ImmutableGraphObjectPrototype.saveVersion,
@@ -112,7 +110,6 @@ ImmutableGraphArray.prototype = {
       else {
         refToArrayRef.splice(position, 0, newItem);
       }
-      this.length++;
     }
   },
 
@@ -340,6 +337,10 @@ ImmutableGraphArray.prototype = {
 
   groupBy: function() {
 
+  },
+
+  length: function() {
+    return this.__private.refToObj.ref.length;
   }
 
 };

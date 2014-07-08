@@ -123,9 +123,6 @@ function add200AtOnce() {
   todoList
     .items()
     .insertMultiRaw(items);
-  setTimeout(function(){
-    debugger;
-  }, 0);
 }
 
 function change200() {
