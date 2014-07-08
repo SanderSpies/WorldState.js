@@ -56,7 +56,7 @@ var ReferenceRegistry = {
    */
   getReferenceTo: function(obj) {
     var reference;
-    var izArray = isArray(obj);
+    var izArray = isObjectArray(obj);
     if (obj.__worldStateUniqueId) {
       if (izArray) {
         reference = ReferenceRegistry.findArrayReference(obj);
@@ -117,7 +117,7 @@ var ReferenceRegistry = {
       }
       return refToArray;
     }
-    else { // an object
+    else if (typeof obj === 'object' && !isArray(obj)){ // an object
       var refToObj = ReferenceRegistry.getReferenceTo(obj);
       var newObj = refToObj.ref;
       var keys = Object.keys(obj);
@@ -134,6 +134,9 @@ var ReferenceRegistry = {
         }
       }
       return refToObj;
+    }
+    else {
+      return obj;
     }
   }
 

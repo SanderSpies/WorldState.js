@@ -50,6 +50,38 @@ describe('WorldState.js', function() {
     });
   });
 
+  it('should keep non object arrays simple', function() {
+    var data = {
+      x: [
+        {
+          a: [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    };
+    var imo = ImmutableGraphRegistry.getImmutableObject(data);
+    expect(imo.__private.refToObj.ref.x.ref[0].ref.a[1]).toEqual(2);
+    expect(imo.wrapped().x.at(0).read().a.ref[1]).toEqual(2);
+
+    var data2 = {
+      x: [
+        {
+          a: [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      ]
+    };
+    var imo2 = ImmutableGraphRegistry.getImmutableObject(data2);
+    expect(imo2.__private.refToObj.ref.x.ref[0].ref.a[1]).toEqual("2");
+    expect(imo2.wrapped().x.at(0).read().a.ref[1]).toEqual("2");
+  });
+
   it ('should be possible to listen to the change of the same object', function(done) {
     var blaData = {
       o: [
@@ -109,9 +141,9 @@ describe('WorldState.js', function() {
       var old5 = imo.wrapped().andAnother.read();
 
       imo.addChangeListener(function(){
-        console.log('I was called!');
+        //console.log('I was called!');
       });
-      console.log('start');
+      //console.log('start');
 
       deepItem.changeValueTo({
         hello: 'there'
@@ -127,7 +159,7 @@ describe('WorldState.js', function() {
         // test to see if the changed item has really changed
         expect(imo.read().items.ref[0].ref.bla.ref.items.ref[0].ref).
           not.toBe(old3);
-        console.log('end');
+        //console.log('end');
         expect(deepItem.read()).not.toBe(old3);
 
         expect(oldObj3).not.toBe(imo.read().items.ref[0]);
@@ -721,5 +753,6 @@ describe('WorldState.js', function() {
   // xit('should ')
   // add tests for addChangeListener + removeChangeListener
   // add tests for removeMulti, updateMulti
+
 
 });

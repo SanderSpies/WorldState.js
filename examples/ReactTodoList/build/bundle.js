@@ -1145,8 +1145,6 @@ todoList.addChangeListener(function() {
 });
 
 
-
-
 // testing code
 var idCounter = 1;
 function add200() {
@@ -1160,14 +1158,17 @@ function add200() {
 }
 
 function add200AtOnce() {
-  requestAnimationFrame(function(){
-    start = window.performance.now();
-    var items = [];
-    for (var i = 0, l = 200; i < l; i++) {
-      items[i] = {text: 'another' + i, id: 900000 + i}
-    }
-    todoList.items().insertMultiRaw(items);
-  });
+  start = window.performance.now();
+  var items = [];
+  for (var i = 0, l = 200; i < l; i++) {
+    items[i] = {text: 'another' + i, id: 900000 + i, test1: [1 + i, 2 + i, 4 + i], test2: ['a' + 1, 'b' + i, 'c' + i]};
+  }
+  todoList
+    .items()
+    .insertMultiRaw(items);
+  setTimeout(function(){
+    debugger;
+  }, 0);
 }
 
 function change200() {
@@ -1189,13 +1190,14 @@ function remove200() {
 }
 
 function removeItems() {
+  start = window.performance.now();
   requestAnimationFrame(function(){
-    start = window.performance.now();
     TodoActions.removeAllTodoItems();
   });
 }
 
 function insertAt5() {
+  start = window.performance.now();
   todoList.items().insertAt(5, Item.newInstance({
     text: 'inserted item',
     isComplete: false
@@ -1203,6 +1205,7 @@ function insertAt5() {
 }
 
 function order() {
+  start = window.performance.now();
   TodoActions.orderByTextAndCompleted();
 }
 
@@ -19878,7 +19881,7 @@ var ReferenceRegistry = {
    */
   getReferenceTo: function(obj) {
     var reference;
-    var izArray = isArray(obj);
+    var izArray = isObjectArray(obj);
     if (obj.__worldStateUniqueId) {
       if (izArray) {
         reference = ReferenceRegistry.findArrayReference(obj);
@@ -19939,7 +19942,7 @@ var ReferenceRegistry = {
       }
       return refToArray;
     }
-    else { // an object
+    else if (typeof obj === 'object' && !isArray(obj)){ // an object
       var refToObj = ReferenceRegistry.getReferenceTo(obj);
       var newObj = refToObj.ref;
       var keys = Object.keys(obj);
@@ -19956,6 +19959,9 @@ var ReferenceRegistry = {
         }
       }
       return refToObj;
+    }
+    else {
+      return obj;
     }
   }
 
@@ -20038,7 +20044,7 @@ module.exports = createMicroTask;
 var isArray = Array.isArray;
 
 function isObjectArray(arr) {
-  return isArray(arr) && arr.length && typeof arr[0] === 'object';
+  return (isArray(arr) && arr.length && typeof arr[0] === 'object') || (isArray(arr) && arr.length === 0);
 }
 
 module.exports = isObjectArray;

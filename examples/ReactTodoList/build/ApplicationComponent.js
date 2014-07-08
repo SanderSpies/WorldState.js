@@ -102,8 +102,6 @@ todoList.addChangeListener(function() {
 });
 
 
-
-
 // testing code
 var idCounter = 1;
 function add200() {
@@ -117,14 +115,17 @@ function add200() {
 }
 
 function add200AtOnce() {
-  requestAnimationFrame(function(){
-    start = window.performance.now();
-    var items = [];
-    for (var i = 0, l = 200; i < l; i++) {
-      items[i] = {text: 'another' + i, id: 900000 + i}
-    }
-    todoList.items().insertMultiRaw(items);
-  });
+  start = window.performance.now();
+  var items = [];
+  for (var i = 0, l = 200; i < l; i++) {
+    items[i] = {text: 'another' + i, id: 900000 + i, test1: [1 + i, 2 + i, 4 + i], test2: ['a' + 1, 'b' + i, 'c' + i]};
+  }
+  todoList
+    .items()
+    .insertMultiRaw(items);
+  setTimeout(function(){
+    debugger;
+  }, 0);
 }
 
 function change200() {
@@ -146,13 +147,14 @@ function remove200() {
 }
 
 function removeItems() {
+  start = window.performance.now();
   requestAnimationFrame(function(){
-    start = window.performance.now();
     TodoActions.removeAllTodoItems();
   });
 }
 
 function insertAt5() {
+  start = window.performance.now();
   todoList.items().insertAt(5, Item.newInstance({
     text: 'inserted item',
     isComplete: false
@@ -160,6 +162,7 @@ function insertAt5() {
 }
 
 function order() {
+  start = window.performance.now();
   TodoActions.orderByTextAndCompleted();
 }
 

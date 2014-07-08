@@ -122,9 +122,6 @@ todoGraph.afterChange(function() {
 });
 ```
 
-Note that when you listen to events of children, you can set the change listener after the child changes. However when
-you are listening to changes of the object you are directly modifying, you must set the listener before the change.
-
 Finding one or more item:
 ```
 console.log('Found items:', todoGraph.items().where({isComplete:true}));
@@ -142,7 +139,7 @@ items
   });
 ```
 
-Note that this still pretty much a work in progress, so expect this to not work.
+Note that this still pretty much a work in progress, so expect this not to work properly.
 
 Ordering an array:
 ```
@@ -155,10 +152,21 @@ items.orderBy({
 });
 ```
 
+Or:
+```
+items
+  .where({
+    isComplete: true
+  }}
+  .orderBy({text: 0});
+```
+
 Grouping items in an array:
 ```
-items.groupBy([/*TODO*/]);
+items.groupBy({name: null});
 ```
+
+This returns arrays of groups and does not modify the actual array.
 
 Inserting a value into an array:
 ```
