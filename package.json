@@ -1,37 +1,9 @@
 {
   "name": "worldstate",
-  "description": "A generator for immutable graphs",
-  "homepage": "https://github.com/SanderSpies/WorldState.js",
-  "author": {
-    "name": "Sander Spies",
-    "email": "sandermail@gmail.com"
-  },
-  "version": "0.1.1-alpha",
-  "bin": {
-    "worldstate": "src/Generator/Generator.js"
-  },
-  "bugs": {
-    "url":"https://github.com/SanderSpies/WorldState.js/issues"
-  },
-  "license": "MIT",
-  "keywords": ["immutable", "graph"],
-  "dependencies": {
-    "setimmediate": "~1.0.2"
-  },
+  "description": "",
+  "version": "0.2.0",
 
   "devDependencies": {
-    "gulp-util": "~2.2.14",
-    "gulp": "~3.5.1",
-    "gulp-jasmine": "~0.2.0",
-    "gulp-browserify": "0.5.0"
-  },
-
-  "repository": {
-    "type":"git",
-    "url":"https://github.com/SanderSpies/WorldState.js.git"
-  },
-  "scripts": {
-    "test" : "gulp test"
+    "webpack": ""
   }
-
 }

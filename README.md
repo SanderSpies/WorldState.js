@@ -1,294 +1,41 @@
-WorldState.js - 0.1 - a generator for immutable graphs
+WorldState.js
 ===
-[![Build Status](https://travis-ci.org/SanderSpies/WorldState.js.svg?branch=master)](https://travis-ci.org/SanderSpies/WorldState.js)
-[![Code Climate](https://codeclimate.com/github/SanderSpies/WorldState.js.png)](https://codeclimate.com/github/SanderSpies/WorldState.js)
+Warning: currently busy with refactoring - nothing works.
 
-Current version: 0.1 - ROUGH EDGES
+A graph library
 
-Working on: 0.2, which will support: recursive structures, edges support, syntax improvements, ordering, improved graph
-generation capabilities and more.
-
-Introduction
+Changes from older versions
 ---
-This generator turns a JSON object model into an easy to use immutable graph.
+With 0.3.0 I've decided to rewrite everything from scratch as the previous
+version was growing into a complex monster, without actually being a proper
+graph. So with this release everything is different.
 
-You can use this immutable graph as input for rendering your interface from the top node, and efficiently decide what
-needs to happen or not through strict equal checks.
-
-[TodoList example](https://rawgit.com/SanderSpies/WorldState.js/master/examples/ReactTodoList/index.html)
-
-Features
+Description
 ---
-- Immutable
-- High performance
-- Generated JsDocs for auto-complete support
-- Support for complex structures
-- Recursive structures
-- Recreating parent objects
-- Change by value or reference
-- Versioning support
-- ReactWorldStateMixin to make implementing WorldState.js with React easy
-- Chaining
-- Warning: stuff might not work completely as advertised - if you come across anything, please file an issue
+WorldState.js makes it possible to describe your domain as a graph, and perform
+complex queries on this graph inside the browser.
 
-Although it's possible to only use the library, I would recommend using the generator for creating wrappers around
-the library. This way the cognitive strain of using this library is left to a minimum.
-
-[See Jasmine tests for library / non-wrapper examples](tests/BaseTests.js)
-
-[Ideas behind the graph](GRAPH.md)
-
-Installation
+Inspiration
 ---
-First install WorldState.js globally:
-```
-npm install -g worldstate
-```
+It takes inspiration from Cayley and the Gremlin API.
 
-Then add it to your project's package.json:
-```
-{
-    "dependencies": {
-        "worldstate": "~0.1"
-    }
-}
-```
-
-Getting started
+Create a graph
 ---
-First you need to create a JSON representation of the model. For example:
+Let's describe the following simplified social network:
+[TODO: image]
 
-File: TodoGraph.json
-```
-{
-    "title": "an example",
-    "items": [
-        {
-            id: 1,
-            title: "example",
-            isComplete: false
-        },
-        {
-            id: 2,
-            title: "bla 2",
-            isComplete: false
-        }
-    ]
-}
-```
-[Extra syntax options](JSON_SYNTAX.md)
-
-Next you need to generate the immutable wrappers:
-```
-worldstate inputdir outputdir
-```
-
-Now you can use the immutable graph within your application:
-```
-/**
- * @type {TodoGraph}
- */
-var TodoGraph = require('outputdir/TodoGraph');
-```
-
-The {TodoGraph} annotation is added for autocomplete support.
-
-Loading data into the graph (you might want to use [superagent](https://github.com/visionmedia/superagent)):
-```
-var todoGraph = TodoGraph.newInstance({/*data*/});
-```
-
-Getting the first item of an array:
-```
-console.log('The first item is:', todoGraph.items().at(0).read());
-```
-Warning: when you modify objects outside of WorldState.js, like ``foo.read().title = 'bla'``, you violate the
-immutability of the object.
-
-If you have performed an action like ``insert``, ``insertMulti``, ``changeValueTo`` or ``changeReferenceTo``, you must
-wait until the action has completed.
-
-Event listener:
-```
-todoGraph.addChangeListener(function(){
-  // happens every change
-});
-```
-
-One time:
-```
-// perform action like insert, insertMulti, changeValueTo or changeReferenceTo
-todoGraph.afterChange(function() {
-    // happens only once
-});
-```
-
-Finding one or more item:
-```
-console.log('Found items:', todoGraph.items().where({isComplete:true}));
-```
-
-It's also possible to chain actions on the same object:
-```
-items
-  .changeChildPropertiesTo({
-    yolo: 'yolo'
-  })
-  .saveVersionAs('Added yolo to all items', true)
-  .afterChange(function() {
-    // do stuff
-  });
-```
-
-Note that this still pretty much a work in progress, so expect this not to work properly.
-
-Ordering an array:
-```
-items.orderBy({
-    name: 0, //ascending
-    id: 1, //descending
-    another: function(a, b) {
-        // perform custom sorting magic;
-    }
-});
-```
-
-Or:
-```
-items
-  .where({
-    isComplete: true
-  }}
-  .orderBy({text: 0});
-```
-
-Grouping items in an array:
-```
-items.groupBy({name: null});
-```
-
-This returns arrays of groups and does not modify the actual array.
-
-Inserting a value into an array:
-```
-var todoItem = TodoGraphItem.newInstance({
-   id: 3,
-   title: 'foo',
-   isComplete: true
-});
-todoGraph.items().insert(todoItem);
-```
-
-If a new item is inserted with an id parameter that is already present, it will replace the old item.
-
-You can also insert multiple values by using ``insertMulti``, which accepts an array.
-
-If you want to insert an item at a certain position, you can use ``insertAt(position, item)``
-
-Getting the id generated by WorldState.js:
-```
-var generatedId = todoGraph.items().at(0).generatedId();
-```
-
-Changing a value:
-```
-todoGraph.items().at(0).changeValueTo({
-    id: 3,
-    title: 'bla',
-    isComplete: true
-});
-```
-All the objects using this reference will get this value.
-
-Changing a reference:
-```
-var somewhereElseInTheGraph = todoGraph.items.at(0);
-todoGraph.items().at(1).changeReferenceTo(somewhereElseInTheGraph.read());
-```
-Now both items will be changed at the same the time when using changeValueTo.
-
-Changing properties of a value:
-```
-item.changePropertiesTo({
-  title: 'something else
-});
-```
-
-You can also change all the properties of array children at once:
-```
-items.changeChildrenPropertiesTo({
-  isComplete: true
-});
-```
-
-Saving and restoring a version:
-```
-todoGraph.enableVersioning();
-todoGraph.saveVersion('Initial version');
-todoGraph.items().at(0).changeValueTo({
-    id: 3,
-    title: 'bla',
-    isComplete: true
-});
-todoGraph.afterChange(function(){
-    var versions = todoGraph.getVersions();
-    todoGraph.restoreVersion(versions[0]);
-});
-```
-
-Removing a part of the graph:
-```
-todoGraph.items().at(1).remove();
-```
-
-Object pooling:
-```
-Item.setObjectPoolSize(100);
-```
-Note that object pooling and versioning are working kind of against each other, as object pooling wants to keep
-objects for re-use and versioning wants to keep old trees.
-
-Adding an edge to another object:
-```
-items.at(0).addEdgeTo(Topic.Like, anotherObject);
-```
-
-You can also add edge details by using the third attribute:
-```
-items.at(0).addEdgeTo(Topic.Distance, anotherItem, {km: 2});
-```
-
-Removing an edge:
-```
-item.removeEdgeTo(Topic.Distance, anotherItem);
-```
-
-Get outgoing edges to other objects:
-```
-item.getOutgoingEdges();
-```
-
-Get incoming edges from other objects:
-```
-item.getIncomingEdges();
-```
-
-Using the ReactWorldStateMixin:
-```
-var React = require('react');
-var ReactWorldStateMixin = require('worldstate/src/Helpers/ReactWorldStateMixin');
-
-var Foo = React.createClass({
-  mixins: [ReactWorldStateMixin],
-  render: function() {
-    return <div>Bar</div>;
-  }
-});
-```
-Now if you pass an item from WorldState.js it will be checked using strict equals.
-
-[More examples](EXAMPLES.md)
-
-LICENSE
+Queries
 ---
-MIT
+
+Insert
+---
+
+Remove
+---
+
+Observe
+---
+
+License
+---
+MIT license
