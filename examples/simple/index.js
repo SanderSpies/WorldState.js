@@ -15,7 +15,7 @@ friendsOfSander.observe(function() {
   console.log(friendsOfSander.all());
 });
 
-graph.insert([
+graph.add([
   {
     // vertex
   },

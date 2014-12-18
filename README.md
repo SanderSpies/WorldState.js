@@ -1,6 +1,6 @@
 WorldState.js
 ===
-Warning: currently busy with refactoring - nothing works.
+Warning: currently busy with refactoring - nothing works \o/.
 
 A graph library
 
@@ -13,7 +13,7 @@ graph. So with this release everything is different.
 Description
 ---
 WorldState.js makes it possible to describe your domain as a graph, and perform
-complex queries on this graph inside the browser.
+queries on this graph inside the browser.
 
 Inspiration
 ---
