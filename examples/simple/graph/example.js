@@ -1,27 +1,27 @@
 'use strict';
 
-
-
 var graph = {
 
   nodes: [
     {
       id: 1,
-      value: {
-
-      }
+      name: 'Bruce Banner'
     },
     {
       id: 2,
-      value: {
-
-      }
+      name: 'Tony Stark'
     },
     {
       id: 3,
-      value: {
-
-      }
+      name: 'Thor'
+    },
+    {
+      id: 4,
+      name: 'Loki'
+    },
+    {
+      id: 5,
+      name: 'Captain America'
     }
   ],
 
@@ -35,6 +35,12 @@ var graph = {
     {
       source: 2,
       target: 3,
+      weight: 1,
+      label: 1
+    },
+    {
+      source: 2,
+      target: 5,
       weight: 0,
       label: 1
     }

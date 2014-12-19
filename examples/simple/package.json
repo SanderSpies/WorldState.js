@@ -1,0 +1,15 @@
+{
+  "name": "worldstate-simple-example",
+  "version": "1.0.0",
+  "description": "Example app which demonstrates worldstate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sander Spies",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "webpack": "1.4.13"
+  }
+}
