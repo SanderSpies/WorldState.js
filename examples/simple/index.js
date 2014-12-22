@@ -1,17 +1,40 @@
 'use strict';
 
-var Graph = require('worldstate');
+var WorldState = require('worldstate');
 
 var input = require('./graph/example');
 
 console.time('total');
-var graph = Graph.create(input);
+var graph = WorldState.create(input);
 var friendsOfBruceBanner = graph.nodes({name: 'Bruce Banner'}).out('friend');
 console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
 console.log('friends of friends of Bruce Banner:', friendsOfBruceBanner.out('friend').all());
 var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {greaterThan: .5});
 console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
 console.timeEnd('total');
+
+graph.add({
+  nodes: [
+    {
+      id: 5,
+      name: 'Random Evil Bad Guy'
+    }
+  ],
+  edges: [{
+    source: 5,
+    target: 1,
+    label: 2
+  }],
+  edgeLabels: {
+    enemy: {
+      id: 2
+    }
+  }
+});
+
+
+console.log(graph.nodes({name:'Bruce Banner'}).in('enemy').all());
+
 
 //
 //friendsOfSander.observe(function() {
