@@ -11,15 +11,13 @@ console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
 console.log('friends of friends of Bruce Banner:', friendsOfBruceBanner.out('friend').all());
 var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {greaterThan: .5});
 console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
-console.timeEnd('total');
 
+var testNodes = [];
+for (var i = 5, l = 10000; i < l; i++) {
+  testNodes.push({id: i, name: 'Random Evil Bad Guy'});
+}
 graph.add({
-  nodes: [
-    {
-      id: 5,
-      name: 'Random Evil Bad Guy'
-    }
-  ],
+  nodes: testNodes,
   edges: [{
     source: 5,
     target: 1,
@@ -34,6 +32,7 @@ graph.add({
 
 
 console.log(graph.nodes({name:'Bruce Banner'}).in('enemy').all());
+console.timeEnd('total');
 
 
 //
