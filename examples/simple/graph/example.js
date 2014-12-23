@@ -22,7 +22,16 @@ var graph = {
     {
       id: 5,
       name: 'Captain America'
+    },
+    {
+      id: 10001,
+      name: 'dude 1'
+    },
+    {
+      id: 10002,
+      name: 'dude 2'
     }
+
   ],
 
   edges: [
@@ -42,6 +51,11 @@ var graph = {
       source: 2,
       target: 5,
       weight: 0,
+      label: 1
+    },
+    {
+      source: 10001,
+      target: 10002,
       label: 1
     }
   ],

@@ -4,7 +4,7 @@ var WorldState = require('worldstate');
 
 var input = require('./graph/example');
 
-console.time('total');
+console.profile('total');
 var graph = WorldState.create(input);
 var friendsOfBruceBanner = graph.nodes({name: 'Bruce Banner'}).out('friend');
 console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
@@ -13,16 +13,19 @@ var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {gre
 console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
 
 var testNodes = [];
-for (var i = 5, l = 10000; i < l; i++) {
+for (var i = 5, l = 200000; i < l; i++) {
   testNodes.push({id: i, name: 'Random Evil Bad Guy'});
 }
+console.log('should have nothing:', graph.props.nodes[0].__worldState.in);
+
 graph.add({
   nodes: testNodes,
   edges: [{
-    source: 5,
-    target: 1,
-    label: 2
-  }],
+      source: 6,
+      target: 1,
+      label: 2
+    }
+  ],
   edgeLabels: {
     enemy: {
       id: 2
@@ -30,9 +33,13 @@ graph.add({
   }
 });
 
+console.log('should now have an inwards pointing node', graph.props.nodes[0].__worldState.in);
 
+// TODO: removal
+
+console.log('nr of added bad guys:', graph.nodes({name:'Random Evil Bad Guy'}).all().length);
 console.log(graph.nodes({name:'Bruce Banner'}).in('enemy').all());
-console.timeEnd('total');
+console.profileEnd('total');
 
 
 //
