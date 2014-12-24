@@ -42,6 +42,7 @@ console.log('should now have an inwards pointing node', graph.props.nodes[0].__w
 
 console.log('nr of added bad guys:', graph.nodes({name:'Random Evil Bad Guy'}).all().length);
 console.log(graph.nodes({name:'Bruce Banner'}).in('enemy').all());
+console.log(graph.nodes({name:'Bruce Banner'}).outEdges());
 console.profileEnd('total');
 
 
