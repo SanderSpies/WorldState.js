@@ -8,9 +8,7 @@ console.profile('total');
 var graph = WorldState.create(input);
 var friendsOfBruceBanner = graph.nodes({name: 'Bruce Banner'}).out('friend');
 console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
-console.log('friends of friends of Bruce Banner:', friendsOfBruceBanner.out('friend').all());
-var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {greaterThan: .5});
-console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
+
 
 var testNodes = [];
 for (var i = 5, l = 200000; i < l; i++) {
@@ -21,10 +19,10 @@ console.log('should have nothing:', graph.props.nodes[0].__worldState.in);
 graph.add({
   nodes: testNodes,
   edges: [{
-      source: 6,
-      target: 1,
-      label: 2
-    }
+    source: 6,
+    target: 1,
+    label: 2
+  }
   ],
   edgeLabels: {
     enemy: {
@@ -32,6 +30,11 @@ graph.add({
     }
   }
 });
+
+
+console.log('friends of friends of Bruce Banner:', friendsOfBruceBanner.out('friend').all());
+var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {greaterThan: .5});
+console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
 
 console.log('should now have an inwards pointing node', graph.props.nodes[0].__worldState.in);
 

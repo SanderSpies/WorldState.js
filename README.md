@@ -73,7 +73,7 @@ module.exports = graph;
 ```
 
 The objects from this input are linked together for fast graph navigation. The
-cost for this is O(V * E * V) when the graph is being loaded. If the graph is
+cost for this is O(V * E + V) when the graph is being loaded. If the graph is
 very large, it might be wiser to have the graph inside a webworker.
 
 Base queries
