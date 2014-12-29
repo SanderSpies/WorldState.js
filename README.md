@@ -98,9 +98,7 @@ Should go towards O(E) where E are edges of the current nodes
 
 Algorithms
 ---
-In a future release of WorldState.js common
-[graph algorithms](http://en.wikipedia.org/wiki/Category:Graph_algorithms)
-will be added.
+
 
 Graph manipulation
 ---
