@@ -2,9 +2,10 @@
   "name": "worldstate",
   "description": "",
   "version": "0.3.0",
-
+  "scripts": {
+    "test": "jest"
+  },
   "devDependencies": {
-    "webpack": "",
-    "jest": ""
+    "jest-cli": "0.2.1"
   }
 }
