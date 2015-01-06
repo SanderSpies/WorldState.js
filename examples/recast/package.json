@@ -1,0 +1,9 @@
+{
+  "name": "worldstate-js-graph",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "recast": "0.9.11"
+  }
+}

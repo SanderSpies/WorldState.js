@@ -116,8 +116,7 @@ Background
 1. Immutability
 ---
 WorldState.js has immutable edges and immutable objects. Edges are recursively
-immutable, while objects are not. 
-
+immutable, while objects are not.
 
 License
 ---
