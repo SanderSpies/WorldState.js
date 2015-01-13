@@ -11,10 +11,9 @@ console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
 
 
 var testNodes = [];
-for (var i = 5, l = 200000; i < l; i++) {
+for (var i = 5, l = 2000000; i < l; i++) {
   testNodes.push({id: i, name: 'Random Evil Bad Guy'});
 }
-console.log('should have nothing:', graph.props.nodes[0].__worldState.in);
 
 graph.add({
   nodes: testNodes,
@@ -31,12 +30,10 @@ graph.add({
   }
 });
 
-
 console.log('friends of friends of Bruce Banner:', friendsOfBruceBanner.out('friend').all());
 var bestFriendOfTonyStark = graph.nodes({name: 'Tony Stark'}).out('friend', {greaterThan: .5});
 console.log('best friend(s) of Tony Stark:', bestFriendOfTonyStark.all());
 
-console.log('should now have an inwards pointing node', graph.props.nodes[0].__worldState.in);
 
 // TODO: removal
 
@@ -46,6 +43,10 @@ console.log(graph.nodes({name:'Bruce Banner'}).outEdges());
 console.log('filter testing:', graph.filter(function(node){
   return node.name.indexOf('ony') > -1;
 }).all());
+
+var bruce = graph.nodes({name: 'Tony Stark'}).all();
+console.log(bruce);
+console.log('pleh:', graph.nodes(bruce).in('friend').all());
 
 console.profileEnd('total');
 
