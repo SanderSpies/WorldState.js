@@ -3,8 +3,8 @@
 var WorldState = require('worldstate');
 
 var input = require('./graph/example');
-
 console.profile('total');
+
 var graph = WorldState.create(input);
 var friendsOfBruceBanner = graph.nodes({name: 'Bruce Banner'}).out('friend');
 console.log('friends of Bruce Banner:', friendsOfBruceBanner.all());
@@ -46,6 +46,7 @@ console.log('filter testing:', graph.filter(function(node){
 
 var bruce = graph.nodes({name: 'Tony Stark'}).all();
 console.log(bruce);
+
 console.log('pleh:', graph.nodes(bruce).in('friend').all());
 
 console.profileEnd('total');
